@@ -78,21 +78,62 @@ export default function Footer() {
 
           <div>
             <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-white">
-              Connect
+              Legal
             </h3>
             <ul className="space-y-2">
               <li>
-                <span className="text-sm text-slate-400">
-                  info@kaimoku.tech
-                </span>
+                <Link
+                  href="/legal/terms"
+                  className="text-sm text-slate-400 transition-colors hover:text-white"
+                >
+                  Terms of Service
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/legal/privacy"
+                  className="text-sm text-slate-400 transition-colors hover:text-white"
+                >
+                  Privacy Policy
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/legal/acceptable-use"
+                  className="text-sm text-slate-400 transition-colors hover:text-white"
+                >
+                  Acceptable Use Policy
+                </Link>
               </li>
             </ul>
           </div>
         </div>
 
-        <div className="mt-12 border-t border-slate-700 pt-8 text-center text-sm text-slate-400">
-          &copy; {new Date().getFullYear()} Kaimoku Technologies, LLC. All
-          rights reserved.
+        <div className="mt-12 flex flex-col items-center gap-4 border-t border-slate-700 pt-8 text-sm text-slate-400 sm:flex-row sm:justify-between">
+          <p>
+            &copy; {new Date().getFullYear()} Kaimoku Technologies, LLC. All
+            rights reserved.
+          </p>
+          <div className="flex gap-6">
+            <Link
+              href="/legal/terms"
+              className="transition-colors hover:text-white"
+            >
+              Terms
+            </Link>
+            <Link
+              href="/legal/privacy"
+              className="transition-colors hover:text-white"
+            >
+              Privacy
+            </Link>
+            <Link
+              href="/legal/acceptable-use"
+              className="transition-colors hover:text-white"
+            >
+              Acceptable Use
+            </Link>
+          </div>
         </div>
       </div>
     </footer>
