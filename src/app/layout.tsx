@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Kaimoku Technologies",
   description:
-    "Kaimoku Technologies builds modern, reliable infrastructure software. Our flagship product Kuju Email is a complete, self-hosted email platform.",
+    "Kaimoku Technologies builds modern, reliable software. Our flagship product Kuju Email is a complete email platform with AI-powered security, calendar, contacts, and full admin control.",
 };
 
 export default function RootLayout({

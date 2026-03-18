@@ -15,8 +15,8 @@ export default function Footer() {
               </span>
             </div>
             <p className="text-sm leading-relaxed text-slate-400">
-              Building modern, reliable infrastructure software for
-              organizations that value control, security, and transparency.
+              Building modern, reliable software for organizations that
+              value security, transparency, and a better email experience.
             </p>
           </div>
 

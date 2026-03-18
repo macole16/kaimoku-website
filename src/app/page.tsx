@@ -8,15 +8,14 @@ export default function Home() {
         <div className="mx-auto max-w-7xl">
           <div className="max-w-3xl">
             <h1 className="mb-6 text-4xl font-bold leading-tight tracking-tight md:text-6xl">
-              Infrastructure software
+              Email done right.
               <br />
-              <span className="text-accent">you can trust.</span>
+              <span className="text-accent">Managed for you.</span>
             </h1>
             <p className="mb-10 max-w-2xl text-lg leading-relaxed text-slate-300 md:text-xl">
               Kaimoku Technologies builds modern, reliable software for
-              organizations that value control, security, and transparency. We
-              believe critical infrastructure should be yours to own and
-              operate.
+              organizations that value security, transparency, and a better
+              email experience.
             </p>
             <div className="flex flex-wrap gap-4">
               <Link
@@ -45,10 +44,9 @@ export default function Home() {
             </h2>
             <p className="mb-6 text-lg leading-relaxed text-slate-600">
               Kaimoku Technologies, LLC is a software company focused on
-              building infrastructure tools that put organizations back in
-              control. We specialize in email and communications infrastructure
-              &mdash; systems that are too critical to leave entirely in someone
-              else&rsquo;s hands.
+              building tools that make email better. We specialize in email
+              and communications &mdash; delivering the security, features, and
+              control that modern organizations deserve.
             </p>
             <p className="text-lg leading-relaxed text-slate-600">
               Our name,{" "}
@@ -90,7 +88,7 @@ export default function Home() {
               <p className="mb-6 text-lg leading-relaxed text-slate-600">
                 A complete email platform with IMAP, webmail, calendar, contacts,
                 AI-powered security, and full administrative control. Available
-                as a managed SaaS or self-hosted deployment.
+                delivered as a managed service so you can focus on what matters.
               </p>
               <div className="mb-8 grid gap-4 sm:grid-cols-3">
                 {[
@@ -153,7 +151,7 @@ export default function Home() {
             {[
               {
                 title: "Ownership",
-                desc: "Your infrastructure should belong to you. We build software that gives organizations full control over their critical systems — no vendor lock-in, no surprises.",
+                desc: "Your email should work for you. We give organizations full control over their email experience — powerful admin tools, transparent operations, no surprises.",
                 icon: (
                   <path
                     strokeLinecap="round"
@@ -165,7 +163,7 @@ export default function Home() {
               },
               {
                 title: "Transparency",
-                desc: "We believe in clear pricing, honest documentation, and visible operations. Our software gives you full observability into what's happening with your email infrastructure.",
+                desc: "We believe in clear pricing, honest documentation, and visible operations. Kuju Email gives you full observability into what's happening with your email — delivery analytics, spam stats, and more.",
                 icon: (
                   <path
                     strokeLinecap="round"
@@ -219,7 +217,7 @@ export default function Home() {
             Ready to take control of your email?
           </h2>
           <p className="mb-8 text-lg text-slate-300">
-            Explore Kuju Email and see how a modern email platform should work.
+            Sign up for Kuju Email and see how a modern email platform should work.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Link

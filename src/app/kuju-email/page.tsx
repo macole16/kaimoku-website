@@ -85,7 +85,7 @@ const features = [
       },
       {
         title: "Prometheus Monitoring",
-        desc: "Standard /metrics endpoint with Kuju and KumoMTA metrics. Built-in admin dashboard with storage analytics, delivery trends, spam stats, and plugin cost tracking.",
+        desc: "Built-in admin dashboard with storage analytics, delivery trends, spam stats, and plugin cost tracking. Standard Prometheus metrics endpoint for integration with your existing monitoring.",
       },
     ],
   },
@@ -106,20 +106,20 @@ const features = [
 
 const standoutFeatures = [
   {
-    title: "Single Binary, Complete Platform",
-    desc: "Unlike email solutions that require assembling multiple services, Kuju Email is a single binary serving IMAP, webmail, REST API, CalDAV/CardDAV, background workers, and delivery handling — all in one.",
+    title: "Complete Platform, One Service",
+    desc: "Unlike email solutions that require assembling multiple services, Kuju Email is a fully integrated platform — IMAP, webmail, REST API, CalDAV/CardDAV, and delivery handling — all working together seamlessly.",
   },
   {
     title: "AI Security Built In, Not Bolted On",
     desc: "Two-tier threat detection with heuristics + LLM analysis, message intelligence panels, sender verification, and URL inspection are native features — not third-party add-ons with separate billing.",
   },
   {
-    title: "No Phone-Home Licensing",
-    desc: "Offline license validation using ECDSA signatures. No telemetry calls required, no activation servers, no kill switches. Your email works even if our servers don't.",
+    title: "No Surprises",
+    desc: "Transparent pricing, no hidden fees, no per-seat gotchas. Start with the free Community tier and upgrade when you're ready. Downgrade gracefully with a 30-day grace period — your email never stops working.",
   },
   {
-    title: "Flexible Deployment",
-    desc: "Run embedded (everything included) or bolt-on to an existing KumoMTA installation. Store messages on filesystem or S3/MinIO. Manage secrets internally or through Vault, AWS, GCP, or Azure.",
+    title: "Self-Hosted Option Coming Soon",
+    desc: "Love the platform but need to run it on your own infrastructure? A self-hosted deployment option is on the roadmap for organizations with strict compliance or data residency requirements.",
   },
   {
     title: "True Multi-Tenant Isolation",
@@ -147,7 +147,7 @@ export default function KujuEmailPage() {
             <p className="mb-10 max-w-2xl text-lg leading-relaxed text-slate-300 md:text-xl">
               A complete, modern email platform with IMAP, webmail, calendar,
               contacts, AI-powered security, and full administrative control.
-              Available as managed SaaS or self-hosted.
+              Fully managed so you can focus on your business.
             </p>
             <div className="flex flex-wrap gap-4">
               <Link
