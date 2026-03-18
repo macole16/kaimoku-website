@@ -1,0 +1,100 @@
+import Link from "next/link";
+
+export default function Footer() {
+  return (
+    <footer className="border-t border-slate-200 bg-primary text-slate-300">
+      <div className="mx-auto max-w-7xl px-6 py-12">
+        <div className="grid gap-8 md:grid-cols-4">
+          <div>
+            <div className="mb-4 flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 text-sm font-bold text-white">
+                K
+              </div>
+              <span className="text-lg font-bold text-white">
+                Kaimoku Technologies
+              </span>
+            </div>
+            <p className="text-sm leading-relaxed text-slate-400">
+              Building modern, reliable infrastructure software for
+              organizations that value control, security, and transparency.
+            </p>
+          </div>
+
+          <div>
+            <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-white">
+              Products
+            </h3>
+            <ul className="space-y-2">
+              <li>
+                <Link
+                  href="/kuju-email"
+                  className="text-sm text-slate-400 transition-colors hover:text-white"
+                >
+                  Kuju Email
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/kuju-email/pricing"
+                  className="text-sm text-slate-400 transition-colors hover:text-white"
+                >
+                  Pricing
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/kuju-email/guide"
+                  className="text-sm text-slate-400 transition-colors hover:text-white"
+                >
+                  User Guide
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-white">
+              Company
+            </h3>
+            <ul className="space-y-2">
+              <li>
+                <Link
+                  href="/#about"
+                  className="text-sm text-slate-400 transition-colors hover:text-white"
+                >
+                  About
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/#values"
+                  className="text-sm text-slate-400 transition-colors hover:text-white"
+                >
+                  Values
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-white">
+              Connect
+            </h3>
+            <ul className="space-y-2">
+              <li>
+                <span className="text-sm text-slate-400">
+                  info@kaimoku.tech
+                </span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="mt-12 border-t border-slate-700 pt-8 text-center text-sm text-slate-400">
+          &copy; {new Date().getFullYear()} Kaimoku Technologies, LLC. All
+          rights reserved.
+        </div>
+      </div>
+    </footer>
+  );
+}
