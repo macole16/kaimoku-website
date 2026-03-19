@@ -4,7 +4,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Kuju Email — Complete Email Platform | Kaimoku Technologies",
   description:
-    "Kuju Email is a complete email platform with IMAP, webmail, calendar, contacts, AI-powered security, and full admin control.",
+    "Kuju Email is a complete email platform with IMAP, webmail, calendar, contacts, AI-powered productivity and security, and full admin control.",
 };
 
 const features = [
@@ -13,15 +13,48 @@ const features = [
     items: [
       {
         title: "Full IMAP Server",
-        desc: "RFC 3501 compliant with server-side SORT and THREAD. Works with Thunderbird, Apple Mail, Outlook, K-9 Mail, and any standard client. Push notifications via IMAP IDLE.",
+        desc: "RFC 3501 compliant with server-side SORT, THREAD, and full-text SEARCH. Works with Thunderbird, Apple Mail, Outlook, K-9 Mail, and any standard client. Push notifications via IMAP IDLE.",
       },
       {
         title: "Modern Webmail",
-        desc: "Full-featured browser-based client with compose, reply, forward, attachments, drag-and-drop, folder management, full-text search, and draft auto-save.",
+        desc: "Full-featured browser-based client with compose, reply, forward, attachments with drag-and-drop, folder management, auto-save drafts (configurable intervals), and forward-as-attachment (.eml).",
       },
       {
-        title: "Plus Addressing",
-        desc: "Create unlimited aliases on-the-fly with user+tag@domain. Messages are stored with the tag for easy filtering and organization.",
+        title: "Command Palette",
+        desc: "Press Cmd+K to access 17+ fuzzy-searchable commands instantly. Navigate folders, compose messages, toggle features, and access settings without leaving the keyboard.",
+      },
+      {
+        title: "Thread Views",
+        desc: "Three selectable conversation designs: Command-Centric (summary + actions), Document-Centric (structured AI sections with key points, decisions, and action items), or Timeline + Context Stream.",
+      },
+    ],
+  },
+  {
+    category: "AI Productivity",
+    items: [
+      {
+        title: "AI Reply",
+        desc: "Generate contextual reply drafts with one click. The AI reads the conversation and drafts a relevant response — review, edit, and send.",
+      },
+      {
+        title: "AI Rewrite & Compose",
+        desc: "Rewrite messages with tone control — Professional, Friendly, Concise, or Formal. Full version history (v1, v2, v3...) with instant restore. Quoted text is preserved automatically.",
+      },
+      {
+        title: "Natural Language Search",
+        desc: "Search your inbox the way you think. Type queries like \"invoices from last month\" or \"unread emails with attachments\" and the AI interprets them into precise searches with timezone-aware date resolution.",
+      },
+      {
+        title: "AI Task Extraction",
+        desc: "Automatically extract action items, deadlines, and follow-ups from emails. Tasks appear in a dedicated sidebar view with pending/completed filters and one-click \"Add to Calendar\" for detected dates.",
+      },
+      {
+        title: "Waiting-On-Reply Tracker",
+        desc: "Automatically detects sent messages expecting a reply using heuristic classification. Tracks aging with green/yellow/red indicators and offers a \"Nudge\" button to generate follow-up drafts.",
+      },
+      {
+        title: "Inbox Summary Dashboard",
+        desc: "At-a-glance view of your inbox health: mail volume stats (today/week/month), security counts (spam/viruses/quarantine), productivity metrics (waiting on reply, pending tasks), and AI classification breakdown.",
       },
     ],
   },
@@ -30,11 +63,15 @@ const features = [
     items: [
       {
         title: "Native CalDAV Calendar",
-        desc: "Full RFC 4791 support with month/week/day views, multi-calendar with color coding, and sync with Apple Calendar, Thunderbird, and any CalDAV client.",
+        desc: "Full RFC 4791 support with month/week/day views, multi-calendar with color coding, all-day events, and sync with Apple Calendar, Thunderbird, and any CalDAV client. AI-powered one-click \"Add to Calendar\" from detected dates in emails.",
       },
       {
         title: "Native CardDAV Contacts",
-        desc: "RFC 6352 contact management with multi-value fields, address books, full-text search, and sync with Apple Contacts, Thunderbird, and any CardDAV client.",
+        desc: "RFC 6352 contact management with multi-value email and phone fields (with type labels), address fields, organization and job title, notes, multiple address books, and full-text search across all fields.",
+      },
+      {
+        title: "Activity Feed",
+        desc: "A unified chronological stream combining messages, calendar events, and tasks in one view. Filter by type to focus on what matters. Available as a dedicated view in the sidebar.",
       },
     ],
   },
@@ -43,15 +80,23 @@ const features = [
     items: [
       {
         title: "Message Intelligence Panel",
-        desc: "On-demand email security inspection: SPF/DKIM/DMARC verification, sender identity checks, relay hop tracing, URL inspection with domain mismatch detection, and antivirus scanning.",
+        desc: "On-demand email security inspection: SPF/DKIM/DMARC verification, sender identity checks, relay hop tracing with rDNS, URL inspection with domain mismatch detection, ClamAV antivirus scanning, and AI threat assessment with evidence-based reasoning.",
       },
       {
         title: "Two-Tier Spam & Phishing Detection",
-        desc: "Tier 1 heuristics run on every message with zero API dependency. Tier 2 LLM analysis provides deep content evaluation with support for Claude, OpenAI, and other providers.",
+        desc: "Tier 1 heuristics run on every message with zero API dependency — catching impersonation, auth failures, and suspicious patterns. Tier 2 LLM analysis provides deep content evaluation with support for Claude, OpenAI, Groq, Fireworks, Mistral, and more.",
       },
       {
         title: "Smart Inbox (AI Categorization)",
-        desc: "Automatic intent classification — personal, newsletter, transactional, notification, calendar, task, financial, social — powered by a fast local model on delivery.",
+        desc: "Automatic intent classification — personal, newsletter, transactional, notification, calendar, task, financial, social — powered by a fast AI model on delivery. Manual reclassification with colored badge indicators.",
+      },
+      {
+        title: "Tracking Protection",
+        desc: "Detects tracking pixels from services like Mailchimp, ConvertKit, and GitHub. Toggle to strip trackers from displayed messages with sender domain identification so you control what gets tracked.",
+      },
+      {
+        title: "Thread Status Indicators",
+        desc: "AI-powered labels like \"No reply needed\" or \"Suspicious\" on conversation threads. Classification reconciliation automatically updates intent when threat analysis reveals new information.",
       },
     ],
   },
@@ -60,15 +105,15 @@ const features = [
     items: [
       {
         title: "Automatic DKIM Rotation",
-        desc: "Zero-downtime DKIM key rotation with three-phase lifecycle: generate, switch, cleanup. Includes DNS propagation verification and configurable rotation intervals.",
+        desc: "Zero-downtime DKIM key rotation with three-phase lifecycle: generate, switch, cleanup. DNS propagation verification, configurable intervals (default 30 days), and support for PowerDNS and Cloudflare with auto-detection.",
       },
       {
         title: "Modern Auth Methods",
-        desc: "TOTP two-factor authentication (Google Authenticator compatible) and WebAuthn/FIDO2 passkeys for passwordless login. Automatic JWT key rotation.",
+        desc: "TOTP two-factor authentication (Google Authenticator compatible), WebAuthn/FIDO2 passkeys for passwordless login, automatic JWT key rotation on configurable schedule, and CSRF protection with double-submit cookies.",
       },
       {
         title: "Encrypted Secrets Storage",
-        desc: "AES-256-GCM encryption with Argon2id key derivation. Supports internal store, HashiCorp Vault, AWS Secrets Manager, GCP Secret Manager, and Azure Key Vault.",
+        desc: "AES-256-GCM encryption with Argon2id key derivation. Supports internal store, HashiCorp Vault/OpenBao, AWS Secrets Manager, GCP Secret Manager, and Azure Key Vault.",
       },
     ],
   },
@@ -77,15 +122,19 @@ const features = [
     items: [
       {
         title: "Multi-Domain Multi-Tenant",
-        desc: "Full multi-domain support with per-domain configuration, admin delegation, account quotas, and domain-partitioned storage for clean data boundaries.",
+        desc: "Full multi-domain support with per-domain configuration, admin delegation, account quotas, domain-partitioned storage, and per-domain API key isolation. Tenants are fully isolated.",
       },
       {
         title: "Per-Domain Branding",
-        desc: "Custom logos, themes, CSS, and branded webmail URLs (webmail.yourdomain.com). Pre-made themes modeled after popular email clients. User-level light/dark mode.",
+        desc: "Custom logos, favicons, themes, CSS, and branded webmail URLs (webmail.yourdomain.com). Pre-made themes modeled after popular email clients. User-level light/dark/system mode.",
+      },
+      {
+        title: "Analytics Dashboard",
+        desc: "Delivery volume charts, status breakdown, spam score distribution, scan verdict breakdown, top senders and source IPs, and plugin token usage tracking with cost estimation. Time range selectors for 24h/7d/30d views.",
       },
       {
         title: "Prometheus Monitoring",
-        desc: "Built-in admin dashboard with storage analytics, delivery trends, spam stats, and plugin cost tracking. Standard Prometheus metrics endpoint for integration with your existing monitoring.",
+        desc: "Standard /metrics endpoint with application metrics (domains, accounts, messages, storage), compression stats, and Go runtime metrics. Grafana compatible.",
       },
     ],
   },
@@ -94,11 +143,15 @@ const features = [
     items: [
       {
         title: "Plugin System",
-        desc: "gRPC subprocess architecture for plugins. Install and uninstall dynamically without restart. Built-in plugins for ClamAV antivirus, AI spam scanning, and AI inbox categorization.",
+        desc: "gRPC subprocess architecture for plugins. Install and uninstall dynamically without restart. Built-in plugins for ClamAV antivirus, AI spam scanning, AI inbox categorization, webhook forwarding, and RSPAMD spam training.",
       },
       {
         title: "Full REST API",
-        desc: "JWT-authenticated API for folders, messages, drafts, calendar, contacts, and admin operations. JMAP endpoints for modern clients. OpenAPI specification included.",
+        desc: "JWT-authenticated API for folders, messages, drafts, calendar, contacts, analysis, tasks, feed, branding, and admin operations. JMAP endpoints for modern clients. Over 60 endpoints with OpenAPI specification.",
+      },
+      {
+        title: "Plus Addressing",
+        desc: "Create unlimited aliases on-the-fly with user+tag@domain. Messages are stored with the tag for easy filtering and organization. Catch-all delivery available per domain.",
       },
     ],
   },
@@ -106,28 +159,28 @@ const features = [
 
 const standoutFeatures = [
   {
+    title: "AI That Actually Helps You Work",
+    desc: "One-click AI replies, tone-controlled rewrites with version history, task extraction from emails, natural language search, waiting-on-reply tracking with nudge, and an inbox summary dashboard. AI isn't a gimmick here — it's woven into every workflow.",
+  },
+  {
     title: "Complete Platform, One Service",
-    desc: "Unlike email solutions that require assembling multiple services, Kuju Email is a fully integrated platform — IMAP, webmail, REST API, CalDAV/CardDAV, and delivery handling — all working together seamlessly.",
+    desc: "IMAP, webmail, REST API, CalDAV/CardDAV, activity feed, AI productivity tools, and delivery handling — all fully integrated. No bolting together separate services or managing multiple vendors.",
   },
   {
     title: "AI Security Built In, Not Bolted On",
-    desc: "Two-tier threat detection with heuristics + LLM analysis, message intelligence panels, sender verification, and URL inspection are native features — not third-party add-ons with separate billing.",
+    desc: "Two-tier threat detection, message intelligence panels, tracking pixel detection, thread status indicators, and sender verification are native features — not third-party add-ons with separate billing.",
   },
   {
     title: "No Surprises",
     desc: "Transparent pricing, no hidden fees, no per-seat gotchas. Start with the free Community tier and upgrade when you're ready. Downgrade gracefully with a 30-day grace period — your email never stops working.",
   },
   {
+    title: "True Multi-Tenant Isolation",
+    desc: "Per-domain admin delegation, API key isolation, partitioned storage, branded hostnames with automatic TLS, and separate configuration. Tenants can't see each other's data or settings.",
+  },
+  {
     title: "Self-Hosted Option Coming Soon",
     desc: "Love the platform but need to run it on your own infrastructure? A self-hosted deployment option is on the roadmap for organizations with strict compliance or data residency requirements.",
-  },
-  {
-    title: "True Multi-Tenant Isolation",
-    desc: "Per-domain admin delegation, API key isolation, partitioned storage, branded hostnames, and separate configuration. Tenants can't see each other's data or settings.",
-  },
-  {
-    title: "Zero-Downtime DKIM Rotation",
-    desc: "Automatic DKIM key rotation with DNS propagation verification, three-phase lifecycle management, and support for standalone or API-managed DNS — a feature most providers lack entirely.",
   },
 ];
 
@@ -146,8 +199,9 @@ export default function KujuEmailPage() {
             </h1>
             <p className="mb-10 max-w-2xl text-lg leading-relaxed text-slate-300 md:text-xl">
               A complete, modern email platform with IMAP, webmail, calendar,
-              contacts, AI-powered security, and full administrative control.
-              Fully managed so you can focus on your business.
+              contacts, AI-powered productivity and security, and full
+              administrative control. Fully managed so you can focus on your
+              business.
             </p>
             <div className="flex flex-wrap gap-4">
               <Link
@@ -176,7 +230,7 @@ export default function KujuEmailPage() {
           <p className="mx-auto mb-12 max-w-2xl text-center text-lg text-slate-600">
             Kuju Email isn&rsquo;t another email wrapper. It&rsquo;s a
             ground-up email platform designed for organizations that need
-            control, security, and modern features.
+            productivity, security, and modern features.
           </p>
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {standoutFeatures.map((f) => (

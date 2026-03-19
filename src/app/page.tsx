@@ -87,17 +87,20 @@ export default function Home() {
               </div>
               <p className="mb-6 text-lg leading-relaxed text-slate-600">
                 A complete email platform with IMAP, webmail, calendar, contacts,
-                AI-powered security, and full administrative control. Available
+                AI-powered productivity tools, and built-in security &mdash;
                 delivered as a managed service so you can focus on what matters.
               </p>
               <div className="mb-8 grid gap-4 sm:grid-cols-3">
                 {[
                   "Full IMAP & Webmail",
                   "Calendar & Contacts",
+                  "AI Reply & Compose",
                   "AI Threat Detection",
+                  "Natural Language Search",
+                  "Smart Inbox & Tasks",
+                  "Tracking Protection",
                   "Multi-Domain Support",
-                  "Plugin Ecosystem",
-                  "Prometheus Metrics",
+                  "Command Palette",
                 ].map((feature) => (
                   <div key={feature} className="flex items-center gap-2">
                     <svg
