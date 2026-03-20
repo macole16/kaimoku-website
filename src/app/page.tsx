@@ -96,11 +96,14 @@ export default function Home() {
                   "Calendar & Contacts",
                   "AI Reply & Compose",
                   "AI Threat Detection",
+                  "Workspaces",
+                  "Attachment Summarization",
                   "Natural Language Search",
+                  "Contact Intelligence",
                   "Smart Inbox & Tasks",
-                  "Tracking Protection",
-                  "Multi-Domain Support",
-                  "Command Palette",
+                  "Vacation Responder",
+                  "Safe Browsing URL Checks",
+                  "Retention Policies",
                 ].map((feature) => (
                   <div key={feature} className="flex items-center gap-2">
                     <svg

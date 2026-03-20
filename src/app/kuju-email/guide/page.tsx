@@ -57,11 +57,13 @@ const tocSections = [
       { title: "Composing Messages", id: "composing" },
       { title: "AI Rewrite & Tone Control", id: "ai-rewrite" },
       { title: "Attachments", id: "attachments" },
-      { title: "Folders", id: "folders" },
+      { title: "Folders & Drag-and-Drop", id: "folders" },
       { title: "Search & Natural Language", id: "search" },
       { title: "Command Palette", id: "command-palette" },
       { title: "Thread Views", id: "thread-views" },
       { title: "Auto-Save Drafts", id: "auto-save" },
+      { title: "Workspaces", id: "workspaces" },
+      { title: "Browser Notifications", id: "notifications" },
       { title: "Message Intelligence", id: "intelligence" },
       { title: "Tracking Protection", id: "tracking" },
     ],
@@ -72,7 +74,9 @@ const tocSections = [
     children: [
       { title: "AI Reply", id: "ai-reply" },
       { title: "Task Extraction", id: "task-extraction" },
+      { title: "Attachment Summarization", id: "attachment-knowledge" },
       { title: "Waiting-On-Reply Tracker", id: "waiting-tracker" },
+      { title: "Contact Intelligence", id: "contact-intelligence" },
       { title: "Inbox Summary Dashboard", id: "inbox-dashboard" },
       { title: "Activity Feed", id: "activity-feed" },
     ],
@@ -115,6 +119,7 @@ const tocSections = [
     children: [
       { title: "Password & Security", id: "password" },
       { title: "Theme & Appearance", id: "theme" },
+      { title: "Vacation Responder", id: "vacation" },
       { title: "Plus Addressing", id: "plus-addressing" },
     ],
   },
@@ -128,6 +133,8 @@ const tocSections = [
       { title: "Custom Hostnames", id: "custom-hostnames" },
       { title: "DKIM Management", id: "dkim" },
       { title: "DNS Health Checks", id: "dns-health" },
+      { title: "Retention Policies", id: "retention" },
+      { title: "Delivery Thresholds", id: "delivery-thresholds" },
       { title: "Catch-All Addresses", id: "catch-all" },
       { title: "Spam Training", id: "spam-training" },
       { title: "Analytics", id: "analytics" },
@@ -310,13 +317,17 @@ export default function GuidePage() {
               them.
             </p>
 
-            <SubHeading id="folders">Folders</SubHeading>
+            <SubHeading id="folders">Folders &amp; Drag-and-Drop</SubHeading>
             <p className="mb-4 leading-relaxed text-slate-700">
               Standard folders (Inbox, Sent, Drafts, Junk, Trash) are created
               automatically. You can create custom folders for organization.
-              Drag and drop messages between folders, or use the Move/Copy
-              actions. Folders support IMAP SPECIAL-USE attributes for
-              compatibility with all clients.
+              Drag and drop messages directly from the message list onto
+              folders in the sidebar — the target folder highlights on hover
+              and folder counts update automatically. The Trash folder includes
+              an Empty Trash button for one-click permanent deletion with a
+              confirmation dialog. Folders display unread counts (red badge)
+              and total counts (gray), and support IMAP SPECIAL-USE attributes
+              for compatibility with all clients.
             </p>
 
             <SubHeading id="search">Search &amp; Natural Language</SubHeading>
@@ -348,8 +359,15 @@ export default function GuidePage() {
             <p className="mb-4 leading-relaxed text-slate-700">
               Press <strong>Cmd+K</strong> (or Ctrl+K) to open the Command
               Palette — a fuzzy-searchable list of 17+ commands. Navigate to
-              folders, compose new messages, toggle Smart Inbox, access settings,
-              switch themes, and more — all without reaching for the mouse.
+              folders, compose new messages, toggle Smart Inbox, access
+              settings, switch themes, assign workspaces, and more.
+            </p>
+            <p className="mb-4 leading-relaxed text-slate-700">
+              The Command Palette also supports{" "}
+              <strong>natural language commands</strong> — type instructions
+              like &ldquo;move this to archive&rdquo;, &ldquo;flag for
+              follow-up&rdquo;, or &ldquo;assign to Project Alpha
+              workspace&rdquo; and the AI interprets and executes the action.
             </p>
 
             <SubHeading id="thread-views">Thread Views</SubHeading>
@@ -384,10 +402,58 @@ export default function GuidePage() {
               just the webmail.
             </p>
 
+            <SubHeading id="workspaces">Workspaces</SubHeading>
+            <p className="mb-4 leading-relaxed text-slate-700">
+              Workspaces let you organize email by project. Messages can belong
+              to multiple workspaces while staying in their original folders —
+              think of them as tags, not folders.
+            </p>
+            <div className="mb-6 rounded-lg border border-slate-200 bg-slate-50 p-6">
+              <h4 className="mb-3 font-semibold text-slate-900">
+                Using Workspaces:
+              </h4>
+              <ul className="space-y-2 text-sm text-slate-700">
+                <li>
+                  <strong>Create:</strong> Create a workspace from the sidebar
+                  or via the Command Palette
+                </li>
+                <li>
+                  <strong>Assign:</strong> Drag and drop messages onto a
+                  workspace, or use the Command Palette to assign
+                </li>
+                <li>
+                  <strong>Auto-assign rules:</strong> Set rules to
+                  automatically assign messages by sender domain, participant
+                  email, or subject keyword
+                </li>
+                <li>
+                  <strong>View:</strong> Click a workspace to see all messages
+                  grouped together regardless of their folder
+                </li>
+                <li>
+                  <strong>Remove:</strong> Remove messages from a workspace
+                  without affecting the original message or other workspaces
+                </li>
+              </ul>
+            </div>
+
+            <SubHeading id="notifications">Browser Notifications</SubHeading>
+            <p className="mb-4 leading-relaxed text-slate-700">
+              Enable desktop notifications to be alerted when new messages
+              arrive. Click the bell icon in the toolbar to toggle
+              notifications on or off. Your browser will ask for permission the
+              first time. Click a notification to jump directly to the webmail
+              tab. Notifications work in Chrome, Firefox, Safari, and Edge
+              while the webmail tab is open.
+            </p>
+
             <SubHeading id="intelligence">Message Intelligence</SubHeading>
             <p className="mb-4 leading-relaxed text-slate-700">
               The Message Intelligence panel provides on-demand security
-              analysis for any email. Click the shield icon on a message to see:
+              analysis organized into two tabs: <strong>AI Insights</strong>{" "}
+              (intent classification, thread summary, tracking, quick stats) and{" "}
+              <strong>Security</strong> (authentication, threats, URLs, virus
+              scanning). Click the shield icon on a message to see:
             </p>
             <div className="mb-6 rounded-lg border border-slate-200 bg-slate-50 p-6">
               <ul className="space-y-2 text-sm text-slate-700">
@@ -408,8 +474,17 @@ export default function GuidePage() {
                   domain mismatch detection (display text vs. actual URL)
                 </li>
                 <li>
+                  <strong>Google Safe Browsing:</strong> Real-time URL threat
+                  checking against Google&rsquo;s malware, social engineering,
+                  unwanted software, and harmful app databases. Results are
+                  cached for 24 hours with a refresh button for re-checking.
+                  Threat level badges show safe (green) or specific threat
+                  types (red)
+                </li>
+                <li>
                   <strong>Antivirus:</strong> On-demand ClamAV scanning of
-                  attachments with cached results
+                  attachments with cached results. Infected attachments are
+                  automatically stripped while preserving the message body
                 </li>
                 <li>
                   <strong>AI Threat Assessment:</strong> Evidence-based
@@ -462,6 +537,41 @@ export default function GuidePage() {
               spot deadlines and meeting times at a glance.
             </p>
 
+            <SubHeading id="attachment-knowledge">
+              Attachment Summarization
+            </SubHeading>
+            <p className="mb-4 leading-relaxed text-slate-700">
+              Click <strong>Extract &amp; Summarize</strong> next to any
+              supported attachment to extract its text content and generate an
+              AI summary with key facts. Supported formats include:
+            </p>
+            <div className="mb-4 grid gap-2 sm:grid-cols-3">
+              {[
+                "PDF",
+                "DOCX",
+                "XLSX",
+                "CSV",
+                "Plain Text",
+                "HTML",
+                "Markdown",
+                "JSON",
+                "XML",
+              ].map((fmt) => (
+                <div
+                  key={fmt}
+                  className="rounded border border-slate-200 bg-white px-3 py-1.5 text-center text-sm text-slate-700"
+                >
+                  {fmt}
+                </div>
+              ))}
+            </div>
+            <p className="mb-4 leading-relaxed text-slate-700">
+              Attachments up to 10 MB are supported. Extracted text is indexed
+              for search, so you can find content inside attachments — not just
+              email bodies. Results are cached per message, and an AI badge
+              appears on the attachment after extraction.
+            </p>
+
             <SubHeading id="waiting-tracker">
               Waiting-On-Reply Tracker
             </SubHeading>
@@ -491,6 +601,33 @@ export default function GuidePage() {
               </p>
             </div>
 
+            <SubHeading id="contact-intelligence">
+              Contact Intelligence
+            </SubHeading>
+            <p className="mb-4 leading-relaxed text-slate-700">
+              The <strong>People</strong> view provides AI-powered
+              communication pattern analysis:
+            </p>
+            <ul className="mb-4 list-inside list-disc space-y-2 text-slate-700">
+              <li>
+                <strong>Top Contacts:</strong> Your most frequent
+                correspondents, ranked by communication frequency
+              </li>
+              <li>
+                <strong>Dormant Contacts:</strong> People you haven&rsquo;t
+                emailed in a while, with last communication dates
+              </li>
+              <li>
+                <strong>Per-Contact Stats:</strong> Emails sent and received,
+                last contact date for any person
+              </li>
+              <li>
+                <strong>Quick-Add:</strong> One-click add to your address book
+                from the People view, with display names enriched from your
+                contacts
+              </li>
+            </ul>
+
             <SubHeading id="inbox-dashboard">
               Inbox Summary Dashboard
             </SubHeading>
@@ -512,6 +649,14 @@ export default function GuidePage() {
               <li>
                 <strong>AI breakdown:</strong> Classification distribution with
                 bar chart visualization
+              </li>
+              <li>
+                <strong>Top senders:</strong> Your top 10 correspondents with
+                display names from your address book
+              </li>
+              <li>
+                <strong>Response rate:</strong> Your reply rate and average
+                messages per day
               </li>
               <li>
                 <strong>Recent quarantine:</strong> Quick list of recently
@@ -788,6 +933,33 @@ export default function GuidePage() {
               Proton Mail). Your theme preference syncs across sessions.
             </p>
 
+            <SubHeading id="vacation">Vacation Responder</SubHeading>
+            <p className="mb-4 leading-relaxed text-slate-700">
+              Set up an automatic out-of-office reply from the{" "}
+              <strong>Vacation</strong> entry in the sidebar. Configure a
+              custom subject and message, and optionally set a date range.
+            </p>
+            <div className="mb-6 rounded-lg border border-slate-200 bg-slate-50 p-6">
+              <h4 className="mb-3 font-semibold text-slate-900">
+                Smart features:
+              </h4>
+              <ul className="space-y-2 text-sm text-slate-700">
+                <li>
+                  <strong>AI calendar detection:</strong> Automatically
+                  detects vacation-related all-day events on your calendar
+                  and suggests enabling the responder
+                </li>
+                <li>
+                  <strong>Per-sender deduplication:</strong> Each sender
+                  receives only one auto-reply per vacation period
+                </li>
+                <li>
+                  <strong>Smart filtering:</strong> Does not reply to mailing
+                  lists, spam, or messages where you were BCC&rsquo;d
+                </li>
+              </ul>
+            </div>
+
             <SubHeading id="plus-addressing">Plus Addressing</SubHeading>
             <p className="mb-4 leading-relaxed text-slate-700">
               Use plus addressing to create unlimited aliases:
@@ -907,6 +1079,45 @@ export default function GuidePage() {
               records are validated before any updates are applied. The system
               auto-detects whether you&rsquo;re using PowerDNS or Cloudflare and
               adapts accordingly.
+            </p>
+
+            <SubHeading id="retention">Retention Policies</SubHeading>
+            <p className="mb-4 leading-relaxed text-slate-700">
+              Configure automatic message deletion based on age to manage
+              storage and comply with data retention requirements. Set policies
+              at the domain level with optional per-folder overrides (e.g.,
+              keep Inbox messages for 365 days but Trash for 30 days).
+              Individual accounts can also have their own overrides.
+            </p>
+            <p className="mb-4 leading-relaxed text-slate-700">
+              A background cleanup worker runs on a configurable schedule
+              (default hourly), processing batch deletions with automatic
+              storage reclamation and folder count updates.
+            </p>
+
+            <SubHeading id="delivery-thresholds">
+              Delivery Thresholds
+            </SubHeading>
+            <p className="mb-4 leading-relaxed text-slate-700">
+              Fine-tune spam handling per domain with configurable thresholds:
+            </p>
+            <ul className="mb-4 list-inside list-disc space-y-2 text-slate-700">
+              <li>
+                <strong>Junk threshold</strong> (default 5.0): Messages
+                scoring above this are routed to the Junk folder
+              </li>
+              <li>
+                <strong>Drop threshold</strong> (default 15.0): Messages
+                scoring above this are hard-rejected and never delivered
+              </li>
+              <li>
+                <strong>Quarantine expiry</strong> (default 30 days):
+                Quarantined messages are automatically purged after this period
+              </li>
+            </ul>
+            <p className="mb-4 leading-relaxed text-slate-700">
+              Drop statistics are available via the admin API for monitoring
+              rejected message volume.
             </p>
 
             <SubHeading id="catch-all">Catch-All Addresses</SubHeading>

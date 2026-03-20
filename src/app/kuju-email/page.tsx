@@ -17,15 +17,23 @@ const features = [
       },
       {
         title: "Modern Webmail",
-        desc: "Full-featured browser-based client with compose, reply, forward, attachments with drag-and-drop, folder management, auto-save drafts (configurable intervals), and forward-as-attachment (.eml).",
+        desc: "Full-featured browser-based client with compose, reply, forward, drag-and-drop attachments and message movement, folder management, auto-save drafts, forward-as-attachment (.eml), and browser push notifications.",
       },
       {
-        title: "Command Palette",
-        desc: "Press Cmd+K to access 17+ fuzzy-searchable commands instantly. Navigate folders, compose messages, toggle features, and access settings without leaving the keyboard.",
+        title: "Command Palette & Natural Language Commands",
+        desc: "Press Cmd+K for 17+ fuzzy-searchable commands. Also supports natural language commands — type \"move this to archive\" or \"flag for follow-up\" and the AI interprets and executes the action.",
       },
       {
         title: "Thread Views",
         desc: "Three selectable conversation designs: Command-Centric (summary + actions), Document-Centric (structured AI sections with key points, decisions, and action items), or Timeline + Context Stream.",
+      },
+      {
+        title: "Workspaces",
+        desc: "Organize email by project with tag-based grouping. Messages can belong to multiple workspaces while staying in their original folders. Set auto-assign rules by sender domain, participant, or subject keyword.",
+      },
+      {
+        title: "Vacation Responder",
+        desc: "Smart auto-reply with AI calendar detection. Set a custom subject and message, configure date ranges, and let the system automatically detect vacation events. Deduplicates replies per sender and skips mailing lists, spam, and BCC messages.",
       },
     ],
   },
@@ -46,15 +54,19 @@ const features = [
       },
       {
         title: "AI Task Extraction",
-        desc: "Automatically extract action items, deadlines, and follow-ups from emails. Tasks appear in a dedicated sidebar view with pending/completed filters and one-click \"Add to Calendar\" for detected dates.",
+        desc: "Automatically extract action items, deadlines, and follow-ups from emails. Tasks appear in a dedicated sidebar view with pending/completed filters and one-click \"Add to Calendar\" for detected dates. Inline date detection highlights dates right in email bodies.",
+      },
+      {
+        title: "Attachment Knowledge Extraction",
+        desc: "Extract text from and AI-summarize document attachments. Supports PDF, DOCX, XLSX, CSV, plain text, HTML, Markdown, JSON, and XML (up to 10 MB). Extracted text is indexed for search so you can find content inside attachments.",
       },
       {
         title: "Waiting-On-Reply Tracker",
-        desc: "Automatically detects sent messages expecting a reply using heuristic classification. Tracks aging with green/yellow/red indicators and offers a \"Nudge\" button to generate follow-up drafts.",
+        desc: "Automatically detects sent messages expecting a reply. Tracks aging with green/yellow/red indicators, auto-matches incoming replies, and offers a \"Nudge\" button to generate follow-up drafts.",
       },
       {
         title: "Inbox Summary Dashboard",
-        desc: "At-a-glance view of your inbox health: mail volume stats (today/week/month), security counts (spam/viruses/quarantine), productivity metrics (waiting on reply, pending tasks), and AI classification breakdown.",
+        desc: "At-a-glance inbox health: mail volume, security counts, productivity metrics, AI classification breakdown, top 10 senders with display names, response rate, and recent quarantine list.",
       },
     ],
   },
@@ -70,6 +82,10 @@ const features = [
         desc: "RFC 6352 contact management with multi-value email and phone fields (with type labels), address fields, organization and job title, notes, multiple address books, and full-text search across all fields.",
       },
       {
+        title: "Contact Intelligence & People View",
+        desc: "AI-powered communication pattern analysis. See your top contacts ranked by frequency, identify dormant contacts, view per-contact stats (emails sent/received, last contact), and quick-add people to your address book from the People view.",
+      },
+      {
         title: "Activity Feed",
         desc: "A unified chronological stream combining messages, calendar events, and tasks in one view. Filter by type to focus on what matters. Available as a dedicated view in the sidebar.",
       },
@@ -80,23 +96,27 @@ const features = [
     items: [
       {
         title: "Message Intelligence Panel",
-        desc: "On-demand email security inspection: SPF/DKIM/DMARC verification, sender identity checks, relay hop tracing with rDNS, URL inspection with domain mismatch detection, ClamAV antivirus scanning, and AI threat assessment with evidence-based reasoning.",
+        desc: "Tabbed security analysis with AI Insights and Security views: SPF/DKIM/DMARC verification, sender identity checks, relay hop tracing, URL inspection, ClamAV antivirus scanning, and AI threat assessment with evidence-based reasoning.",
+      },
+      {
+        title: "Google Safe Browsing",
+        desc: "Real-time URL threat checking against Google Safe Browsing API. Every link in an email is verified against malware, social engineering, unwanted software, and harmful app databases with threat level badges and cached results.",
       },
       {
         title: "Two-Tier Spam & Phishing Detection",
-        desc: "Tier 1 heuristics run on every message with zero API dependency — catching impersonation, auth failures, and suspicious patterns. Tier 2 LLM analysis provides deep content evaluation with support for Claude, OpenAI, Groq, Fireworks, Mistral, and more.",
+        desc: "Tier 1 heuristics run on every message with zero API dependency. Tier 2 LLM analysis provides deep content evaluation. User reclassifications automatically train the RSPAMD filter for continuous improvement.",
       },
       {
         title: "Smart Inbox (AI Categorization)",
-        desc: "Automatic intent classification — personal, newsletter, transactional, notification, calendar, task, financial, social — powered by a fast AI model on delivery. Manual reclassification with colored badge indicators.",
+        desc: "Automatic intent classification — personal, newsletter, transactional, notification, calendar, task, financial, social — powered by a cost-optimized tiered AI model architecture (fast/standard/premium).",
       },
       {
         title: "Tracking Protection",
         desc: "Detects tracking pixels from services like Mailchimp, ConvertKit, and GitHub. Toggle to strip trackers from displayed messages with sender domain identification so you control what gets tracked.",
       },
       {
-        title: "Thread Status Indicators",
-        desc: "AI-powered labels like \"No reply needed\" or \"Suspicious\" on conversation threads. Classification reconciliation automatically updates intent when threat analysis reveals new information.",
+        title: "Virus Attachment Stripping",
+        desc: "When ClamAV detects an infected attachment, it's automatically stripped from the message while preserving the email body — so you receive the message safely without the malicious file.",
       },
     ],
   },
@@ -126,7 +146,15 @@ const features = [
       },
       {
         title: "Per-Domain Branding",
-        desc: "Custom logos, favicons, themes, CSS, and branded webmail URLs (webmail.yourdomain.com). Pre-made themes modeled after popular email clients. User-level light/dark/system mode.",
+        desc: "Custom logos, favicons, themes, CSS, and branded webmail URLs (webmail.yourdomain.com). Pre-made themes modeled after popular email clients. Full dark mode with OS preference detection.",
+      },
+      {
+        title: "Message Retention Policies",
+        desc: "Configure automatic message deletion by age at the domain level with per-folder and per-account overrides. Background cleanup worker handles batch deletion with storage reclamation on a configurable schedule.",
+      },
+      {
+        title: "Delivery Pipeline Controls",
+        desc: "Configurable spam score thresholds per domain — set junk routing and hard drop thresholds separately. Quarantine auto-expiry with configurable retention. Drop statistics API for monitoring.",
       },
       {
         title: "Analytics Dashboard",
@@ -147,7 +175,7 @@ const features = [
       },
       {
         title: "Full REST API",
-        desc: "JWT-authenticated API for folders, messages, drafts, calendar, contacts, analysis, tasks, feed, branding, and admin operations. JMAP endpoints for modern clients. Over 60 endpoints with OpenAPI specification.",
+        desc: "JWT-authenticated API for folders, messages, drafts, calendar, contacts, analysis, tasks, feed, workspaces, vacation, retention, and admin operations. Over 80 endpoints with OpenAPI specification.",
       },
       {
         title: "Plus Addressing",
@@ -160,23 +188,23 @@ const features = [
 const standoutFeatures = [
   {
     title: "AI That Actually Helps You Work",
-    desc: "One-click AI replies, tone-controlled rewrites with version history, task extraction from emails, natural language search, waiting-on-reply tracking with nudge, and an inbox summary dashboard. AI isn't a gimmick here — it's woven into every workflow.",
+    desc: "One-click AI replies, tone-controlled rewrites, task extraction, attachment summarization, natural language search and commands, waiting-on-reply tracking with nudge, contact intelligence, and an inbox summary dashboard. AI is woven into every workflow.",
   },
   {
     title: "Complete Platform, One Service",
-    desc: "IMAP, webmail, REST API, CalDAV/CardDAV, activity feed, AI productivity tools, and delivery handling — all fully integrated. No bolting together separate services or managing multiple vendors.",
+    desc: "IMAP, webmail, REST API, CalDAV/CardDAV, workspaces, activity feed, vacation responder, AI productivity tools, and delivery handling — all fully integrated. No bolting together separate services.",
   },
   {
     title: "AI Security Built In, Not Bolted On",
-    desc: "Two-tier threat detection, message intelligence panels, tracking pixel detection, thread status indicators, and sender verification are native features — not third-party add-ons with separate billing.",
+    desc: "Two-tier threat detection, Google Safe Browsing URL checks, message intelligence panels, tracking pixel detection, virus attachment stripping, and sender verification are native — not third-party add-ons.",
   },
   {
-    title: "No Surprises",
-    desc: "Transparent pricing, no hidden fees, no per-seat gotchas. Start with the free Community tier and upgrade when you're ready. Downgrade gracefully with a 30-day grace period — your email never stops working.",
+    title: "Knows Your Documents Too",
+    desc: "Extract and AI-summarize PDF, DOCX, XLSX, CSV, and more — directly from email attachments. Extracted text is indexed so you can search inside attachments, not just email bodies.",
   },
   {
     title: "True Multi-Tenant Isolation",
-    desc: "Per-domain admin delegation, API key isolation, partitioned storage, branded hostnames with automatic TLS, and separate configuration. Tenants can't see each other's data or settings.",
+    desc: "Per-domain admin delegation, API key isolation, partitioned storage, branded hostnames with automatic TLS, message retention policies, and separate spam thresholds. Tenants are fully isolated.",
   },
   {
     title: "Self-Hosted Option Coming Soon",
