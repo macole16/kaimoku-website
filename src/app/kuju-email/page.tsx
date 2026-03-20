@@ -146,7 +146,7 @@ const features = [
       },
       {
         title: "Per-Domain Branding",
-        desc: "Custom logos, favicons, themes, CSS, and branded webmail URLs (webmail.yourdomain.com). Pre-made themes modeled after popular email clients. Full dark mode with OS preference detection.",
+        desc: "Custom logos, favicons, themes, CSS, and branded webmail URLs (webmail.yourdomain.com). Full dark mode with OS preference detection and user-level theme overrides.",
       },
       {
         title: "Message Retention Policies",

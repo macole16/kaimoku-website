@@ -928,9 +928,7 @@ export default function GuidePage() {
             <p className="mb-4 leading-relaxed text-slate-700">
               Choose between Light, Dark, or System themes. Your domain admin
               may have configured a custom theme with branded colors, logos, and
-              favicon. Kuju Email includes pre-made themes inspired by popular
-              email clients (Outlook, Gmail, Apple Mail, Thunderbird, Yahoo,
-              Proton Mail). Your theme preference syncs across sessions.
+              favicon. Your theme preference syncs across sessions.
             </p>
 
             <SubHeading id="vacation">Vacation Responder</SubHeading>
@@ -1018,10 +1016,6 @@ export default function GuidePage() {
             <ul className="mb-4 list-inside list-disc space-y-2 text-slate-700">
               <li>Upload a custom logo (SVG, PNG, JPEG) and favicon (SVG, ICO)</li>
               <li>Set a custom app name that replaces &ldquo;Kuju Email&rdquo;</li>
-              <li>
-                Choose from pre-made themes (Outlook, Gmail, Apple Mail,
-                Thunderbird, Yahoo, Proton Mail styles)
-              </li>
               <li>Upload custom CSS with CSS variable overrides for full control</li>
               <li>Upload files individually or as ZIP/tar.gz archives</li>
             </ul>
