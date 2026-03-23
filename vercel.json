@@ -1,0 +1,16 @@
+{
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "has": [{ "type": "host", "value": "www.kuju.email" }],
+      "destination": "https://www.kaimoku.tech/kuju-email",
+      "permanent": false
+    },
+    {
+      "source": "/(.*)",
+      "has": [{ "type": "host", "value": "kuju.email" }],
+      "destination": "https://www.kaimoku.tech/kuju-email",
+      "permanent": false
+    }
+  ]
+}

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { URLS } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "Kuju Email — Complete Email Platform | Kaimoku Technologies",
@@ -232,9 +233,24 @@ export default function KujuEmailPage() {
               business.
             </p>
             <div className="flex flex-wrap gap-4">
+              <a
+                href={URLS.KUJU_DEMO_SIGNUP}
+                className={`rounded-lg bg-kuju px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-kuju-dark ${
+                  URLS.KUJU_DEMO_SIGNUP === "#coming-soon"
+                    ? "pointer-events-none opacity-60"
+                    : ""
+                }`}
+                title={
+                  URLS.KUJU_DEMO_SIGNUP === "#coming-soon"
+                    ? "Coming soon"
+                    : undefined
+                }
+              >
+                Try Kuju Email Free
+              </a>
               <Link
                 href="/kuju-email/pricing"
-                className="rounded-lg bg-kuju px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-kuju-dark"
+                className="rounded-lg bg-accent px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-accent-dark"
               >
                 View Plans & Pricing
               </Link>
@@ -326,9 +342,24 @@ export default function KujuEmailPage() {
             Community tier and upgrade as you grow.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
+            <a
+              href={URLS.KUJU_DEMO_SIGNUP}
+              className={`rounded-lg bg-kuju px-8 py-3 font-semibold text-white transition-colors hover:bg-kuju-dark ${
+                URLS.KUJU_DEMO_SIGNUP === "#coming-soon"
+                  ? "pointer-events-none opacity-60"
+                  : ""
+              }`}
+              title={
+                URLS.KUJU_DEMO_SIGNUP === "#coming-soon"
+                  ? "Coming soon"
+                  : undefined
+              }
+            >
+              Try Free
+            </a>
             <Link
               href="/kuju-email/pricing"
-              className="rounded-lg bg-kuju px-8 py-3 font-semibold text-white transition-colors hover:bg-kuju-dark"
+              className="rounded-lg bg-accent px-8 py-3 font-semibold text-white transition-colors hover:bg-accent-dark"
             >
               View Pricing
             </Link>

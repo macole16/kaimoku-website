@@ -49,6 +49,14 @@ export default function Footer() {
                   User Guide
                 </Link>
               </li>
+              <li>
+                <Link
+                  href="/kuju-email/pricing"
+                  className="text-sm text-slate-400 transition-colors hover:text-white"
+                >
+                  Try Kuju Email
+                </Link>
+              </li>
             </ul>
           </div>
 

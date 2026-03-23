@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { URLS } from "@/lib/constants";
 
 export default function Home() {
   return (
@@ -18,6 +19,21 @@ export default function Home() {
               email experience.
             </p>
             <div className="flex flex-wrap gap-4">
+              <a
+                href={URLS.KUJU_DEMO_SIGNUP}
+                className={`rounded-lg bg-kuju px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-kuju-dark ${
+                  URLS.KUJU_DEMO_SIGNUP === "#coming-soon"
+                    ? "pointer-events-none opacity-60"
+                    : ""
+                }`}
+                title={
+                  URLS.KUJU_DEMO_SIGNUP === "#coming-soon"
+                    ? "Coming soon"
+                    : undefined
+                }
+              >
+                Try Kuju Email Free
+              </a>
               <Link
                 href="/kuju-email"
                 className="rounded-lg bg-accent px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-accent-dark"
@@ -147,8 +163,62 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Move Your Domain */}
+      <section className="px-6 py-20 md:py-28">
+        <div className="mx-auto max-w-7xl">
+          <div className="mx-auto max-w-3xl text-center">
+            <h2 className="mb-4 text-3xl font-bold text-primary md:text-4xl">
+              Move Your Domain to Kuju
+            </h2>
+            <p className="mb-12 text-lg text-slate-600">
+              Switch to Kuju Email in three steps. No downtime, no data loss.
+            </p>
+          </div>
+          <div className="grid gap-8 md:grid-cols-3">
+            {[
+              {
+                step: "1",
+                title: "Choose Your Plan",
+                desc: "Pick the tier that fits your organization. Start with the free Community tier or go straight to a paid plan with AI features and more domains.",
+              },
+              {
+                step: "2",
+                title: "Point Your Domain",
+                desc: "Update your MX, SPF, and DKIM records. We provide the exact values — just copy and paste them into your DNS provider.",
+              },
+              {
+                step: "3",
+                title: "You're Live",
+                desc: "Email flows through Kuju immediately. Import your existing mail anytime. Invite your team and start using the full platform.",
+              },
+            ].map((s) => (
+              <div
+                key={s.step}
+                className="rounded-xl border border-slate-200 p-8"
+              >
+                <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-full bg-kuju/10 text-lg font-bold text-kuju-dark">
+                  {s.step}
+                </div>
+                <h3 className="mb-3 text-xl font-bold text-primary">
+                  {s.title}
+                </h3>
+                <p className="leading-relaxed text-slate-600">{s.desc}</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-10 text-center">
+            <Link
+              href="/kuju-email/pricing"
+              className="inline-block rounded-lg bg-accent px-8 py-3 font-semibold text-white transition-colors hover:bg-accent-dark"
+            >
+              View Plans
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* Values */}
-      <section id="values" className="px-6 py-20 md:py-28">
+      <section id="values" className="bg-surface px-6 py-20 md:py-28">
         <div className="mx-auto max-w-7xl">
           <h2 className="mb-12 text-center text-3xl font-bold text-primary md:text-4xl">
             Our Values
@@ -226,6 +296,21 @@ export default function Home() {
             Sign up for Kuju Email and see how a modern email platform should work.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
+            <a
+              href={URLS.KUJU_DEMO_SIGNUP}
+              className={`rounded-lg bg-kuju px-8 py-3 font-semibold text-white transition-colors hover:bg-kuju-dark ${
+                URLS.KUJU_DEMO_SIGNUP === "#coming-soon"
+                  ? "pointer-events-none opacity-60"
+                  : ""
+              }`}
+              title={
+                URLS.KUJU_DEMO_SIGNUP === "#coming-soon"
+                  ? "Coming soon"
+                  : undefined
+              }
+            >
+              Try Free
+            </a>
             <Link
               href="/kuju-email"
               className="rounded-lg bg-accent px-8 py-3 font-semibold text-white transition-colors hover:bg-accent-dark"
