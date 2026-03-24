@@ -2,12 +2,14 @@
 // Update these when Paddle and kuju.email portal go live.
 
 export const URLS = {
-  // Demo signup on kuju.email customer portal
-  KUJU_DEMO_SIGNUP: "#coming-soon", // → https://kuju.email/signup
+  // Trial signup on kuju.email customer portal
+  KUJU_TRIAL_SIGNUP: "#coming-soon", // → https://kuju.email/signup
 
   // Paddle checkout links (replace with real Paddle URLs after approval)
+  PADDLE_INDIVIDUAL_FAMILY: "#coming-soon",
   PADDLE_SMALL_BUSINESS: "#coming-soon",
   PADDLE_PROFESSIONAL: "#coming-soon",
+  PADDLE_ENTERPRISE: "#coming-soon",
   PADDLE_ENTERPRISE_CONTACT:
     "mailto:info@kaimoku.tech?subject=Enterprise%20Inquiry",
 
