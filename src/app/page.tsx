@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { URLS } from "@/lib/constants";
+import { URLS, isComingSoon } from "@/lib/constants";
 
 export default function Home() {
   return (
@@ -20,19 +20,19 @@ export default function Home() {
             </p>
             <div className="flex flex-wrap gap-4">
               <a
-                href={URLS.KUJU_DEMO_SIGNUP}
+                href={URLS.KUJU_TRIAL_SIGNUP}
                 className={`rounded-lg bg-kuju px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-kuju-dark ${
-                  URLS.KUJU_DEMO_SIGNUP === "#coming-soon"
+                  isComingSoon(URLS.KUJU_TRIAL_SIGNUP)
                     ? "pointer-events-none opacity-60"
                     : ""
                 }`}
                 title={
-                  URLS.KUJU_DEMO_SIGNUP === "#coming-soon"
+                  isComingSoon(URLS.KUJU_TRIAL_SIGNUP)
                     ? "Coming soon"
                     : undefined
                 }
               >
-                Try Kuju Email Free
+                Start 14-Day Trial
               </a>
               <Link
                 href="/kuju-email"
@@ -179,7 +179,7 @@ export default function Home() {
               {
                 step: "1",
                 title: "Choose Your Plan",
-                desc: "Pick the tier that fits your organization. Start with the free Community tier or go straight to a paid plan with AI features and more domains.",
+                desc: "Start a 14-day free trial with full access. Then pick the tier that fits — from Individual plans to Enterprise.",
               },
               {
                 step: "2",
@@ -297,19 +297,19 @@ export default function Home() {
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <a
-              href={URLS.KUJU_DEMO_SIGNUP}
+              href={URLS.KUJU_TRIAL_SIGNUP}
               className={`rounded-lg bg-kuju px-8 py-3 font-semibold text-white transition-colors hover:bg-kuju-dark ${
-                URLS.KUJU_DEMO_SIGNUP === "#coming-soon"
+                isComingSoon(URLS.KUJU_TRIAL_SIGNUP)
                   ? "pointer-events-none opacity-60"
                   : ""
               }`}
               title={
-                URLS.KUJU_DEMO_SIGNUP === "#coming-soon"
+                isComingSoon(URLS.KUJU_TRIAL_SIGNUP)
                   ? "Coming soon"
                   : undefined
               }
             >
-              Try Free
+              Start 14-Day Trial
             </a>
             <Link
               href="/kuju-email"
