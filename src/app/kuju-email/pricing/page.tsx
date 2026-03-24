@@ -1,173 +1,183 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
 import { URLS, isComingSoon } from "@/lib/constants";
 
 const tiers = [
   {
-    name: "Community",
-    price: "Free",
-    annualPrice: "Free",
-    period: "",
-    desc: "Perfect for personal use, small teams, and evaluation.",
-    users: "10",
-    domains: "1",
-    domainAliases: "1",
-    storage: "5 GB",
+    name: "Individual / Family",
+    pricingModel: "base" as const,
+    price: "$10",
+    annualPrice: "$8.30",
+    period: "/month",
+    desc: "For individuals and families. Full email platform with AI.",
+    accounts: "5 included",
+    storagePerAccount: "5 GB",
+    extraAccountPrice: "$5/account/mo",
     highlight: false,
-    ctaHref: URLS.KUJU_DEMO_SIGNUP,
-    ctaLabel: "Start Free",
-    overages: null as string[] | null,
+    ctaHref: URLS.PADDLE_INDIVIDUAL_FAMILY,
+    ctaLabel: "Start 14-Day Trial",
+    extras: [
+      "+$5/additional account (includes 5 GB)",
+      "+$1/GB/mo for extra storage",
+      "Premium AI: +$5/account/mo",
+    ],
     features: [
-      "Full IMAP server",
+      "Full IMAP server (RFC 3501)",
       "Webmail with command palette",
       "Calendar & Contacts (CalDAV/CardDAV)",
       "Natural language search",
-      "Auto-save drafts & drag-and-drop",
-      "Browser push notifications",
-      "Vacation responder with calendar detection",
-      "RSPAMD spam filtering",
-      "Heuristic phishing detection",
-      "Message intelligence panel",
-      "Tracking protection",
-      "DKIM signing & rotation",
+      "Spam filtering & heuristic phishing detection",
+      "DKIM signing & automatic rotation",
       "2FA & passkey authentication",
-      "Community support",
+      "Base AI: reply drafting, rewrite, task extraction",
+      "Vacation responder",
+      "Unlimited domains",
     ],
   },
   {
     name: "Small Business",
-    price: "$29",
-    annualPrice: "$24",
-    period: "/month",
-    desc: "For growing organizations that need AI, API access, and extensibility.",
-    users: "50",
-    domains: "2",
-    domainAliases: "Unlimited",
-    storage: "25 GB",
+    pricingModel: "per-account" as const,
+    price: "$5",
+    annualPrice: "$4.15",
+    period: "/account/month",
+    desc: "For growing teams. AI productivity, API access, and extensibility.",
+    accounts: "5 minimum",
+    storagePerAccount: "10 GB",
+    extraAccountPrice: null,
     highlight: true,
     ctaHref: URLS.PADDLE_SMALL_BUSINESS,
-    ctaLabel: "Get Started",
-    overages: [
-      "$1.50/extra user/mo",
-      "$10/extra domain/mo",
-      "$2/extra GB/mo",
-      "75 user cap (upgrade for more)",
+    ctaLabel: "Start 14-Day Trial",
+    extras: [
+      "+$1/GB/mo for extra storage",
+      "Premium AI: +$5/account/mo",
     ],
     features: [
-      "Everything in Community, plus:",
-      "AI Reply & AI Rewrite with tone control",
-      "AI task extraction & calendar integration",
-      "Attachment knowledge extraction & summarization",
+      "Everything in Individual / Family, plus:",
+      "AI attachment summarization",
       "Waiting-on-reply tracker with nudge",
       "Contact intelligence & People view",
       "Workspaces (project-based grouping)",
       "Inbox summary dashboard",
-      "Thread views (3 designs)",
-      "Activity feed",
-      "Natural language commands",
-      "REST API access",
+      "REST API access (80+ endpoints)",
       "Plugin installation & catalog",
-      "Per-domain branding & hostnames",
-      "Per-domain admin delegation",
+      "Per-domain branding & admin delegation",
       "Priority email support",
     ],
   },
   {
     name: "Professional",
-    price: "$99",
-    annualPrice: "$82",
-    period: "/month",
-    desc: "For large teams needing advanced security, archiving, and more domains.",
-    users: "500",
-    domains: "5",
-    domainAliases: "Unlimited",
-    storage: "100 GB",
+    pricingModel: "platform-fee" as const,
+    price: "$5",
+    annualPrice: "$4.15",
+    period: "/account/month",
+    platformFee: "$75",
+    annualPlatformFee: "$62.50",
+    desc: "For compliance-conscious teams. Archiving, retention, and advanced security.",
+    accounts: "10 minimum",
+    storagePerAccount: "10 GB",
+    extraAccountPrice: null,
     highlight: false,
     ctaHref: URLS.PADDLE_PROFESSIONAL,
-    ctaLabel: "Get Started",
-    overages: [
-      "$0.75/extra user/mo",
-      "$8/extra domain/mo",
-      "$2/extra GB/mo",
-      "750 user cap (upgrade for more)",
+    ctaLabel: "Start 14-Day Trial",
+    extras: [
+      "+$1/GB/mo for extra storage",
+      "3-year archiving included",
+      "Extended retention: +$0.50/GB/mo",
+      "Premium AI: +$5/account/mo",
     ],
     features: [
       "Everything in Small Business, plus:",
       "AI spam & phishing scanner (LLM)",
-      "AI Smart Inbox categorization",
+      "Smart Inbox categorization",
       "Google Safe Browsing URL checks",
       "Virus attachment stripping",
-      "Thread status indicators",
-      "Message retention policies",
-      "Configurable delivery thresholds",
+      "Message archiving (3-year retention included)",
+      "Configurable retention policies",
       "Advanced analytics & reporting",
-      "Message archiving",
       "Custom plugin development",
-      "Dedicated storage scaling",
       "Priority support with SLA",
     ],
   },
   {
     name: "Enterprise",
-    price: "Custom",
-    annualPrice: "Custom",
-    period: "",
-    desc: "For organizations with compliance, audit, and SSO requirements.",
-    users: "Unlimited",
-    domains: "Unlimited",
-    domainAliases: "Unlimited",
-    storage: "Custom",
+    pricingModel: "alacarte" as const,
+    price: "$7",
+    annualPrice: "$5.80",
+    period: "/account/month",
+    desc: "Self-serve a la carte. Build the plan your organization needs.",
+    accounts: "Custom",
+    storagePerAccount: "10 GB default",
+    minimumSpend: "$300/mo minimum spend",
+    extraAccountPrice: null,
     highlight: false,
-    ctaHref: URLS.PADDLE_ENTERPRISE_CONTACT,
-    ctaLabel: "Contact Sales",
-    overages: null,
+    ctaHref: URLS.PADDLE_ENTERPRISE,
+    ctaLabel: "Start 14-Day Trial",
+    extras: [
+      "+$1/GB/mo for extra storage",
+      "Managed backups: +$7/account/mo",
+      "Extended retention: +$0.50/GB/mo",
+      "Premium AI: +$5/account/mo",
+    ],
     features: [
       "Everything in Professional, plus:",
-      "Single sign-on (SSO)",
+      "SSO (SAML/OIDC)",
       "Audit logging",
-      "Advanced secrets management",
-      "Dedicated support engineer",
-      "Custom onboarding assistance",
-      "Future self-hosted deployment option",
-      "SLA guarantees",
+      "Self-serve component builder",
+      "Managed backup option",
+      "Dedicated infrastructure (coming soon)",
     ],
   },
 ];
 
 const faqs = [
   {
-    q: "Can I start with Community and upgrade later?",
-    a: "Yes. The Community tier is fully functional with core features. When you need AI, API access, more users, or additional domains, you can upgrade at any time. Your data stays the same.",
+    q: "How does the 14-day trial work?",
+    a: "Every new signup gets a 14-day trial with full Professional-level access — all features, no restrictions. After the trial, pick the plan that fits and you're up and running.",
   },
   {
-    q: "What happens if I exceed my plan limits?",
-    a: "Paid plans support overages — extra users, domains, and storage are billed at the rates shown on each plan. Overages are priced higher per-unit than upgrading, so if you're consistently over your limits, upgrading to the next tier is the better deal. The Community tier does not support overages — you'll need to upgrade.",
+    q: "What happens when my trial expires?",
+    a: "Your account freezes — you can still log in and view your existing email, but sending and receiving is paused. Your data is preserved for 30 days, giving you time to choose a plan. Pick any tier and everything resumes instantly.",
   },
   {
-    q: "What's the difference between a domain alias and a separate domain?",
-    a: "A domain alias shares the same users as your primary domain — mail sent to user@alias.com delivers to user@primary.com. It's free on all plans. A separate domain has its own user accounts and counts toward your domain quota.",
+    q: "How does per-account pricing work?",
+    a: "Small Business, Professional, and Enterprise are billed per email account. You choose how many accounts you need and can add more at any time. Individual/Family includes 5 accounts in the base price with additional accounts at $5 each.",
+  },
+  {
+    q: "What's the Professional platform fee?",
+    a: "Professional has a $75/month platform fee plus $5/account/month. The platform fee covers archiving infrastructure, retention policies, advanced analytics, and LLM-powered spam scanning — systems that cost the same whether you have 10 or 100 users.",
+  },
+  {
+    q: "How does Enterprise a la carte work?",
+    a: "Enterprise is fully self-serve — pick the components you need from the menu. There's a $300/month minimum spend. Accounts are $7/month each, and you can add managed backups, extended retention, and Premium AI as needed.",
+  },
+  {
+    q: "What is Premium AI?",
+    a: "Every plan includes base AI features powered by lightweight models. Premium AI ($5/account/month) upgrades to faster, more capable models for better reply drafting, smarter task extraction, and more accurate spam detection. Available on any tier.",
+  },
+  {
+    q: "Are there limits on domains?",
+    a: "No. All plans include unlimited custom domains at no extra charge. Domain aliases are always free. Per-domain branding and admin delegation are available on Small Business and above.",
   },
   {
     q: "What counts toward my storage limit?",
-    a: "Email messages and attachments stored on the server. Storage is pooled across all your domains. Calendar events and contacts use negligible space and are not metered.",
+    a: "Email messages and attachments stored on the server. Storage is measured per account. Calendar events and contacts use negligible space and are not metered. You can add extra storage at $1/GB/month on any plan.",
+  },
+  {
+    q: "What happens if I exceed my storage?",
+    a: "First, you get a warning and a 14-day grace period to clean up or upgrade. You can opt in to automatic overage billing at $1/GB/month. If you take no action, we'll throttle large attachments but your email keeps working — we never cut you off.",
+  },
+  {
+    q: "Is there an annual discount?",
+    a: "Yes — all plans offer a 17% discount (2 months free) when billed annually.",
+  },
+  {
+    q: "Can I bring my own AI provider?",
+    a: "Yes. The AI features support Anthropic Claude, OpenAI, Together AI, Groq, Fireworks, Mistral, and any OpenAI-compatible endpoint. API keys are isolated per-domain.",
   },
   {
     q: "Is there a self-hosted option?",
     a: "Not yet, but it's on our roadmap. If you have strict compliance or data residency requirements, reach out — we'd love to hear about your needs.",
-  },
-  {
-    q: "Do I need to set up my own mail server?",
-    a: "No. Kuju Email is fully managed — we handle the mail server, spam filtering, DKIM, TLS, and everything else. You just add your domain and start using it.",
-  },
-  {
-    q: "What happens if my subscription expires?",
-    a: "Your email continues to work. The platform gracefully downgrades to the Community tier feature set. There are no kill switches. You get a 30-day grace period for over-capacity usage.",
-  },
-  {
-    q: "Can I bring my own AI provider for spam scanning?",
-    a: "Yes. The AI spam scanner supports Anthropic Claude, OpenAI, Together AI, Groq, Fireworks, Mistral, and any OpenAI-compatible endpoint. API keys are isolated per-domain.",
   },
 ];
 
@@ -182,35 +192,35 @@ export default function PricingPage() {
             Simple, Transparent Pricing
           </h1>
           <p className="mx-auto max-w-2xl text-lg text-slate-300">
-            Start free. Scale when you&rsquo;re ready. No hidden fees, no
-            per-seat surprises. All plans include the full email platform.
+            Start with a 14-day free trial. Pick the plan that fits when
+            you&rsquo;re ready. No hidden fees.
           </p>
         </div>
       </section>
 
       <section className="px-6 py-20">
         <div className="mx-auto max-w-7xl">
-          {/* Demo banner */}
+          {/* Trial banner */}
           <div className="mb-12 rounded-xl border border-kuju/20 bg-kuju/5 p-6 text-center">
             <p className="mb-3 text-lg font-semibold text-primary">
-              Want to try before you buy?
+              Try everything free for 14 days
             </p>
             <p className="mb-4 text-slate-600">
-              Create a free demo account and experience Kuju Email with no
-              commitment.
+              Full Professional-level access. All features, no restrictions, no
+              credit card required.
             </p>
             <a
-              href={URLS.KUJU_DEMO_SIGNUP}
+              href={URLS.KUJU_TRIAL_SIGNUP}
               className={`inline-block rounded-lg bg-kuju px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-kuju-dark ${
-                isComingSoon(URLS.KUJU_DEMO_SIGNUP)
+                isComingSoon(URLS.KUJU_TRIAL_SIGNUP)
                   ? "pointer-events-none opacity-60"
                   : ""
               }`}
               title={
-                isComingSoon(URLS.KUJU_DEMO_SIGNUP) ? "Coming soon" : undefined
+                isComingSoon(URLS.KUJU_TRIAL_SIGNUP) ? "Coming soon" : undefined
               }
             >
-              Try Kuju Email Free
+              Start 14-Day Trial
             </a>
           </div>
 
@@ -241,7 +251,7 @@ export default function PricingPage() {
             </span>
             {annual && (
               <span className="rounded-full bg-kuju/10 px-2 py-0.5 text-xs font-semibold text-kuju-dark">
-                Save ~17%
+                Save 17% (2 months free)
               </span>
             )}
           </div>
@@ -249,8 +259,23 @@ export default function PricingPage() {
           {/* Tier cards */}
           <div className="grid gap-6 lg:grid-cols-4">
             {tiers.map((tier) => {
-              const displayPrice = annual ? tier.annualPrice : tier.price;
               const comingSoon = isComingSoon(tier.ctaHref);
+
+              /* Build price display based on pricing model */
+              let priceDisplay: string;
+              let priceSubtext: string | null = null;
+
+              if (tier.pricingModel === "base") {
+                priceDisplay = annual ? tier.annualPrice : tier.price;
+              } else if (tier.pricingModel === "platform-fee") {
+                priceDisplay = annual ? tier.annualPrice : tier.price;
+                const fee = annual
+                  ? (tier as typeof tiers[2]).annualPlatformFee
+                  : (tier as typeof tiers[2]).platformFee;
+                priceSubtext = `+ ${fee}/mo platform fee`;
+              } else {
+                priceDisplay = annual ? tier.annualPrice : tier.price;
+              }
 
               return (
                 <div
@@ -271,13 +296,18 @@ export default function PricingPage() {
                   </h3>
                   <div className="mt-4 flex items-baseline gap-1">
                     <span className="text-4xl font-bold text-slate-900">
-                      {displayPrice}
+                      {priceDisplay}
                     </span>
                     {tier.period && (
                       <span className="text-slate-500">{tier.period}</span>
                     )}
                   </div>
-                  {annual && tier.price !== "Free" && tier.price !== "Custom" && (
+                  {priceSubtext && (
+                    <p className="mt-1 text-sm font-medium text-kuju-dark">
+                      {priceSubtext}
+                    </p>
+                  )}
+                  {annual && (
                     <p className="mt-1 text-xs text-slate-500">
                       Billed annually
                     </p>
@@ -285,33 +315,31 @@ export default function PricingPage() {
                   <p className="mt-3 text-sm text-slate-600">{tier.desc}</p>
 
                   {/* Plan limits */}
-                  <div className="mt-6 grid grid-cols-3 gap-2 border-t border-slate-100 pt-6">
+                  <div className="mt-6 grid grid-cols-2 gap-2 border-t border-slate-100 pt-6">
                     <div className="text-center">
                       <div className="text-lg font-bold text-primary">
-                        {tier.users}
+                        {tier.accounts}
                       </div>
-                      <div className="text-xs text-slate-500">users</div>
+                      <div className="text-xs text-slate-500">accounts</div>
                     </div>
                     <div className="text-center">
                       <div className="text-lg font-bold text-primary">
-                        {tier.domains}
+                        {tier.storagePerAccount}
                       </div>
-                      <div className="text-xs text-slate-500">
-                        {tier.domains === "Unlimited" ? "domains" : "domains"}
-                      </div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-lg font-bold text-primary">
-                        {tier.storage}
-                      </div>
-                      <div className="text-xs text-slate-500">storage</div>
+                      <div className="text-xs text-slate-500">per account</div>
                     </div>
                   </div>
 
-                  {/* Domain alias note */}
+                  {/* Minimum spend note (Enterprise) */}
+                  {"minimumSpend" in tier && (tier as any).minimumSpend && (
+                    <p className="mt-2 text-center text-xs font-medium text-kuju-dark">
+                      {(tier as any).minimumSpend}
+                    </p>
+                  )}
+
+                  {/* Unlimited domains note */}
                   <p className="mt-3 text-center text-xs text-slate-500">
-                    + {tier.domainAliases} free domain{" "}
-                    {tier.domainAliases === "1" ? "alias" : "aliases"}
+                    Unlimited domains &amp; aliases included
                   </p>
 
                   {/* Features */}
@@ -336,15 +364,15 @@ export default function PricingPage() {
                     ))}
                   </ul>
 
-                  {/* Overages */}
-                  {tier.overages && (
+                  {/* Add-ons & Extras */}
+                  {tier.extras && (
                     <div className="mt-4 rounded-lg bg-slate-50 p-3">
                       <p className="mb-1 text-xs font-semibold text-slate-500 uppercase">
-                        Overages
+                        Add-ons &amp; Extras
                       </p>
-                      {tier.overages.map((o) => (
-                        <p key={o} className="text-xs text-slate-500">
-                          {o}
+                      {tier.extras.map((e) => (
+                        <p key={e} className="text-xs text-slate-500">
+                          {e}
                         </p>
                       ))}
                     </div>
