@@ -57,7 +57,7 @@ export default function AcceptableUsePage() {
 
           <p><strong>Service Abuse</strong></p>
           <ul>
-            <li>Create accounts for the purpose of abusing free tier limits</li>
+            <li>Create accounts for the purpose of abusing trial periods or plan limits</li>
             <li>Use the Service in a way that degrades performance for other customers</li>
             <li>Resell or redistribute access to the Service without authorization</li>
             <li>Circumvent or attempt to circumvent any usage limits, rate limits, or security measures</li>
@@ -90,7 +90,7 @@ export default function AcceptableUsePage() {
         <section>
           <h2>5. Resource Limits</h2>
           <p>
-            Each subscription tier includes defined limits for users, domains, storage, and sending volume. Usage that consistently exceeds your plan&rsquo;s limits may result in a request to upgrade, temporary throttling, or suspension of the account.
+            Each subscription tier includes defined per-account limits for storage and sending volume. Usage that consistently exceeds your plan&rsquo;s limits will trigger a notification and grace period, followed by automatic overage billing (if opted in) or temporary throttling of large attachments.
           </p>
           <p>
             We reserve the right to impose reasonable rate limits on sending, API usage, and other Service functions to ensure fair use and platform stability.
