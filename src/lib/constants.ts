@@ -1,16 +1,16 @@
 // External URLs — single source of truth for all CTA targets.
-// Update these when Paddle and kuju.email portal go live.
+// Update these when Polar and kuju.email portal go live.
 
 export const URLS = {
   // Trial signup on kuju.email customer portal
   KUJU_TRIAL_SIGNUP: "#coming-soon", // → https://kuju.email/signup
 
-  // Paddle checkout links (replace with real Paddle URLs after approval)
-  PADDLE_INDIVIDUAL_FAMILY: "#coming-soon",
-  PADDLE_SMALL_BUSINESS: "#coming-soon",
-  PADDLE_PROFESSIONAL: "#coming-soon",
-  PADDLE_ENTERPRISE: "#coming-soon",
-  PADDLE_ENTERPRISE_CONTACT:
+  // Checkout links (Polar)
+  CHECKOUT_INDIVIDUAL: "#coming-soon",
+  CHECKOUT_SMALL_BUSINESS: "#coming-soon",
+  CHECKOUT_PROFESSIONAL: "#coming-soon",
+  CHECKOUT_ENTERPRISE: "#coming-soon",
+  CHECKOUT_ENTERPRISE_CONTACT:
     "mailto:info@kaimoku.tech?subject=Enterprise%20Inquiry",
 
   // General

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { URLS, isComingSoon } from "@/lib/constants";
 
 const tiers = [
@@ -15,7 +16,7 @@ const tiers = [
     storagePerAccount: "5 GB",
     extraAccountPrice: "$5/account/mo",
     highlight: false,
-    ctaHref: URLS.PADDLE_INDIVIDUAL_FAMILY,
+    ctaHref: URLS.CHECKOUT_INDIVIDUAL,
     ctaLabel: "Start 14-Day Trial",
     extras: [
       "+$5/additional account (includes 5 GB)",
@@ -46,7 +47,7 @@ const tiers = [
     storagePerAccount: "10 GB",
     extraAccountPrice: null,
     highlight: true,
-    ctaHref: URLS.PADDLE_SMALL_BUSINESS,
+    ctaHref: URLS.CHECKOUT_SMALL_BUSINESS,
     ctaLabel: "Start 14-Day Trial",
     extras: [
       "+$1/GB/mo for extra storage",
@@ -78,7 +79,7 @@ const tiers = [
     storagePerAccount: "10 GB",
     extraAccountPrice: null,
     highlight: false,
-    ctaHref: URLS.PADDLE_PROFESSIONAL,
+    ctaHref: URLS.CHECKOUT_PROFESSIONAL,
     ctaLabel: "Start 14-Day Trial",
     extras: [
       "+$1/GB/mo for extra storage",
@@ -111,7 +112,7 @@ const tiers = [
     minimumSpend: "$300/mo minimum spend",
     extraAccountPrice: null,
     highlight: false,
-    ctaHref: URLS.PADDLE_ENTERPRISE,
+    ctaHref: URLS.CHECKOUT_ENTERPRISE,
     ctaLabel: "Start 14-Day Trial",
     extras: [
       "+$1/GB/mo for extra storage",
@@ -181,8 +182,12 @@ const faqs = [
   },
 ];
 
-export default function PricingPage() {
+function PricingPageInner() {
   const [annual, setAnnual] = useState(false);
+  const searchParams = useSearchParams();
+  // accountRef is the trial user's account ID, passed from the upgrade banner.
+  // Will be included in Polar checkout metadata for conversion tracking.
+  const accountRef = searchParams.get("ref") || "";
 
   return (
     <>
@@ -426,5 +431,13 @@ export default function PricingPage() {
         </div>
       </section>
     </>
+  );
+}
+
+export default function PricingPage() {
+  return (
+    <Suspense>
+      <PricingPageInner />
+    </Suspense>
   );
 }
