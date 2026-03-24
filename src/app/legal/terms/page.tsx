@@ -48,7 +48,7 @@ export default function TermsPage() {
         <section>
           <h2>4. Subscriptions and Payment</h2>
           <p>
-            <strong>Plans.</strong> The Service is offered under multiple subscription tiers, including a free Community tier. Paid plans are billed monthly or annually, as selected at the time of purchase.
+            <strong>Plans.</strong> The Service is offered under multiple subscription tiers billed monthly or annually, as selected at the time of purchase. All plans require a paid subscription after the trial period ends.
           </p>
           <p>
             <strong>Payment.</strong> Paid subscriptions are billed in advance. You authorize us to charge your designated payment method for all fees incurred. All fees are stated in U.S. dollars unless otherwise specified.
@@ -65,9 +65,15 @@ export default function TermsPage() {
         </section>
 
         <section>
-          <h2>5. Free Tier</h2>
+          <h2>5. Free Trial</h2>
           <p>
-            The Community tier is provided at no charge and is subject to the usage limits described on our pricing page. We reserve the right to modify the limits or features of the free tier at any time with reasonable notice. The free tier is provided &ldquo;as is&rdquo; without any service level commitments.
+            New accounts receive a 14-day free trial with full access to all platform features. Near the end of the trial period, you may request a one-time 14-day extension. After the trial period (including any extension), you must select a paid subscription to continue using the Service.
+          </p>
+          <p>
+            If no paid plan is selected when the trial expires, your account will be frozen: you may log in and view existing data, but sending and receiving email will be suspended. Your data will be preserved for 30 days following trial expiration. After 30 days without conversion to a paid plan, your account and its data will be permanently deleted with prior notice.
+          </p>
+          <p>
+            The trial is provided &ldquo;as is&rdquo; without any service level commitments.
           </p>
         </section>
 
