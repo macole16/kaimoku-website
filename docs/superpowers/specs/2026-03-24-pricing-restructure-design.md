@@ -33,6 +33,19 @@ Restructure Kuju Email pricing from a freemium model (with a free Community tier
 3. As trial nears expiry, user is offered a one-time 14-day extension
 4. At end of trial (14 or 28 days), user must convert to a paid tier
 
+### Trial Expiration Behavior
+
+When a trial expires without conversion to a paid plan:
+
+- **Account freezes** — the user can log in and view existing mail, but cannot send, receive, or compose new messages
+- A prominent "Select a plan to continue" prompt is displayed on every page
+- Existing data (emails, contacts, calendar) is preserved for 30 days after trial expiration
+- After 30 days with no conversion, the account and its data are permanently deleted with prior warning
+
+### Pre-Launch Test Accounts
+
+The product is currently pre-launch with no existing public users. Existing internal/test accounts will be transitioned to a trial period at launch to validate the full trial lifecycle (conversion, expiration, and extension flows).
+
 ## Pricing Tiers
 
 ### Tier 1: Individual/Family — $10/month
@@ -47,7 +60,7 @@ Restructure Kuju Email pricing from a freemium model (with a free Community tier
 | Account cap | None |
 | AI | Base models included |
 | Premium AI add-on | $5/account/mo |
-| Annual discount | ~17% |
+| Annual discount | 17% (2 months free) |
 
 **Target audience:** Individuals, families, personal use.
 
@@ -65,6 +78,8 @@ Restructure Kuju Email pricing from a freemium model (with a free Community tier
 
 **Account expansion:** Users can add unlimited accounts at $5/account/mo. There is no hard cap — if a user wants 20 accounts on the Family plan, that is supported. The differentiator between Family and Small Business is features, not account limits.
 
+**Tier upgrade nudge:** When an Individual/Family user's total cost approaches or exceeds the equivalent cost on a higher tier (e.g., Small Business), the system displays a recommendation: "Based on your current usage, you'd get more value on the Small Business plan — more storage per account and additional features at a similar price." This nudge applies across all tiers — any customer whose usage pattern suggests a better fit on a different tier will see a contextual recommendation.
+
 ### Tier 2: Small Business — $5/account/month
 
 | Detail | Value |
@@ -75,7 +90,7 @@ Restructure Kuju Email pricing from a freemium model (with a free Community tier
 | Storage per account | 10 GB |
 | Extra storage | $1/GB/mo per account |
 | Premium AI add-on | $5/account/mo |
-| Annual discount | ~17% |
+| Annual discount | 17% (2 months free) |
 
 **Target audience:** Small businesses, startups, small teams.
 
@@ -102,7 +117,7 @@ Restructure Kuju Email pricing from a freemium model (with a free Community tier
 | Archiving | 3-year retention included in platform fee |
 | Extended retention | $0.50/GB/mo for retention beyond 3 years |
 | Premium AI add-on | $5/account/mo |
-| Annual discount | ~17% |
+| Annual discount | 17% (2 months free) |
 
 **Target audience:** Compliance-conscious businesses, regulated industries, larger teams.
 
@@ -128,7 +143,7 @@ Restructure Kuju Email pricing from a freemium model (with a free Community tier
 |---|---|
 | Minimum monthly spend | $300/mo |
 | Per account | $7/account/mo |
-| Storage per account | Configurable |
+| Storage per account | 10 GB default (configurable) |
 | Extra storage | $1/GB/mo |
 | Premium AI | $5/account/mo |
 | Managed backups | +$7/account/mo |
@@ -141,7 +156,7 @@ Restructure Kuju Email pricing from a freemium model (with a free Community tier
 
 **Self-serve model:** Enterprise is fully self-serve. Customers build their own plan by selecting components from the menu. There is no sales team gating — the a la carte menu is published on the website for full transparency.
 
-**Minimum monthly spend:** $300/mo ensures every Enterprise customer represents meaningful revenue. At $7/account, this is approximately 43 accounts before add-ons.
+**Minimum monthly spend:** $300/mo ensures every Enterprise customer represents meaningful revenue. At $7/account, this is approximately 43 accounts before add-ons. The $300 is a billing floor — if a customer's selected components total less than $300, they are charged $300. The self-serve UI should display the running total and indicate how far from the minimum the configuration is.
 
 **Managed backups:** +$7/account/mo provides full backup coverage of emails, accounts, and configurations. This effectively doubles the per-account rate, reflecting the approximately doubled storage and infrastructure footprint of maintaining comprehensive backups.
 
@@ -154,16 +169,20 @@ Restructure Kuju Email pricing from a freemium model (with a free Community tier
 - Managed backup option
 - Dedicated infrastructure option (coming soon)
 
+## Domain Policy
+
+Domains are included without per-domain charges across all tiers. Domain aliases are always free. There are no domain limits — customers on any tier can add as many custom domains as they need. Per-domain branding and admin delegation are available on Small Business and above.
+
 ## Cross-Cutting Pricing Components
 
 ### Premium AI Add-On — $5/account/month
 
-Available to all tiers. Unlocks access to faster, more capable AI models for:
-- Reply drafting and rewrite
-- Task extraction
-- Attachment summarization
-- Spam/phishing analysis
-- Natural language search and commands
+Available to all tiers. Premium AI does NOT unlock new AI features — all AI features available in a tier remain available with base models. Premium AI upgrades the model quality and speed for those same features:
+- Faster, more capable models for reply drafting and rewrite
+- Higher-quality task extraction
+- More accurate attachment summarization
+- Enhanced spam/phishing analysis
+- Better natural language search and commands
 
 **AI model tiering (without Premium AI):**
 - Individual/Family: Lightweight models (fast, cost-effective)
@@ -174,7 +193,7 @@ Available to all tiers. Unlocks access to faster, more capable AI models for:
 
 ### Annual Billing Discount
 
-- ~17% discount on all tiers for annual billing commitment
+- 17% (2 months free) discount on all tiers for annual billing commitment
 - Applied to base prices, per-account rates, and add-ons
 - Publicly displayed on pricing page
 
