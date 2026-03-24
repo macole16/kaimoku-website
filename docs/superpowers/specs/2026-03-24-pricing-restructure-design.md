@@ -258,6 +258,26 @@ The current pricing page has a free Community tier that will be eliminated. Key 
 | Enterprise (Custom) | $300/mo minimum, $7/account, self-serve a la carte |
 | New: Individual/Family | $10/mo, 5 accounts, 5 GB/account |
 
+## Billing Infrastructure
+
+**Provider:** Paddle (account application submitted, currently in review).
+
+Paddle handles:
+- Subscription management (plan creation, upgrades, downgrades)
+- Payment processing (credit card, PayPal, etc.)
+- Sales tax / VAT calculation and remittance (Paddle acts as merchant of record)
+- Invoice generation
+
+**Implementation considerations for the new pricing model:**
+- Per-account billing (Small Business, Professional, Enterprise) requires Paddle's quantity-based pricing or usage-based billing features
+- Platform fee + per-account (Professional) may need to be modeled as a base subscription plus a metered component
+- A la carte Enterprise components will need Paddle's catalog/add-on capabilities
+- Storage overage auto-charge requires Paddle's metered billing or manual invoice adjustments
+- Custom discounts (friends & family, partnerships) need Paddle coupon/discount support
+- Annual billing discount (2 months free) should be modeled as a separate annual price in Paddle
+
+**Dependency:** Paddle account approval is a prerequisite for implementing any payment flows. Pricing page checkout URLs are currently placeholder ("#coming-soon") in `src/lib/constants.ts`.
+
 ## Future Considerations
 
 - **Cost accounting system:** Monitor storage, usage, and relative costs to refine pricing with real data
