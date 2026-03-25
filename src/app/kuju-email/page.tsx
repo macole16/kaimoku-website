@@ -165,6 +165,14 @@ const features = [
         title: "Prometheus Monitoring",
         desc: "Standard /metrics endpoint with application metrics (domains, accounts, messages, storage), compression stats, and Go runtime metrics. Grafana compatible.",
       },
+      {
+        title: "Domain Aliases",
+        desc: "Add alias domains that share all users with your primary domain. Mail to user@alias.com delivers to user@primary.com. Free on all plans, with automatic DKIM and DNS configuration.",
+      },
+      {
+        title: "DNS Setup Guide",
+        desc: "Plain-English guide for non-technical users covering DNS options, step-by-step instructions, and a complete glossary of email terms like MX, SPF, DKIM, and DMARC.",
+      },
     ],
   },
   {
@@ -210,6 +218,14 @@ const standoutFeatures = [
   {
     title: "Self-Hosted Option Coming Soon",
     desc: "Love the platform but need to run it on your own infrastructure? A self-hosted deployment option is on the roadmap for organizations with strict compliance or data residency requirements.",
+  },
+  {
+    title: "14-Day Free Trial",
+    desc: "Sign up and get full Professional-level access for 14 days. No credit card required. Use your own domain during the trial — if you decide it's not for you, walk away with zero commitment.",
+  },
+  {
+    title: "Domain Onboarding Wizard",
+    desc: "Add your domain in minutes. We auto-detect your DNS provider, guide you through setup with plain-English instructions, and verify everything is working. Come back anytime to finish — your progress is saved.",
   },
 ];
 

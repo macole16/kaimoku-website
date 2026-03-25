@@ -118,8 +118,8 @@ export default function Home() {
                   "Contact Intelligence",
                   "Smart Inbox & Tasks",
                   "Vacation Responder",
-                  "Safe Browsing URL Checks",
-                  "Retention Policies",
+                  "Domain Aliases",
+                  "14-Day Free Trial",
                 ].map((feature) => (
                   <div key={feature} className="flex items-center gap-2">
                     <svg
