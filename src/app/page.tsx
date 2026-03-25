@@ -113,7 +113,7 @@ export default function Home() {
                   "AI Reply & Compose",
                   "AI Threat Detection",
                   "Workspaces",
-                  "Attachment Summarization",
+                  "Terminal Mode",
                   "Natural Language Search",
                   "Contact Intelligence",
                   "Smart Inbox & Tasks",

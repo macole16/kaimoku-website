@@ -196,6 +196,10 @@ const features = [
 
 const standoutFeatures = [
   {
+    title: "Terminal Mode",
+    desc: "A keyboard-driven interface inspired by Mutt and Pine. Monospace layout, vim-style keybindings, command prompt, and customizable color schemes. For people who think email clients peaked in 1995.",
+  },
+  {
     title: "AI That Actually Helps You Work",
     desc: "One-click AI replies, tone-controlled rewrites, task extraction, attachment summarization, natural language search and commands, waiting-on-reply tracking with nudge, contact intelligence, and an inbox summary dashboard. AI is woven into every workflow.",
   },
