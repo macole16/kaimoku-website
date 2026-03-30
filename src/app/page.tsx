@@ -178,13 +178,13 @@ export default function Home() {
             {[
               {
                 step: "1",
-                title: "Choose Your Plan",
-                desc: "Start a 14-day free trial with full access. Then pick the tier that fits — from Individual plans to Enterprise.",
+                title: "Start Your Trial",
+                desc: "Sign up for a 14-day free trial on demo.kuju.email. Full Professional-level access — all features, no restrictions.",
               },
               {
                 step: "2",
-                title: "Point Your Domain",
-                desc: "Update your MX, SPF, and DKIM records. We provide the exact values — just copy and paste them into your DNS provider.",
+                title: "Choose a Plan & Bring Your Domain",
+                desc: "Pick the tier that fits. Point your MX, SPF, and DKIM records to Kuju — we provide the exact values to copy into your DNS provider.",
               },
               {
                 step: "3",

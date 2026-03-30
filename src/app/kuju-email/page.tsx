@@ -358,7 +358,7 @@ export default function KujuEmailPage() {
             Ready to get started?
           </h2>
           <p className="mb-8 text-lg text-slate-300">
-            Start with a 14-day free trial. Then choose the plan that fits your organization.
+            Start with a 14-day free trial on demo.kuju.email. Then choose a plan and bring your own domain.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <a

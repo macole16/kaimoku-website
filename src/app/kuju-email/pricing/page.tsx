@@ -134,7 +134,7 @@ const tiers = [
 const faqs = [
   {
     q: "How does the 14-day trial work?",
-    a: "Every new signup gets a 14-day trial with full Professional-level access — all features, no restrictions. After the trial, pick the plan that fits and you're up and running.",
+    a: "Every new signup gets a 14-day trial with full Professional-level access — all features, no restrictions. You'll get an email address on demo.kuju.email to explore the platform. After the trial, pick a plan and bring your own domain to go live.",
   },
   {
     q: "What happens when my trial expires?",
@@ -155,6 +155,10 @@ const faqs = [
   {
     q: "What is Premium AI?",
     a: "Every plan includes base AI features powered by lightweight models. Premium AI ($5/account/month) upgrades to faster, more capable models for better reply drafting, smarter task extraction, and more accurate spam detection. Available on any tier.",
+  },
+  {
+    q: "Do I need my own domain?",
+    a: "Not during the trial — you'll use a demo.kuju.email address. When you convert to a paid plan, you'll bring your own domain and point your MX, SPF, and DKIM records to Kuju. We provide the exact values. All paid plans include unlimited custom domains at no extra charge.",
   },
   {
     q: "Are there limits on domains?",
@@ -211,8 +215,9 @@ function PricingPageInner() {
               Try everything free for 14 days
             </p>
             <p className="mb-4 text-slate-600">
-              Full Professional-level access. All features, no restrictions, no
-              credit card required.
+              Full Professional-level access on demo.kuju.email. All features, no
+              restrictions, no credit card required. Bring your own domain when
+              you&rsquo;re ready to go live.
             </p>
             <a
               href={URLS.KUJU_TRIAL_SIGNUP}
