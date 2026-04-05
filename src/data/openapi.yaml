@@ -1,0 +1,2931 @@
+openapi: 3.0.3
+info:
+  title: Kuju Mail Public API
+  version: "0.1.0"
+servers:
+  - url: https://localhost:8080
+security:
+  - bearerAuth: []
+tags:
+  - name: Auth
+  - name: TOTP
+  - name: Invite
+  - name: Folders
+  - name: Messages
+  - name: Drafts
+  - name: Branding
+  - name: Admin
+  - name: Plugins
+  - name: Plugin Routes
+paths:
+  /api/auth/login:
+    post:
+      tags: [Auth]
+      security: []
+      summary: Login and obtain JWT (or TOTP challenge)
+      description: |
+        If TOTP is enabled for the account, returns `{needs_totp: true, session_id}`
+        instead of a JWT. The client must then call POST /api/auth/totp/verify.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: OK — returns AuthResponse or TOTPChallengeResponse
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/AuthResponse"
+                  - $ref: "#/components/schemas/TOTPChallengeResponse"
+        "401":
+          description: Invalid credentials
+  /api/auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Refresh JWT
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Unauthorized
+  /api/auth/logout:
+    post:
+      tags: [Auth]
+      summary: Logout (no-op)
+      responses:
+        "204":
+          description: No Content
+  /api/invite/validate:
+    get:
+      tags: [Invite]
+      security: []
+      summary: Validate invite token
+      parameters:
+        - in: query
+          name: token
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenValidation"
+  /api/invite:
+    post:
+      tags: [Invite]
+      security: []
+      summary: Accept invite and set password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AcceptInviteRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenAuthResponse"
+        "400":
+          description: Invalid or expired token
+  /api/forgot-password:
+    post:
+      tags: [Invite]
+      security: []
+      summary: Request password reset email (sent to recovery email)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+      responses:
+        "200":
+          description: Always returns OK (prevents email enumeration)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+  /api/reset-password/validate:
+    get:
+      tags: [Invite]
+      security: []
+      summary: Validate password reset token
+      parameters:
+        - in: query
+          name: token
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenValidation"
+  /api/reset-password:
+    post:
+      tags: [Invite]
+      security: []
+      summary: Reset password with token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TokenPasswordRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenAuthResponse"
+        "400":
+          description: Invalid or expired token
+  /api/auth/recovery-email:
+    get:
+      tags: [Auth]
+      summary: Get current recovery email
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  recovery_email:
+                    type: string
+        "401":
+          description: Unauthorized
+    put:
+      tags: [Auth]
+      summary: Update recovery email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                recovery_email:
+                  type: string
+                  description: External email for password resets (empty to clear)
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  recovery_email:
+                    type: string
+        "401":
+          description: Unauthorized
+  /api/auth/totp/status:
+    get:
+      tags: [TOTP]
+      summary: Check if TOTP is enabled
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  enabled:
+                    type: boolean
+        "401":
+          description: Unauthorized
+  /api/auth/totp/setup:
+    post:
+      tags: [TOTP]
+      summary: Generate TOTP secret and QR code
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TOTPSetupResponse"
+        "401":
+          description: Unauthorized
+  /api/auth/totp/confirm:
+    post:
+      tags: [TOTP]
+      summary: Verify code and enable TOTP
+      parameters:
+        - in: query
+          name: session_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TOTPCodeRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TOTPConfirmResponse"
+        "400":
+          description: Invalid or expired session, wrong code
+        "401":
+          description: Unauthorized
+  /api/auth/totp/verify:
+    post:
+      tags: [TOTP]
+      security: []
+      summary: Complete login with TOTP code
+      description: |
+        Validates a TOTP code (or backup code) for a pending login session
+        and issues a JWT on success.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TOTPVerifyRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          description: Missing fields or expired session
+        "401":
+          description: Invalid code
+  /api/auth/totp:
+    delete:
+      tags: [TOTP]
+      summary: Disable TOTP
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TOTPCodeRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+        "400":
+          description: TOTP not enabled
+        "401":
+          description: Unauthorized or invalid code
+  /api/admin/accounts/{id}/invite:
+    post:
+      tags: [Admin]
+      summary: Generate invite link for account (site admin)
+      parameters:
+        - $ref: "#/components/parameters/AdminAccountId"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InviteResponse"
+        "404":
+          description: Account not found
+  /api/domain-admin/accounts/{id}/invite:
+    post:
+      tags: [Admin]
+      summary: Generate invite link for account (domain admin)
+      parameters:
+        - $ref: "#/components/parameters/AdminAccountId"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InviteResponse"
+        "403":
+          description: Account not in admin's domain
+        "404":
+          description: Account not found
+  /api/folders:
+    get:
+      tags: [Folders]
+      summary: List folders
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Folder"
+    post:
+      tags: [Folders]
+      summary: Create folder
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FolderRequest"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Folder"
+        "409":
+          description: Folder exists
+  /api/folders/{id}:
+    put:
+      tags: [Folders]
+      summary: Rename folder
+      parameters:
+        - $ref: "#/components/parameters/FolderId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FolderRequest"
+      responses:
+        "204":
+          description: No Content
+        "409":
+          description: Folder exists
+    delete:
+      tags: [Folders]
+      summary: Delete folder (must be empty)
+      parameters:
+        - $ref: "#/components/parameters/FolderId"
+      responses:
+        "204":
+          description: No Content
+        "409":
+          description: Folder not empty
+  /api/folders/{id}/messages:
+    get:
+      tags: [Messages]
+      summary: List messages in folder
+      parameters:
+        - $ref: "#/components/parameters/FolderId"
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PerPage"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageList"
+  /api/messages:
+    post:
+      tags: [Messages]
+      summary: Compose and send message
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ComposeRequest"
+      responses:
+        "202":
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ComposeResponse"
+  /api/messages/{id}:
+    get:
+      tags: [Messages]
+      summary: Get message metadata
+      parameters:
+        - $ref: "#/components/parameters/MessageId"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageMeta"
+    delete:
+      tags: [Messages]
+      summary: Delete message
+      parameters:
+        - $ref: "#/components/parameters/MessageId"
+      responses:
+        "204":
+          description: No Content
+  /api/messages/{id}/raw:
+    get:
+      tags: [Messages]
+      summary: Get raw RFC 822 message
+      parameters:
+        - $ref: "#/components/parameters/MessageId"
+      responses:
+        "200":
+          description: OK
+          content:
+            message/rfc822:
+              schema:
+                type: string
+  /api/messages/{id}/body:
+    get:
+      tags: [Messages]
+      summary: Get message body
+      parameters:
+        - $ref: "#/components/parameters/MessageId"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageBody"
+  /api/messages/{id}/attachments/{aid}:
+    get:
+      tags: [Messages]
+      summary: Download attachment
+      parameters:
+        - $ref: "#/components/parameters/MessageId"
+        - $ref: "#/components/parameters/AttachmentId"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+  /api/messages/{id}/flags:
+    patch:
+      tags: [Messages]
+      summary: Update message flags
+      parameters:
+        - $ref: "#/components/parameters/MessageId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FlagsRequest"
+      responses:
+        "204":
+          description: No Content
+  /api/messages/{id}/move:
+    patch:
+      tags: [Messages]
+      summary: Move message to folder
+      parameters:
+        - $ref: "#/components/parameters/MessageId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MoveCopyRequest"
+      responses:
+        "204":
+          description: No Content
+  /api/messages/{id}/copy:
+    patch:
+      tags: [Messages]
+      summary: Copy message to folder
+      parameters:
+        - $ref: "#/components/parameters/MessageId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MoveCopyRequest"
+      responses:
+        "204":
+          description: No Content
+  /api/messages/search:
+    get:
+      tags: [Messages]
+      summary: Search messages (GET)
+      parameters:
+        - $ref: "#/components/parameters/SearchQuery"
+        - $ref: "#/components/parameters/FolderIdQuery"
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PerPage"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageList"
+    post:
+      tags: [Messages]
+      summary: Search messages (POST)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SearchRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageList"
+  /api/drafts:
+    get:
+      tags: [Drafts]
+      summary: List drafts
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PerPage"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageList"
+    post:
+      tags: [Drafts]
+      summary: Create draft
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ComposeRequest"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DraftResponse"
+  /api/drafts/{id}:
+    get:
+      tags: [Drafts]
+      summary: Get draft
+      parameters:
+        - $ref: "#/components/parameters/MessageId"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageMeta"
+    put:
+      tags: [Drafts]
+      summary: Update draft
+      parameters:
+        - $ref: "#/components/parameters/MessageId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ComposeRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DraftResponse"
+    delete:
+      tags: [Drafts]
+      summary: Delete draft
+      parameters:
+        - $ref: "#/components/parameters/MessageId"
+      responses:
+        "204":
+          description: No Content
+  /api/drafts/{id}/send:
+    post:
+      tags: [Drafts]
+      summary: Send draft
+      parameters:
+        - $ref: "#/components/parameters/MessageId"
+      responses:
+        "202":
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DraftResponse"
+  /api/branding:
+    get:
+      tags: [Branding]
+      summary: Get branding config for authenticated user's domain
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BrandingConfig"
+        "401":
+          description: Unauthorized
+  /api/branding/assets/{filename}:
+    get:
+      tags: [Branding]
+      summary: Get branding asset for authenticated user's domain
+      parameters:
+        - $ref: "#/components/parameters/BrandingFilename"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Not found
+  /api/admin/branding/{domain}:
+    get:
+      tags: [Branding]
+      summary: Get branding config for a domain (admin)
+      parameters:
+        - $ref: "#/components/parameters/BrandingDomain"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BrandingConfig"
+        "403":
+          description: Forbidden
+  /api/admin/branding/{domain}/files:
+    get:
+      tags: [Branding]
+      summary: List branding files for a domain (admin)
+      parameters:
+        - $ref: "#/components/parameters/BrandingDomain"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/BrandingFileInfo"
+        "403":
+          description: Forbidden
+  /api/admin/branding/{domain}/archive:
+    post:
+      tags: [Branding]
+      summary: Upload and extract a branding archive (admin)
+      description: |
+        Accepts a tar.gz or zip archive (max 2 MB). Only whitelisted filenames
+        are extracted: branding.json, logo.svg, logo.png, favicon.ico, favicon.svg, custom.css.
+        Files in subdirectories are flattened. Per-file size limits apply (512 KB images, 64 KB text).
+      parameters:
+        - $ref: "#/components/parameters/BrandingDomain"
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ArchiveResult"
+        "400":
+          description: Unsupported archive format
+        "403":
+          description: Forbidden
+        "413":
+          description: Archive too large
+  /api/admin/branding/{domain}/{filename}:
+    get:
+      tags: [Branding]
+      summary: Get a branding asset file (admin)
+      parameters:
+        - $ref: "#/components/parameters/BrandingDomain"
+        - $ref: "#/components/parameters/BrandingFilename"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Not found
+    post:
+      tags: [Branding]
+      summary: Upload a branding asset file (admin)
+      description: |
+        Upload a single branding file. Allowed filenames: branding.json, logo.svg,
+        logo.png, favicon.ico, favicon.svg, custom.css. Size limits: 512 KB for images,
+        64 KB for CSS/JSON. Accepts multipart/form-data or raw body.
+      parameters:
+        - $ref: "#/components/parameters/BrandingDomain"
+        - $ref: "#/components/parameters/BrandingFilename"
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid filename
+        "403":
+          description: Forbidden
+        "413":
+          description: File too large
+    delete:
+      tags: [Branding]
+      summary: Delete a branding asset file (admin)
+      parameters:
+        - $ref: "#/components/parameters/BrandingDomain"
+        - $ref: "#/components/parameters/BrandingFilename"
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid filename
+        "403":
+          description: Forbidden
+  /api/admin/domains:
+    get:
+      tags: [Admin]
+      summary: List domains
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AdminDomain"
+    post:
+      tags: [Admin]
+      summary: Create domain
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminDomainRequest"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminDomain"
+        "409":
+          description: Domain exists
+  /api/admin/domains/{id}:
+    put:
+      tags: [Admin]
+      summary: Update domain
+      parameters:
+        - $ref: "#/components/parameters/AdminDomainId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminDomainRequest"
+      responses:
+        "204":
+          description: No Content
+        "409":
+          description: Domain exists
+    delete:
+      tags: [Admin]
+      summary: Deactivate domain
+      parameters:
+        - $ref: "#/components/parameters/AdminDomainId"
+      responses:
+        "204":
+          description: No Content
+  /api/admin/accounts:
+    get:
+      tags: [Admin]
+      summary: List accounts
+      parameters:
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Offset"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AdminAccount"
+    post:
+      tags: [Admin]
+      summary: Create account
+      description: |
+        Creates a new account. When EXTERNAL_URL is configured, the response
+        includes an invite_url field with a one-time link for the user to set
+        their own password.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminAccountCreate"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/AdminAccount"
+                  - type: object
+                    properties:
+                      invite_url:
+                        type: string
+                        description: One-time invite link (present when EXTERNAL_URL is set)
+        "409":
+          description: Account exists
+  /api/admin/accounts/{id}:
+    put:
+      tags: [Admin]
+      summary: Update account
+      parameters:
+        - $ref: "#/components/parameters/AdminAccountId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminAccountUpdate"
+      responses:
+        "204":
+          description: No Content
+        "409":
+          description: Account exists
+    delete:
+      tags: [Admin]
+      summary: Deactivate account
+      parameters:
+        - $ref: "#/components/parameters/AdminAccountId"
+      responses:
+        "204":
+          description: No Content
+  /api/admin/stats:
+    get:
+      tags: [Admin]
+      summary: System stats
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminStats"
+  /api/admin/delivery-log:
+    get:
+      tags: [Admin]
+      summary: Delivery log entries
+      parameters:
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Offset"
+        - $ref: "#/components/parameters/DeliveryAccountId"
+        - $ref: "#/components/parameters/DeliveryStatus"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DeliveryLogEntry"
+  /api/admin/license:
+    get:
+      tags: [Admin]
+      summary: License status and usage
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LicenseStatus"
+    put:
+      tags: [Admin]
+      summary: Install/update license key
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LicenseUpdateRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LicenseStatus"
+  /api/admin/storage/stats:
+    get:
+      tags: [Admin]
+      summary: Storage compression statistics
+      description: |
+        Returns the storage backend type and, when compression is enabled,
+        runtime statistics including total puts, bytes in/out, compression
+        ratio, and get counts broken down by compressed vs legacy
+        (uncompressed) reads. Stats are in-memory and reset on restart.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StorageStats"
+        "401":
+          description: Unauthorized
+  /api/admin/secrets/rotate:
+    post:
+      tags: [Admin]
+      summary: Trigger manual JWT secret rotation
+      description: |
+        Generates a new JWT signing secret, stores it in the secrets backend,
+        and rotates the keyring. The previous key remains valid for a grace
+        period of 2× the JWT expiry duration. Returns 503 if rotation is not enabled.
+      responses:
+        "200":
+          description: OK — rotation completed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RotationStatus"
+        "401":
+          description: Unauthorized
+        "503":
+          description: Rotation not enabled
+
+  /api/admin/secrets/rotation:
+    get:
+      tags: [Admin]
+      summary: Current JWT rotation state
+      description: |
+        Returns the current rotation configuration, keyring version info,
+        last rotation time, and next scheduled rotation.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RotationStatus"
+        "401":
+          description: Unauthorized
+
+  /api/admin/system-info:
+    get:
+      tags: [Admin]
+      summary: System info including module versions
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SystemInfo"
+  /api/admin/settings:
+    get:
+      tags: [Admin]
+      summary: Get system settings (key-value)
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Key-value settings (e.g., corporate_domain_id)
+  /api/admin/settings/corporate-domain:
+    put:
+      tags: [Admin]
+      summary: Update corporate domain
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                domain_id:
+                  type: integer
+                  description: ID of the domain to set as corporate domain
+              required: [domain_id]
+      responses:
+        "200":
+          description: OK
+  /api/admin/openapi.yaml:
+    get:
+      tags: [Admin]
+      summary: OpenAPI spec for the REST API
+      responses:
+        "200":
+          description: OK
+          content:
+            application/yaml:
+              schema:
+                type: string
+  /api/admin/services/status:
+    get:
+      tags: [Admin]
+      summary: Service status (wrapper output)
+      parameters:
+        - in: query
+          name: logs
+          schema:
+            type: boolean
+        - in: query
+          name: tail
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminStatusResponse"
+  /api/admin/services/logs:
+    get:
+      tags: [Admin]
+      summary: Service logs (tail)
+      parameters:
+        - in: query
+          name: service
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: tail
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminLogsResponse"
+  /api/admin/services/start:
+    post:
+      tags: [Admin]
+      summary: Start services (stub)
+      responses:
+        "501":
+          description: Not implemented
+  /api/admin/services/stop:
+    post:
+      tags: [Admin]
+      summary: Stop services (stub)
+      responses:
+        "501":
+          description: Not implemented
+  /api/admin/services/restart:
+    post:
+      tags: [Admin]
+      summary: Restart services (stub)
+      responses:
+        "501":
+          description: Not implemented
+  /api/admin/dns:
+    get:
+      tags: [Admin]
+      summary: DNS list (wrapper output)
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminDNSListResponse"
+  /api/admin/dns/set:
+    post:
+      tags: [Admin]
+      summary: Set DNS servers
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DNSSetRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminCommandOutput"
+  /api/admin/dns/add:
+    post:
+      tags: [Admin]
+      summary: Add DNS server
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DNSValueRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminCommandOutput"
+  /api/admin/dns/remove:
+    post:
+      tags: [Admin]
+      summary: Remove DNS server
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DNSValueRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminCommandOutput"
+  /api/admin/dns/clear:
+    post:
+      tags: [Admin]
+      summary: Clear DNS servers
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminCommandOutput"
+  /api/admin/dns/auto:
+    post:
+      tags: [Admin]
+      summary: Auto-detect DNS
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminCommandOutput"
+  /api/admin/dns/test:
+    get:
+      tags: [Admin]
+      summary: DNS test (wrapper output)
+      parameters:
+        - in: query
+          name: host
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminDNSTestResponse"
+  /api/admin/dns/check-records:
+    get:
+      tags: [Admin]
+      summary: Verify DNS records (MX, SPF, DKIM, DMARC) for a domain
+      parameters:
+        - in: query
+          name: domain
+          required: true
+          schema:
+            type: string
+          description: Domain to check
+        - in: query
+          name: selector
+          schema:
+            type: string
+            default: default
+          description: DKIM selector
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DNSResult"
+        "400":
+          description: Missing domain parameter
+        "401":
+          description: Unauthorized
+  /api/admin/dns/validate:
+    post:
+      tags: [Admin]
+      summary: Validate proposed DNS record values (MX, SPF, DKIM, DMARC)
+      description: |
+        Stateless validation of proposed DNS record values before updating
+        your DNS provider. Checks format and content — no DNS lookups are
+        performed. Returns per-record results with specific issues.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DNSValidateRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DNSValidateResult"
+        "400":
+          description: Missing domain or no record values provided
+        "401":
+          description: Unauthorized
+  /api/admin/dns/detect-provider:
+    get:
+      tags: [Admin]
+      summary: Auto-detect DNS provider for a domain
+      description: |
+        Performs an NS lookup and classifies the DNS provider based on
+        nameserver patterns: ns*.kuju.email → PowerDNS,
+        *.ns.cloudflare.com → Cloudflare, anything else → unknown.
+      parameters:
+        - name: domain
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  provider:
+                    type: string
+                    enum: [powerdns, cloudflare, unknown]
+                  current_ns:
+                    type: array
+                    items:
+                      type: string
+                  error:
+                    type: string
+                  cf_configured:
+                    type: boolean
+        "400":
+          description: Missing domain
+        "401":
+          description: Unauthorized
+  /api/admin/settings/cloudflare-token:
+    put:
+      tags: [Admin]
+      summary: Save Cloudflare API token
+      description: |
+        Stores a Cloudflare API token in system_settings for DNS management.
+        If no DNS client is configured, activates Cloudflare immediately (hot-swap).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token]
+              properties:
+                token:
+                  type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+        "400":
+          description: Missing or empty token
+        "401":
+          description: Unauthorized
+  /api/admin/dkim/rotation:
+    get:
+      tags: [Admin]
+      summary: List DKIM key rotations
+      description: Returns all active and recently completed DKIM key rotations.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DKIMRotation"
+        "401":
+          description: Unauthorized
+  /api/admin/dkim/rotation/trigger:
+    post:
+      tags: [Admin]
+      summary: Trigger DKIM key rotation for a domain
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                domain_id:
+                  type: integer
+                domain_name:
+                  type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+        "400":
+          description: Missing domain identifier or rotation manager not configured
+        "401":
+          description: Unauthorized
+  /api/admin/dkim/rotation/advance:
+    post:
+      tags: [Admin]
+      summary: Manually advance a pending DKIM rotation
+      description: |
+        In standalone mode (no DNS provider configured), advances a rotation
+        from pending_dns to pending_switch after the admin has manually
+        published the DNS record.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [domain_id]
+              properties:
+                domain_id:
+                  type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+        "400":
+          description: Missing domain_id or rotation manager not configured
+        "401":
+          description: Unauthorized
+  /api/admin/install-summary:
+    get:
+      tags: [Admin]
+      summary: Install summary
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/admin/compose-config:
+    get:
+      tags: [Admin]
+      summary: Compose config (read-only)
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
+  /api/admin/certs/self-signed:
+    post:
+      tags: [Admin]
+      summary: Generate self-signed certs
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CertsRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminCommandOutput"
+  # ── Plugin Management (admin-only, license-gated) ──
+
+  /api/admin/plugins:
+    get:
+      tags: [Plugins]
+      summary: List installed plugins
+      description: Returns all plugins currently installed in the system. Requires admin auth and plugins license feature.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PluginMetadata"
+        "401":
+          description: Unauthorized
+        "403":
+          description: License feature not available
+
+  /api/admin/plugins/available:
+    get:
+      tags: [Plugins]
+      summary: List available plugins
+      description: Returns built-in plugins that are not yet installed.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PluginMetadata"
+        "401":
+          description: Unauthorized
+
+  /api/admin/plugins/{id}/install:
+    post:
+      tags: [Plugins]
+      summary: Install a plugin
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Plugin installed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  plugin_id:
+                    type: string
+        "400":
+          description: Plugin not found or install failed
+        "403":
+          description: Custom plugins require upgraded license
+
+  /api/admin/plugins/{id}:
+    delete:
+      tags: [Plugins]
+      summary: Uninstall a plugin
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Plugin uninstalled
+        "400":
+          description: Cannot uninstall system plugin
+
+  /api/admin/plugins/{id}/events:
+    get:
+      tags: [Plugins]
+      summary: List plugin execution events
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+
+  /api/domain-admin/plugins:
+    get:
+      tags: [Plugins]
+      summary: List plugins enabled for the admin's domain
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DomainPluginConfig"
+
+  /api/domain-admin/plugins/stats:
+    get:
+      tags: [Plugins]
+      summary: Get per-plugin stats for the admin's domain (last 30 days)
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: object
+                  properties:
+                    scanned:
+                      type: integer
+                    rejected:
+                      type: integer
+                    quarantined:
+                      type: integer
+                    tagged:
+                      type: integer
+                    errors:
+                      type: integer
+
+  /api/domain-admin/plugins/{pid}:
+    put:
+      tags: [Plugins]
+      summary: Enable a plugin for a domain
+      parameters:
+        - name: pid
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                config:
+                  type: object
+                priority:
+                  type: integer
+      responses:
+        "200":
+          description: Plugin enabled
+    delete:
+      tags: [Plugins]
+      summary: Disable a plugin for a domain
+      parameters:
+        - name: pid
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Plugin disabled
+
+  /api/domain-admin/license:
+    get:
+      tags: [Domain Admin]
+      summary: Domain license status and account usage
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DomainLicenseStatus"
+    put:
+      tags: [Domain Admin]
+      summary: Install domain license key
+      description: |
+        Install a domain-specific license JWT. The JWT must contain a `domain`
+        claim matching the admin's domain. Controls per-domain account limits.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LicenseUpdateRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DomainLicenseStatus"
+    delete:
+      tags: [Domain Admin]
+      summary: Remove domain license
+      description: |
+        Remove the domain license. Only site-wide license limits will apply.
+      responses:
+        "200":
+          description: OK
+
+  # ── Plugin-Registered Routes ──
+  # Plugins that implement RoutePlugin register HTTP routes under
+  # /api/plugins/{plugin-id}/. Auth is per-route: public, authenticated,
+  # or admin-only. All routes are gated by the plugins license feature.
+
+  /api/plugins/{plugin-id}/{path}:
+    get:
+      tags: [Plugin Routes]
+      summary: Plugin-registered route (GET)
+      description: |
+        Routes are registered by plugins at startup. Each plugin's routes
+        are namespaced under `/api/plugins/{plugin-id}/`. Auth requirements
+        vary per route (public, authenticated, or admin-only).
+
+        Example routes from the webhook-forwarder plugin:
+        - `GET /api/plugins/kuju-webhook-forwarder/status` (authenticated)
+        - `GET /api/plugins/kuju-webhook-forwarder/config` (admin-only)
+        - `POST /api/plugins/kuju-webhook-forwarder/incoming` (public)
+      parameters:
+        - name: plugin-id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: path
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+        - {}
+      responses:
+        "200":
+          description: Plugin-specific response
+        "401":
+          description: Unauthorized (for authenticated routes)
+        "403":
+          description: Forbidden (admin-only routes or license missing)
+    post:
+      tags: [Plugin Routes]
+      summary: Plugin-registered route (POST)
+      parameters:
+        - name: plugin-id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: path
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+        - {}
+      responses:
+        "200":
+          description: Plugin-specific response
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    BrandingDomain:
+      name: domain
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Domain name (e.g. example.com)
+    BrandingFilename:
+      name: filename
+      in: path
+      required: true
+      schema:
+        type: string
+        enum: [branding.json, logo.svg, logo.png, favicon.ico, favicon.svg, custom.css]
+      description: Whitelisted branding filename
+    FolderId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+    AdminDomainId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+    AdminAccountId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+    MessageId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+    AttachmentId:
+      name: aid
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        format: int32
+        default: 1
+    PerPage:
+      name: per_page
+      in: query
+      schema:
+        type: integer
+        format: int32
+        default: 50
+    Limit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        format: int32
+        default: 100
+    Offset:
+      name: offset
+      in: query
+      schema:
+        type: integer
+        format: int32
+        default: 0
+    SearchQuery:
+      name: q
+      in: query
+      required: true
+      schema:
+        type: string
+    FolderIdQuery:
+      name: folder_id
+      in: query
+      schema:
+        type: integer
+        format: int64
+    DeliveryAccountId:
+      name: account_id
+      in: query
+      schema:
+        type: integer
+        format: int64
+    DeliveryStatus:
+      name: status
+      in: query
+      schema:
+        type: string
+  schemas:
+    BrandingConfig:
+      type: object
+      properties:
+        app_name:
+          type: string
+        primary_color:
+          type: string
+        accent_color:
+          type: string
+        has_logo:
+          type: boolean
+        has_favicon:
+          type: boolean
+        has_custom_css:
+          type: boolean
+    BrandingFileInfo:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Filename (e.g. logo.svg)
+        size:
+          type: integer
+          format: int64
+          description: File size in bytes
+        modified:
+          type: string
+          description: Last modified time (ISO 8601 UTC)
+    ArchiveResult:
+      type: object
+      properties:
+        extracted:
+          type: array
+          items:
+            type: string
+          description: Filenames successfully extracted
+        skipped:
+          type: array
+          items:
+            type: string
+          description: Filenames skipped (not whitelisted)
+        errors:
+          type: array
+          items:
+            type: string
+          description: Error messages for files that failed
+    CertsRequest:
+      type: object
+      properties:
+        domain:
+          type: string
+    ServiceStatus:
+      type: object
+      properties:
+        name:
+          type: string
+        status:
+          type: string
+        note:
+          type: string
+    AdminStatusResponse:
+      type: object
+      properties:
+        ok:
+          type: boolean
+        output:
+          type: string
+        exit_code:
+          type: integer
+        summary:
+          type: string
+        services:
+          type: array
+          items:
+            $ref: "#/components/schemas/ServiceStatus"
+    AdminLogsResponse:
+      type: object
+      properties:
+        ok:
+          type: boolean
+        output:
+          type: string
+        exit_code:
+          type: integer
+        service:
+          type: string
+        tail:
+          type: integer
+        lines:
+          type: array
+          items:
+            type: string
+        entries:
+          type: array
+          items:
+            $ref: "#/components/schemas/LogEntry"
+    LogEntry:
+      type: object
+      properties:
+        timestamp:
+          type: string
+        level:
+          type: string
+        message:
+          type: string
+        component:
+          type: string
+        context:
+          type: string
+        raw:
+          type: string
+    AdminDNSListResponse:
+      type: object
+      properties:
+        ok:
+          type: boolean
+        output:
+          type: string
+        exit_code:
+          type: integer
+        servers:
+          type: array
+          items:
+            type: string
+    AdminDNSTestSection:
+      type: object
+      properties:
+        service:
+          type: string
+        lines:
+          type: array
+          items:
+            type: string
+    AdminDNSTestDetail:
+      type: object
+      properties:
+        service:
+          type: string
+        docker_dns:
+          type: array
+          items:
+            type: string
+        networks:
+          type: array
+          items:
+            type: string
+        note:
+          type: string
+        getent:
+          type: array
+          items:
+            type: string
+        dig_default:
+          type: array
+          items:
+            type: string
+        dig_primary:
+          type: array
+          items:
+            type: string
+        dig_secondary:
+          type: array
+          items:
+            type: string
+        resolv_conf:
+          type: array
+          items:
+            type: string
+        other:
+          type: array
+          items:
+            type: string
+        primary_server:
+          type: string
+        secondary_server:
+          type: string
+    AdminDNSTestResponse:
+      type: object
+      properties:
+        ok:
+          type: boolean
+        output:
+          type: string
+        exit_code:
+          type: integer
+        host:
+          type: string
+        sections:
+          type: array
+          items:
+            $ref: "#/components/schemas/AdminDNSTestSection"
+        details:
+          type: array
+          items:
+            $ref: "#/components/schemas/AdminDNSTestDetail"
+    DNSResult:
+      type: object
+      properties:
+        domain:
+          type: string
+        checks:
+          type: array
+          items:
+            $ref: "#/components/schemas/RecordCheck"
+        all_ok:
+          type: boolean
+    RecordCheck:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Record type (MX, SPF, DKIM, DMARC)
+        status:
+          type: string
+          enum: [ok, warn, fail]
+        value:
+          type: string
+          description: The DNS record value found
+        details:
+          type: string
+          description: Human-readable explanation
+    AdminCommandOutput:
+      type: object
+      properties:
+        ok:
+          type: boolean
+        output:
+          type: string
+        exit_code:
+          type: integer
+    DNSSetRequest:
+      type: object
+      properties:
+        primary:
+          type: string
+        secondary:
+          type: string
+        value:
+          type: string
+        host:
+          type: string
+    DNSValueRequest:
+      type: object
+      properties:
+        value:
+          type: string
+        host:
+          type: string
+    DNSValidateRequest:
+      type: object
+      required: [domain]
+      properties:
+        domain:
+          type: string
+          description: Domain to validate records for
+        dkim_selector:
+          type: string
+          default: default
+          description: DKIM selector (defaults to "default")
+        mx_value:
+          type: string
+          description: "Proposed MX record (e.g. \"10 mail.example.com\")"
+        spf_value:
+          type: string
+          description: "Proposed SPF record (e.g. \"v=spf1 mx ~all\")"
+        dkim_value:
+          type: string
+          description: "Proposed DKIM record (e.g. \"v=DKIM1; k=rsa; p=...\")"
+        dmarc_value:
+          type: string
+          description: "Proposed DMARC record (e.g. \"v=DMARC1; p=reject; rua=mailto:...\")"
+    DNSValidateResult:
+      type: object
+      properties:
+        domain:
+          type: string
+        checks:
+          type: array
+          items:
+            $ref: "#/components/schemas/ValidateCheck"
+        all_ok:
+          type: boolean
+    ValidateCheck:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Record type (MX, SPF, DKIM, DMARC)
+        status:
+          type: string
+          enum: [ok, warn, fail, skip]
+        value:
+          type: string
+          description: The record value validated
+        details:
+          type: string
+          description: Human-readable explanation
+        issues:
+          type: array
+          items:
+            type: string
+          description: Specific issues found with the record
+    DKIMRotation:
+      type: object
+      properties:
+        id:
+          type: integer
+        domain_id:
+          type: integer
+        domain_name:
+          type: string
+        old_selector:
+          type: string
+        new_selector:
+          type: string
+        phase:
+          type: string
+          enum: [pending_dns, pending_switch, cleanup_pending, completed]
+        dns_published_at:
+          type: string
+          format: date-time
+          nullable: true
+        switched_at:
+          type: string
+          format: date-time
+          nullable: true
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        error_message:
+          type: string
+          nullable: true
+    TokenValidation:
+      type: object
+      properties:
+        valid:
+          type: boolean
+        email:
+          type: string
+    AcceptInviteRequest:
+      type: object
+      required: [token, password]
+      properties:
+        token:
+          type: string
+        password:
+          type: string
+        recovery_email:
+          type: string
+          description: Optional external email for password resets
+    TokenPasswordRequest:
+      type: object
+      required: [token, password]
+      properties:
+        token:
+          type: string
+        password:
+          type: string
+    TokenAuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          description: JWT token
+    InviteResponse:
+      type: object
+      properties:
+        invite_url:
+          type: string
+        email:
+          type: string
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+        expires_at:
+          type: string
+          format: date-time
+    TOTPChallengeResponse:
+      type: object
+      properties:
+        needs_totp:
+          type: boolean
+        session_id:
+          type: string
+    TOTPSetupResponse:
+      type: object
+      properties:
+        secret:
+          type: string
+          description: Base32-encoded TOTP secret
+        uri:
+          type: string
+          description: otpauth:// URI for authenticator apps
+        qr_base64:
+          type: string
+          description: QR code as base64-encoded PNG
+        session_id:
+          type: string
+          description: Session ID for the confirm step
+    TOTPCodeRequest:
+      type: object
+      required: [code]
+      properties:
+        code:
+          type: string
+          description: 6-digit TOTP code or 8-char backup code
+    TOTPConfirmResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        backup_codes:
+          type: array
+          items:
+            type: string
+          description: 8 single-use backup codes (8-char hex)
+    TOTPVerifyRequest:
+      type: object
+      required: [session_id, code]
+      properties:
+        session_id:
+          type: string
+        code:
+          type: string
+          description: 6-digit TOTP code or 8-char backup code
+    FolderRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        special_use:
+          type: string
+    Folder:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        special_use:
+          type: string
+        message_count:
+          type: integer
+          format: int64
+        unseen_count:
+          type: integer
+          format: int64
+    ComposeRequest:
+      type: object
+      properties:
+        from:
+          type: string
+        to:
+          type: array
+          items:
+            type: string
+        cc:
+          type: array
+          items:
+            type: string
+        bcc:
+          type: array
+          items:
+            type: string
+        subject:
+          type: string
+        text:
+          type: string
+        html:
+          type: string
+        attachments:
+          type: array
+          items:
+            $ref: "#/components/schemas/Attachment"
+    Attachment:
+      type: object
+      properties:
+        filename:
+          type: string
+        content_type:
+          type: string
+        content_base64:
+          type: string
+    ComposeResponse:
+      type: object
+      properties:
+        message_id:
+          type: string
+        status:
+          type: string
+    DraftResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        message_id:
+          type: string
+        status:
+          type: string
+    AdminDomain:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    AdminDomainRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        is_active:
+          type: boolean
+    AdminAccount:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        email:
+          type: string
+        domain_id:
+          type: integer
+          format: int64
+        domain_name:
+          type: string
+        local_part:
+          type: string
+        display_name:
+          type: string
+        recovery_email:
+          type: string
+          description: External email address for password resets
+        quota_bytes:
+          type: integer
+          format: int64
+        used_bytes:
+          type: integer
+          format: int64
+        is_active:
+          type: boolean
+        is_admin:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    AdminAccountCreate:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+        display_name:
+          type: string
+        recovery_email:
+          type: string
+          description: External email address for password resets
+        quota_bytes:
+          type: integer
+          format: int64
+        is_active:
+          type: boolean
+        is_admin:
+          type: boolean
+    AdminAccountUpdate:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+        display_name:
+          type: string
+        recovery_email:
+          type: string
+          description: External email address for password resets
+        quota_bytes:
+          type: integer
+          format: int64
+        is_active:
+          type: boolean
+        is_admin:
+          type: boolean
+          description: Set to true to promote account to site admin, false to demote
+    AdminStats:
+      type: object
+      properties:
+        total_domains:
+          type: integer
+          format: int64
+        active_domains:
+          type: integer
+          format: int64
+        total_accounts:
+          type: integer
+          format: int64
+        active_accounts:
+          type: integer
+          format: int64
+        total_messages:
+          type: integer
+          format: int64
+        storage_bytes:
+          type: integer
+          format: int64
+    DeliveryLogEntry:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        account_id:
+          type: integer
+          format: int64
+        message_id:
+          type: string
+        from_address:
+          type: string
+        to_address:
+          type: string
+        status:
+          type: string
+        scan_action:
+          type: string
+        scan_score:
+          type: number
+          format: float
+        error_message:
+          type: string
+        source_ip:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+    LicenseStatus:
+      type: object
+      properties:
+        valid:
+          type: boolean
+        error:
+          type: string
+        warnings:
+          type: array
+          items:
+            type: string
+        usage:
+          type: object
+          properties:
+            registered_users:
+              type: integer
+              format: int64
+            active_domains:
+              type: integer
+              format: int64
+            storage_bytes:
+              type: integer
+              format: int64
+            taken_at:
+              type: string
+              format: date-time
+        remaining:
+          type: integer
+          format: int64
+        license:
+          type: object
+          properties:
+            id:
+              type: string
+            tier:
+              type: string
+            max_users:
+              type: integer
+              format: int64
+            issued_at:
+              type: string
+              format: date-time
+            expires_at:
+              type: string
+              format: date-time
+    DomainLicenseStatus:
+      type: object
+      properties:
+        has_license:
+          type: boolean
+        valid:
+          type: boolean
+        max_accounts:
+          type: integer
+          description: Per-domain account limit (0 = unlimited)
+        current_accounts:
+          type: integer
+        remaining:
+          type: integer
+          description: Accounts remaining (-1 = unlimited)
+        holder:
+          type: string
+        tier:
+          type: string
+        domain:
+          type: string
+        issued_at:
+          type: string
+          format: date-time
+        expires_at:
+          type: string
+          format: date-time
+        warnings:
+          type: array
+          items:
+            type: string
+        error:
+          type: string
+    LicenseUpdateRequest:
+      type: object
+      properties:
+        key:
+          type: string
+        license_key:
+          type: string
+    SystemInfo:
+      type: object
+      properties:
+        go_version:
+          type: string
+        main:
+          $ref: "#/components/schemas/ModuleInfo"
+        deps:
+          type: array
+          items:
+            $ref: "#/components/schemas/ModuleInfo"
+        settings:
+          type: object
+          additionalProperties:
+            type: string
+    ModuleInfo:
+      type: object
+      properties:
+        path:
+          type: string
+        version:
+          type: string
+        sum:
+          type: string
+        replace_path:
+          type: string
+        replace_version:
+          type: string
+    MessageMeta:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        folder_id:
+          type: integer
+          format: int64
+        subject:
+          type: string
+        from:
+          type: string
+        to:
+          type: array
+          items:
+            type: string
+        cc:
+          type: array
+          items:
+            type: string
+        date:
+          type: string
+        internal_date:
+          type: string
+        size_bytes:
+          type: integer
+          format: int64
+        flags:
+          type: array
+          items:
+            type: string
+        attachments:
+          type: array
+          items:
+            $ref: "#/components/schemas/AttachmentInfo"
+    AttachmentInfo:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        filename:
+          type: string
+        content_type:
+          type: string
+        size_bytes:
+          type: integer
+          format: int64
+    MessageList:
+      type: object
+      properties:
+        page:
+          type: integer
+          format: int32
+        per_page:
+          type: integer
+          format: int32
+        total:
+          type: integer
+          format: int64
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/MessageMeta"
+    MessageBody:
+      type: object
+      properties:
+        text:
+          type: string
+        html:
+          type: string
+    FlagsRequest:
+      type: object
+      properties:
+        seen:
+          type: boolean
+        answered:
+          type: boolean
+        flagged:
+          type: boolean
+        deleted:
+          type: boolean
+        draft:
+          type: boolean
+    MoveCopyRequest:
+      type: object
+      properties:
+        folder_id:
+          type: integer
+          format: int64
+    StorageStats:
+      type: object
+      properties:
+        backend:
+          type: string
+          description: Storage backend type (e.g. "dedup:compress:filesystem")
+        compress:
+          $ref: "#/components/schemas/CompressStats"
+    CompressStats:
+      type: object
+      nullable: true
+      description: Compression statistics (null when compression is not enabled)
+      properties:
+        puts:
+          type: integer
+          format: int64
+          description: Total Put operations since startup
+        bytes_in:
+          type: integer
+          format: int64
+          description: Total uncompressed bytes received
+        bytes_out:
+          type: integer
+          format: int64
+          description: Total compressed bytes stored
+        gets:
+          type: integer
+          format: int64
+          description: Total Get operations since startup
+        gets_compressed:
+          type: integer
+          format: int64
+          description: Gets that returned gzip-compressed data
+        gets_legacy:
+          type: integer
+          format: int64
+          description: Gets that returned uncompressed (legacy) data
+        compression_pct:
+          type: number
+          format: double
+          description: Space savings percentage (0-100)
+    RotationStatus:
+      type: object
+      properties:
+        rotation_enabled:
+          type: boolean
+          description: Whether automatic JWT rotation is enabled
+        interval:
+          type: string
+          description: Rotation interval (e.g. "2160h0m0s")
+        last_rotated:
+          type: string
+          format: date-time
+          nullable: true
+          description: When the last rotation occurred
+        next_scheduled:
+          type: string
+          format: date-time
+          nullable: true
+          description: When the next automatic rotation is scheduled
+        keyring:
+          $ref: "#/components/schemas/KeyRingStatus"
+    KeyRingStatus:
+      type: object
+      nullable: true
+      properties:
+        current_version:
+          type: integer
+          description: Version number of the current signing key
+        current_since:
+          type: string
+          format: date-time
+          description: When the current key was installed
+        previous_version:
+          type: integer
+          nullable: true
+          description: Version number of the previous key (if in grace period)
+        previous_since:
+          type: string
+          format: date-time
+          nullable: true
+          description: When the previous key was installed
+        grace_remaining:
+          type: string
+          description: Time remaining in the grace period (e.g. "47h59m30s")
+    SearchRequest:
+      type: object
+      properties:
+        query:
+          type: string
+        folder_id:
+          type: integer
+          format: int64
+        page:
+          type: integer
+          format: int32
+        per_page:
+          type: integer
+          format: int32
+    PluginMetadata:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique plugin identifier (e.g. "kuju-ai-headers")
+        name:
+          type: string
+        description:
+          type: string
+        version:
+          type: string
+          description: Semver version string
+        author:
+          type: string
+        source_url:
+          type: string
+        category:
+          type: string
+          description: Plugin category (e.g. "filter", "ai", "monitoring")
+        hook_points:
+          type: array
+          items:
+            type: string
+          description: Delivery pipeline stages this plugin hooks into
+        config_schema:
+          type: object
+          description: JSON Schema for plugin configuration UI
+        is_system:
+          type: boolean
+          description: System plugins cannot be uninstalled
+        license_feature:
+          type: string
+          description: License feature required to use this plugin
+        has_routes:
+          type: boolean
+          description: Whether the plugin registers HTTP routes
+        has_scan:
+          type: boolean
+          description: Whether the plugin implements the scan interface
+        route_paths:
+          type: array
+          items:
+            type: string
+          description: Full paths of registered routes (populated at runtime)
+    DomainPluginConfig:
+      type: object
+      properties:
+        domain_id:
+          type: integer
+          format: int64
+        plugin_id:
+          type: string
+        enabled:
+          type: boolean
+        config:
+          type: object
+          description: Domain-specific plugin configuration
+        priority:
+          type: integer
+          description: Execution order (lower runs first)
+    ScanResult:
+      type: object
+      description: Returned by scan plugins during the delivery scan phase
+      properties:
+        action:
+          type: string
+          enum: [accept, reject, quarantine, tag]
+        score:
+          type: number
+          format: double
+          description: "0.0 = clean, higher = worse"
+        details:
+          type: string
+          description: Human-readable explanation
+        headers:
+          type: object
+          additionalProperties:
+            type: string
+          description: Headers to inject into the message

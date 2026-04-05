@@ -1,0 +1,316 @@
+# API overlay: marketing descriptions per endpoint
+# Auto-extracted from page.tsx
+
+"/.well-known/caldav":
+  GET:
+    marketing_summary: "redirects to /caldav/"
+"/.well-known/carddav":
+  GET:
+    marketing_summary: "redirects to /carddav/"
+"/api/account/preferences":
+  PUT:
+    marketing_summary: "update account preferences (spam_folder, plus_tag_filing, etc.)"
+"/api/address-books":
+  GET:
+    marketing_summary: "list address books"
+  POST:
+    marketing_summary: "create address book"
+"/api/address-books/:abId/contacts":
+  POST:
+    marketing_summary: "create contact"
+"/api/address-books/:abId/contacts/:id":
+  GET:
+    marketing_summary: "get contact"
+  PUT:
+    marketing_summary: "update contact"
+  DELETE:
+    marketing_summary: "delete contact"
+"/api/address-books/:abId/contacts?q=...":
+  GET:
+    marketing_summary: "list contacts (optional search)"
+"/api/address-books/:id":
+  PUT:
+    marketing_summary: "update address book"
+  DELETE:
+    marketing_summary: "delete address book"
+"/api/admin/accounts/:id":
+  PUT:
+    marketing_summary: "update account; set is_admin to promote/demote"
+"/api/admin/branding/:domain":
+  GET:
+    marketing_summary: "branding config"
+"/api/admin/branding/:domain/:filename":
+  GET:
+    marketing_summary: "download/preview asset"
+  POST:
+    marketing_summary: "upload single asset"
+  DELETE:
+    marketing_summary: "delete asset"
+"/api/admin/branding/:domain/archive":
+  POST:
+    marketing_summary: "upload tar.gz/zip archive"
+"/api/admin/branding/:domain/files":
+  GET:
+    marketing_summary: "list branding files"
+"/api/admin/delivery/drops":
+  GET:
+    marketing_summary: "hard drop statistics"
+"/api/admin/dns/check-records?domain=...":
+  GET:
+    marketing_summary: "verify DNS records (MX, SPF, DKIM, DMARC)"
+"/api/admin/domains/:domainId/retention":
+  GET:
+    marketing_summary: "get domain retention policy"
+  PUT:
+    marketing_summary: "upsert domain retention policy"
+  DELETE:
+    marketing_summary: "remove domain retention policy"
+"/api/admin/domains/:domainId/thresholds":
+  GET:
+    marketing_summary: "get spam score thresholds"
+  PUT:
+    marketing_summary: "update junk/drop thresholds and quarantine expiry"
+"/api/admin/kumomta/metrics":
+  GET:
+    marketing_summary: "raw KumoMTA metrics (includes uptime, version)"
+"/api/admin/kumomta/{endpoint}":
+  GET:
+    marketing_summary: "proxy GET (bounces, suspensions, ready-q-suspensions)"
+  POST:
+    marketing_summary: "create bounce/suspend rules"
+  DELETE:
+    marketing_summary: "delete bounce/suspend rules"
+"/api/admin/plugins/{id}/enable-all":
+  POST:
+    marketing_summary: "enable a plugin for all domains"
+"/api/admin/settings":
+  GET:
+    marketing_summary: "system settings (key-value)"
+"/api/admin/settings/corporate-domain":
+  PUT:
+    marketing_summary: "update corporate domain"
+"/api/admin/settings/safe-browsing-key":
+  PUT:
+    marketing_summary: "save Google Safe Browsing API key"
+"/api/analysis/backfill-body-search":
+  POST:
+    marketing_summary: "backfill body search index"
+"/api/analysis/natural-search":
+  POST:
+    marketing_summary: "interpret natural language search query"
+"/api/auth/totp":
+  DELETE:
+    marketing_summary: "disable TOTP (requires current code)"
+"/api/auth/totp/confirm?session_id=...":
+  POST:
+    marketing_summary: "verify code, enable TOTP, return backup codes"
+"/api/auth/totp/setup":
+  POST:
+    marketing_summary: "generate secret + QR code"
+"/api/auth/totp/status":
+  GET:
+    marketing_summary: "check if TOTP is enabled"
+"/api/auth/totp/verify":
+  POST:
+    marketing_summary: "verify TOTP code during login, issue JWT"
+"/api/branding":
+  GET:
+    marketing_summary: "branding config for the authenticated user's domain"
+"/api/branding/assets/:filename":
+  GET:
+    marketing_summary: "branding asset file (logo, favicon, CSS)"
+"/api/calendars":
+  GET:
+    marketing_summary: "list calendars"
+  POST:
+    marketing_summary: "create calendar"
+"/api/calendars/:calId/events":
+  POST:
+    marketing_summary: "create event"
+"/api/calendars/:calId/events/:id":
+  GET:
+    marketing_summary: "get event"
+  PUT:
+    marketing_summary: "update event"
+  DELETE:
+    marketing_summary: "delete event"
+"/api/calendars/:calId/events?start=...&end=...":
+  GET:
+    marketing_summary: "list events (optional RFC 3339 range filter)"
+"/api/calendars/:id":
+  PUT:
+    marketing_summary: "update calendar"
+  DELETE:
+    marketing_summary: "delete calendar"
+"/api/commands/execute":
+  POST:
+    marketing_summary: "execute a command plan (move, archive, delete, flag)"
+"/api/commands/interpret":
+  POST:
+    marketing_summary: "AI interprets natural language command"
+"/api/contacts/intelligence/:email":
+  GET:
+    marketing_summary: "per-email communication stats"
+"/api/contacts/intelligence/dormant":
+  GET:
+    marketing_summary: "contacts with no recent communication"
+"/api/contacts/intelligence/top":
+  GET:
+    marketing_summary: "top contacts by email frequency"
+"/api/contacts/quick-add":
+  POST:
+    marketing_summary: "quick-add sender to address book"
+"/api/domain-admin/accounts":
+  POST:
+    marketing_summary: "create account (see Account Creation below)"
+"/api/domain-admin/accounts/:id/recover":
+  POST:
+    marketing_summary: "send password reset to recovery email"
+"/api/domain-admin/accounts/:id/resend-invite":
+  POST:
+    marketing_summary: "resend invite email (pending accounts only)"
+"/api/domain-admin/accounts/:id/retention":
+  GET:
+    marketing_summary: "get account retention override"
+  PUT:
+    marketing_summary: "upsert account retention override"
+  DELETE:
+    marketing_summary: "remove account retention override"
+"/api/domain-admin/dns/check-records":
+  GET:
+    marketing_summary: "verify DNS records for the admin's domain"
+"/api/domain-admin/retention":
+  GET:
+    marketing_summary: "get effective retention (domain + account policies)"
+"/api/domain-admin/retention/domain":
+  PUT:
+    marketing_summary: "upsert retention for own domain"
+"/api/drafts/:id/send":
+  POST:
+    marketing_summary: "send a saved draft"
+"/api/feed?limit=...":
+  GET:
+    marketing_summary: "merged chronological feed (messages, events, tasks)"
+"/api/forgot-password":
+  POST:
+    marketing_summary: "request password reset email"
+"/api/inbox-summary":
+  GET:
+    marketing_summary: "dashboard stats (volume, security, productivity, classifications)"
+"/api/invite":
+  POST:
+    marketing_summary: "accept invite and set password (public, token-based)"
+"/api/messages":
+  POST:
+    marketing_summary: "compose / send"
+"/api/messages/:id/ai-reply":
+  POST:
+    marketing_summary: "generate AI reply draft"
+"/api/messages/:id/analysis":
+  GET:
+    marketing_summary: "cached results + feature availability"
+"/api/messages/:id/analysis/ai":
+  POST:
+    marketing_summary: "AI threat assessment (?force=true to re-analyze)"
+"/api/messages/:id/analysis/av-rescan":
+  POST:
+    marketing_summary: "ClamAV attachment scan"
+"/api/messages/:id/analysis/instant":
+  GET:
+    marketing_summary: "header analysis (auth, sender, hops, URLs)"
+"/api/messages/:id/analysis/url-safety":
+  POST:
+    marketing_summary: "Google Safe Browsing URL check"
+"/api/messages/:id/attachments/:aid":
+  GET:
+    marketing_summary: "download attachment"
+"/api/messages/:id/attachments/:aid/knowledge":
+  GET:
+    marketing_summary: "cached extraction result"
+  POST:
+    marketing_summary: "extract text + AI summarize"
+"/api/messages/:id/body":
+  GET:
+    marketing_summary: "rendered body"
+"/api/messages/:id/flags":
+  PATCH:
+    marketing_summary: "update flags (read, starred, etc.)"
+"/api/messages/:id/raw":
+  GET:
+    marketing_summary: "raw RFC 822 source"
+"/api/messages/:id/rewrite-draft":
+  POST:
+    marketing_summary: "rewrite compose draft with tone control"
+"/api/messages/:id/thread-ai-state":
+  GET:
+    marketing_summary: "get AI triage state for a thread"
+"/api/messages/:id/thread-document":
+  POST:
+    marketing_summary: "generate document-centric thread analysis"
+"/api/messages/:id/thread-graph":
+  GET:
+    marketing_summary: "get conversation graph (nodes + edges)"
+"/api/messages/:id/workspaces":
+  GET:
+    marketing_summary: "get workspaces a message belongs to"
+"/api/messages/search":
+  POST:
+    marketing_summary: "advanced search"
+"/api/messages/search?q=...":
+  GET:
+    marketing_summary: "quick search"
+"/api/reset-password":
+  POST:
+    marketing_summary: "reset password with token"
+"/api/tasks":
+  GET:
+    marketing_summary: "list tasks"
+  POST:
+    marketing_summary: "create task"
+"/api/tasks/:id":
+  PUT:
+    marketing_summary: "update task"
+  DELETE:
+    marketing_summary: "delete task"
+"/api/tasks/:id/to-calendar":
+  POST:
+    marketing_summary: "convert task to calendar event"
+"/api/vacation":
+  GET:
+    marketing_summary: "get vacation responder settings"
+  PUT:
+    marketing_summary: "update vacation responder (enabled, subject, body, start/end dates)"
+"/api/waiting":
+  GET:
+    marketing_summary: "list sent messages awaiting reply"
+"/api/waiting/:id":
+  PUT:
+    marketing_summary: "update waiting status (resolved, snoozed)"
+"/api/waiting/:id/nudge":
+  POST:
+    marketing_summary: "send follow-up nudge"
+"/api/workspaces":
+  GET:
+    marketing_summary: "list workspaces with message counts"
+  POST:
+    marketing_summary: "create workspace"
+"/api/workspaces/:id":
+  PUT:
+    marketing_summary: "update workspace (name, color, rules, etc.)"
+  DELETE:
+    marketing_summary: "delete workspace (messages preserved)"
+"/api/workspaces/:id/messages":
+  POST:
+    marketing_summary: "assign message"
+"/api/workspaces/:id/messages/:messageId":
+  DELETE:
+    marketing_summary: "remove message from workspace"
+"/api/workspaces/:id/messages?page=1&per_page=50":
+  GET:
+    marketing_summary: "paginated messages"
+"/caldav/{accountId}/{calendarName}/":
+  GET:
+    marketing_summary: "CalDAV endpoint"
+"/carddav/{accountId}/{addressBookName}/":
+  GET:
+    marketing_summary: "CardDAV endpoint"

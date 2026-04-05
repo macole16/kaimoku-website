@@ -1,0 +1,282 @@
+# API categories: section grouping and endpoint ordering
+# Auto-extracted from page.tsx
+
+categories:
+  - name: "Overview"
+    id: "overview"
+    children:
+      - name: "Base URL"
+        id: "base-url"
+      - name: "Authentication"
+        id: "authentication"
+  - name: "Public API"
+    id: "public-api"
+    children:
+      - name: "Auth"
+        id: "auth"
+        endpoints:
+          - { method: "POST", path: "/api/auth/login" }
+          - { method: "POST", path: "/api/auth/logout" }
+          - { method: "POST", path: "/api/auth/refresh" }
+          - { method: "POST", path: "/api/invite" }
+          - { method: "POST", path: "/api/forgot-password" }
+          - { method: "POST", path: "/api/reset-password" }
+      - name: "Two-Factor (TOTP)"
+        id: "totp"
+        endpoints:
+          - { method: "GET", path: "/api/auth/totp/status" }
+          - { method: "POST", path: "/api/auth/totp/setup" }
+          - { method: "POST", path: "/api/auth/totp/confirm?session_id=..." }
+          - { method: "POST", path: "/api/auth/totp/verify" }
+          - { method: "DELETE", path: "/api/auth/totp" }
+      - name: "Folders"
+        id: "folders"
+        endpoints:
+          - { method: "GET", path: "/api/folders" }
+          - { method: "POST", path: "/api/folders" }
+          - { method: "PUT", path: "/api/folders/:id" }
+          - { method: "DELETE", path: "/api/folders/:id" }
+          - { method: "GET", path: "/api/folders/:id/messages" }
+      - name: "Messages"
+        id: "messages"
+        endpoints:
+          - { method: "POST", path: "/api/messages" }
+          - { method: "GET", path: "/api/messages/:id" }
+          - { method: "GET", path: "/api/messages/:id/raw" }
+          - { method: "GET", path: "/api/messages/:id/body" }
+          - { method: "GET", path: "/api/messages/:id/attachments/:aid" }
+          - { method: "PATCH", path: "/api/messages/:id/flags" }
+          - { method: "PATCH", path: "/api/messages/:id/move" }
+          - { method: "PATCH", path: "/api/messages/:id/copy" }
+          - { method: "DELETE", path: "/api/messages/:id" }
+          - { method: "POST", path: "/api/messages/search" }
+          - { method: "GET", path: "/api/messages/search?q=..." }
+      - name: "Message Analysis"
+        id: "message-analysis"
+        endpoints:
+          - { method: "GET", path: "/api/messages/:id/analysis" }
+          - { method: "GET", path: "/api/messages/:id/analysis/instant" }
+          - { method: "POST", path: "/api/messages/:id/analysis/ai" }
+          - { method: "POST", path: "/api/messages/:id/analysis/av-rescan" }
+          - { method: "POST", path: "/api/messages/:id/analysis/url-safety" }
+      - name: "Attachment Knowledge"
+        id: "attachment-knowledge"
+        endpoints:
+          - { method: "GET", path: "/api/messages/:id/attachments/:aid/knowledge" }
+          - { method: "POST", path: "/api/messages/:id/attachments/:aid/knowledge" }
+      - name: "Drafts"
+        id: "drafts"
+        endpoints:
+          - { method: "GET", path: "/api/drafts" }
+          - { method: "POST", path: "/api/drafts" }
+          - { method: "GET", path: "/api/drafts/:id" }
+          - { method: "PUT", path: "/api/drafts/:id" }
+          - { method: "DELETE", path: "/api/drafts/:id" }
+          - { method: "POST", path: "/api/drafts/:id/send" }
+      - name: "Calendars & Events"
+        id: "calendars"
+        endpoints:
+          - { method: "GET", path: "/api/calendars" }
+          - { method: "POST", path: "/api/calendars" }
+          - { method: "PUT", path: "/api/calendars/:id" }
+          - { method: "DELETE", path: "/api/calendars/:id" }
+          - { method: "GET", path: "/api/calendars/:calId/events?start=...&end=..." }
+          - { method: "GET", path: "/api/calendars/:calId/events/:id" }
+          - { method: "POST", path: "/api/calendars/:calId/events" }
+          - { method: "PUT", path: "/api/calendars/:calId/events/:id" }
+          - { method: "DELETE", path: "/api/calendars/:calId/events/:id" }
+      - name: "Address Books & Contacts"
+        id: "contacts"
+        endpoints:
+          - { method: "GET", path: "/api/address-books" }
+          - { method: "POST", path: "/api/address-books" }
+          - { method: "PUT", path: "/api/address-books/:id" }
+          - { method: "DELETE", path: "/api/address-books/:id" }
+          - { method: "GET", path: "/api/address-books/:abId/contacts?q=..." }
+          - { method: "GET", path: "/api/address-books/:abId/contacts/:id" }
+          - { method: "POST", path: "/api/address-books/:abId/contacts" }
+          - { method: "PUT", path: "/api/address-books/:abId/contacts/:id" }
+          - { method: "DELETE", path: "/api/address-books/:abId/contacts/:id" }
+      - name: "CalDAV / CardDAV"
+        id: "dav"
+        endpoints:
+          - { method: "GET", path: "/.well-known/caldav" }
+          - { method: "GET", path: "/.well-known/carddav" }
+          - { method: "GET", path: "/caldav/{accountId}/{calendarName}/" }
+          - { method: "GET", path: "/carddav/{accountId}/{addressBookName}/" }
+      - name: "Branding"
+        id: "branding"
+        endpoints:
+          - { method: "GET", path: "/api/branding" }
+          - { method: "GET", path: "/api/branding/assets/:filename" }
+  - name: "Account API"
+    id: "account-api"
+    children:
+      - name: "Preferences"
+        id: "preferences"
+        endpoints:
+          - { method: "PUT", path: "/api/account/preferences" }
+      - name: "AI & Intelligence"
+        id: "ai-intelligence"
+        endpoints:
+          - { method: "GET", path: "/api/messages/:id/thread-ai-state" }
+          - { method: "POST", path: "/api/messages/:id/ai-reply" }
+          - { method: "POST", path: "/api/messages/:id/rewrite-draft" }
+          - { method: "POST", path: "/api/messages/:id/thread-document" }
+          - { method: "POST", path: "/api/analysis/natural-search" }
+          - { method: "POST", path: "/api/analysis/backfill-body-search" }
+      - name: "Thread Graph"
+        id: "thread-graph"
+        endpoints:
+          - { method: "GET", path: "/api/messages/:id/thread-graph" }
+      - name: "Vacation"
+        id: "vacation"
+        endpoints:
+          - { method: "GET", path: "/api/vacation" }
+          - { method: "PUT", path: "/api/vacation" }
+      - name: "Waiting On Reply"
+        id: "waiting"
+        endpoints:
+          - { method: "GET", path: "/api/waiting" }
+          - { method: "PUT", path: "/api/waiting/:id" }
+          - { method: "POST", path: "/api/waiting/:id/nudge" }
+      - name: "Tasks"
+        id: "tasks"
+        endpoints:
+          - { method: "GET", path: "/api/tasks" }
+          - { method: "POST", path: "/api/tasks" }
+          - { method: "PUT", path: "/api/tasks/:id" }
+          - { method: "DELETE", path: "/api/tasks/:id" }
+          - { method: "POST", path: "/api/tasks/:id/to-calendar" }
+      - name: "Activity Feed"
+        id: "feed"
+        endpoints:
+          - { method: "GET", path: "/api/feed?limit=..." }
+      - name: "Contact Intelligence"
+        id: "contact-intel"
+        endpoints:
+          - { method: "GET", path: "/api/contacts/intelligence/top" }
+          - { method: "GET", path: "/api/contacts/intelligence/dormant" }
+          - { method: "GET", path: "/api/contacts/intelligence/:email" }
+          - { method: "POST", path: "/api/contacts/quick-add" }
+      - name: "Inbox Summary"
+        id: "inbox-summary"
+        endpoints:
+          - { method: "GET", path: "/api/inbox-summary" }
+      - name: "Workspaces"
+        id: "workspaces"
+        endpoints:
+          - { method: "GET", path: "/api/workspaces" }
+          - { method: "POST", path: "/api/workspaces" }
+          - { method: "PUT", path: "/api/workspaces/:id" }
+          - { method: "DELETE", path: "/api/workspaces/:id" }
+          - { method: "GET", path: "/api/workspaces/:id/messages?page=1&per_page=50" }
+          - { method: "POST", path: "/api/workspaces/:id/messages" }
+          - { method: "DELETE", path: "/api/workspaces/:id/messages/:messageId" }
+          - { method: "GET", path: "/api/messages/:id/workspaces" }
+      - name: "NL Commands"
+        id: "nl-commands"
+        endpoints:
+          - { method: "POST", path: "/api/commands/interpret" }
+          - { method: "POST", path: "/api/commands/execute" }
+  - name: "Domain Admin API"
+    id: "domain-admin-api"
+    children:
+      - name: "Accounts & Stats"
+        id: "domain-accounts"
+        endpoints:
+          - { method: "GET", path: "/api/domain-admin/stats" }
+          - { method: "GET", path: "/api/domain-admin/accounts" }
+          - { method: "POST", path: "/api/domain-admin/accounts" }
+          - { method: "PUT", path: "/api/domain-admin/accounts/:id" }
+          - { method: "DELETE", path: "/api/domain-admin/accounts/:id" }
+          - { method: "POST", path: "/api/domain-admin/accounts/:id/resend-invite" }
+          - { method: "POST", path: "/api/domain-admin/accounts/:id/recover" }
+          - { method: "GET", path: "/api/domain-admin/delivery-log" }
+          - { method: "GET", path: "/api/domain-admin/dns/check-records" }
+      - name: "Retention Policies"
+        id: "domain-retention"
+        endpoints:
+          - { method: "GET", path: "/api/domain-admin/retention" }
+          - { method: "PUT", path: "/api/domain-admin/retention/domain" }
+          - { method: "GET", path: "/api/domain-admin/accounts/:id/retention" }
+          - { method: "PUT", path: "/api/domain-admin/accounts/:id/retention" }
+          - { method: "DELETE", path: "/api/domain-admin/accounts/:id/retention" }
+      - name: "Account Creation"
+        id: "account-creation"
+  - name: "Site Admin API"
+    id: "admin-api"
+    children:
+      - name: "Domains"
+        id: "admin-domains"
+        endpoints:
+          - { method: "GET", path: "/api/admin/domains" }
+          - { method: "POST", path: "/api/admin/domains" }
+          - { method: "PUT", path: "/api/admin/domains/:id" }
+          - { method: "DELETE", path: "/api/admin/domains/:id" }
+      - name: "Accounts"
+        id: "admin-accounts"
+        endpoints:
+          - { method: "GET", path: "/api/admin/accounts" }
+          - { method: "POST", path: "/api/admin/accounts" }
+          - { method: "PUT", path: "/api/admin/accounts/:id" }
+          - { method: "DELETE", path: "/api/admin/accounts/:id" }
+      - name: "Branding (Admin)"
+        id: "admin-branding"
+        endpoints:
+          - { method: "GET", path: "/api/admin/branding/:domain" }
+          - { method: "GET", path: "/api/admin/branding/:domain/files" }
+          - { method: "POST", path: "/api/admin/branding/:domain/archive" }
+          - { method: "GET", path: "/api/admin/branding/:domain/:filename" }
+          - { method: "POST", path: "/api/admin/branding/:domain/:filename" }
+          - { method: "DELETE", path: "/api/admin/branding/:domain/:filename" }
+      - name: "System & Licensing"
+        id: "admin-system"
+        endpoints:
+          - { method: "GET", path: "/api/admin/stats" }
+          - { method: "GET", path: "/api/admin/delivery-log" }
+          - { method: "GET", path: "/api/admin/license" }
+          - { method: "PUT", path: "/api/admin/license" }
+          - { method: "GET", path: "/api/admin/system-info" }
+          - { method: "GET", path: "/api/admin/settings" }
+          - { method: "PUT", path: "/api/admin/settings/corporate-domain" }
+          - { method: "PUT", path: "/api/admin/settings/safe-browsing-key" }
+          - { method: "GET", path: "/api/admin/dns/check-records?domain=..." }
+          - { method: "GET", path: "/api/admin/openapi.yaml" }
+      - name: "Delivery Thresholds"
+        id: "admin-thresholds"
+        endpoints:
+          - { method: "GET", path: "/api/admin/domains/:domainId/thresholds" }
+          - { method: "PUT", path: "/api/admin/domains/:domainId/thresholds" }
+          - { method: "GET", path: "/api/admin/delivery/drops" }
+      - name: "Retention Policies"
+        id: "admin-retention"
+        endpoints:
+          - { method: "GET", path: "/api/admin/domains/:domainId/retention" }
+          - { method: "PUT", path: "/api/admin/domains/:domainId/retention" }
+          - { method: "DELETE", path: "/api/admin/domains/:domainId/retention" }
+      - name: "KumoMTA Proxy"
+        id: "admin-kumomta"
+        endpoints:
+          - { method: "GET", path: "/api/admin/kumomta/metrics" }
+          - { method: "GET", path: "/api/admin/kumomta/{endpoint}" }
+          - { method: "POST", path: "/api/admin/kumomta/{endpoint}" }
+          - { method: "DELETE", path: "/api/admin/kumomta/{endpoint}" }
+      - name: "Plugins"
+        id: "admin-plugins"
+        endpoints:
+          - { method: "POST", path: "/api/admin/plugins/{id}/enable-all" }
+  - name: "Concepts"
+    id: "concepts"
+    children:
+      - name: "Account Status"
+        id: "account-status"
+      - name: "Domain Fields"
+        id: "domain-fields"
+      - name: "Plus Addressing"
+        id: "plus-addressing"
+      - name: "Branding Files"
+        id: "branding-files"
+  - name: "Examples"
+    id: "examples"
+    children: []
