@@ -105,11 +105,14 @@ export default function Home() {
                 A complete email platform with IMAP, webmail, calendar, contacts,
                 AI-powered productivity tools, and built-in security &mdash;
                 delivered as a managed service so you can focus on what matters.
+                Connect your existing Gmail, Outlook, or IMAP accounts to manage
+                all your email in one place.
               </p>
               <div className="mb-8 grid gap-4 sm:grid-cols-3">
                 {[
                   "Full IMAP & Webmail",
                   "Calendar & Contacts",
+                  "Connect Gmail & Outlook",
                   "AI Reply & Compose",
                   "AI Threat Detection",
                   "Workspaces",
@@ -118,7 +121,6 @@ export default function Home() {
                   "Contact Intelligence",
                   "Smart Inbox & Tasks",
                   "Vacation Responder",
-                  "Domain Aliases",
                   "14-Day Free Trial",
                 ].map((feature) => (
                   <div key={feature} className="flex items-center gap-2">
