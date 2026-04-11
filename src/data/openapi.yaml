@@ -17,6 +17,8 @@ tags:
   - name: Admin
   - name: Plugins
   - name: Plugin Routes
+  - name: Bridge
+    description: External email provider connections
 paths:
   /api/auth/login:
     post:
@@ -1773,6 +1775,210 @@ paths:
         "200":
           description: Plugin-specific response
 
+  /api/connections:
+    get:
+      tags: [Bridge]
+      summary: List connections
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ConnectionResponse"
+        "401":
+          description: Unauthorized
+
+  /api/connections/{id}:
+    get:
+      tags: [Bridge]
+      summary: Get connection details
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConnectionResponse"
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+    patch:
+      tags: [Bridge]
+      summary: Update connection settings
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConnectionUpdateRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConnectionResponse"
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+    delete:
+      tags: [Bridge]
+      summary: Disconnect and delete connection data
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+
+  /api/connections/{id}/sync:
+    post:
+      tags: [Bridge]
+      summary: Trigger manual sync
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "202":
+          description: Accepted
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+
+  /api/connections/{id}/health:
+    get:
+      tags: [Bridge]
+      summary: Check connection health
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  healthy:
+                    type: boolean
+                  message:
+                    type: string
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+
+  /auth/gmail/start:
+    get:
+      tags: [Bridge]
+      summary: Start Gmail OAuth flow
+      security: []
+      description: Redirects to Google OAuth authorization page
+      responses:
+        "302":
+          description: Redirect to Google OAuth
+
+  /auth/gmail/callback:
+    get:
+      tags: [Bridge]
+      summary: Gmail OAuth callback
+      security: []
+      description: Handles OAuth callback from Google and redirects to storage mode selection
+      responses:
+        "302":
+          description: Redirect to storage mode selection
+
+  /auth/outlook/start:
+    get:
+      tags: [Bridge]
+      summary: Start Outlook OAuth flow
+      security: []
+      description: Redirects to Microsoft OAuth authorization page
+      responses:
+        "302":
+          description: Redirect to Microsoft OAuth
+
+  /auth/outlook/callback:
+    get:
+      tags: [Bridge]
+      summary: Outlook OAuth callback
+      security: []
+      description: Handles OAuth callback from Microsoft and redirects to storage mode selection
+      responses:
+        "302":
+          description: Redirect to storage mode selection
+
+  /api/bridge/imap-signup:
+    post:
+      tags: [Bridge]
+      summary: IMAP signup
+      security: []
+      description: Create a new account via IMAP provider credentials
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IMAPSignupRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          description: Invalid request or IMAP connection failed
+
 components:
   securitySchemes:
     bearerAuth:
@@ -2928,4 +3134,64 @@ components:
           type: object
           additionalProperties:
             type: string
+
+    ConnectionResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        provider:
+          type: string
+          enum: [local, gmail, outlook, imap]
+        label:
+          type: string
+          nullable: true
+        storage_mode:
+          type: string
+          enum: [mirror, proxy]
+        provider_email:
+          type: string
+        sync_status:
+          type: string
+          enum: [pending, syncing, idle, error]
+        last_sync_at:
+          type: string
+          format: date-time
+          nullable: true
+        sync_error:
+          type: string
+          nullable: true
+        is_primary:
+          type: boolean
+        is_active:
+          type: boolean
+
+    ConnectionUpdateRequest:
+      type: object
+      properties:
+        storage_mode:
+          type: string
+          enum: [mirror, proxy]
+        label:
+          type: string
+
+    IMAPSignupRequest:
+      type: object
+      required: [email, password, imap_host, imap_port, kuju_password]
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+        imap_host:
+          type: string
+        imap_port:
+          type: integer
+        smtp_host:
+          type: string
+        smtp_port:
+          type: integer
+        kuju_password:
+          type: string
           description: Headers to inject into the message
