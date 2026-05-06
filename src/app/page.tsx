@@ -18,7 +18,7 @@ export default function Home() {
               organizations that value security, transparency, and a better
               email experience.
             </p>
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-wrap items-center gap-6">
               <a
                 href={URLS.KUJU_TRIAL_SIGNUP}
                 className={`rounded-lg bg-kuju px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-kuju-dark ${
@@ -36,15 +36,9 @@ export default function Home() {
               </a>
               <Link
                 href="/kuju-email"
-                className="rounded-lg bg-accent px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-accent-dark"
+                className="text-sm font-medium text-white underline-offset-4 transition-colors hover:text-kuju hover:underline"
               >
-                Explore Kuju Email
-              </Link>
-              <Link
-                href="#about"
-                className="rounded-lg border border-white/30 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/10"
-              >
-                Learn More
+                Explore Kuju Email →
               </Link>
             </div>
           </div>
@@ -61,14 +55,14 @@ export default function Home() {
             <p className="mb-6 text-lg leading-relaxed text-slate-600">
               Kaimoku Technologies, LLC is a software company focused on
               building tools that make email better. We specialize in email and
-              communications &mdash; delivering the security, features, and
-              control that modern organizations deserve.
+              communications, delivering the security, features, and control
+              that modern organizations deserve.
             </p>
             <p className="text-lg leading-relaxed text-slate-600">
               Our name,{" "}
               <span className="font-semibold text-primary">Kaimoku</span>{" "}
-              (開目), means &ldquo;opening one&rsquo;s eyes&rdquo; in Japanese
-              &mdash; reflecting our belief that organizations should have clear
+              (開目), means &ldquo;opening one&rsquo;s eyes&rdquo; in Japanese.
+              It reflects our belief that organizations should have clear
               visibility into the systems they depend on.
             </p>
           </div>
@@ -103,10 +97,10 @@ export default function Home() {
               </div>
               <p className="mb-6 text-lg leading-relaxed text-slate-600">
                 A complete email platform with IMAP, webmail, calendar,
-                contacts, AI-powered productivity tools, and built-in security
-                &mdash; delivered as a managed service so you can focus on what
-                matters. Connect your existing Gmail, Outlook, or IMAP accounts
-                to manage all your email in one place.
+                contacts, AI-powered productivity tools, and built-in security,
+                delivered as a managed service so you can focus on what matters.
+                Connect your existing Gmail, Outlook, or IMAP accounts to manage
+                all your email in one place.
               </p>
               <div className="mb-8 grid gap-4 sm:grid-cols-3">
                 {[
@@ -181,12 +175,12 @@ export default function Home() {
               {
                 step: "1",
                 title: "Start Your Trial",
-                desc: "Sign up for a 14-day free trial on demo.kuju.email. Full Professional-level access — all features, no restrictions.",
+                desc: "Sign up for a 14-day free trial on demo.kuju.email. Full Professional-level access. All features, no restrictions.",
               },
               {
                 step: "2",
                 title: "Choose a Plan & Bring Your Domain",
-                desc: "Pick the tier that fits. Point your MX, SPF, and DKIM records to Kuju — we provide the exact values to copy into your DNS provider.",
+                desc: "Pick the tier that fits. Point your MX, SPF, and DKIM records to Kuju. We provide the exact values to copy into your DNS provider.",
               },
               {
                 step: "3",
@@ -229,7 +223,7 @@ export default function Home() {
             {[
               {
                 title: "Ownership",
-                desc: "Your email should work for you. We give organizations full control over their email experience — powerful admin tools, transparent operations, no surprises.",
+                desc: "Your email should work for you. We give organizations full control over their email experience: powerful admin tools, transparent operations, no surprises.",
                 icon: (
                   <path
                     strokeLinecap="round"
@@ -241,7 +235,7 @@ export default function Home() {
               },
               {
                 title: "Transparency",
-                desc: "We believe in clear pricing, honest documentation, and visible operations. Kuju Email gives you full observability into what's happening with your email — delivery analytics, spam stats, and more.",
+                desc: "We believe in clear pricing, honest documentation, and visible operations. Kuju Email gives you full observability into what's happening with your email: delivery analytics, spam stats, and more.",
                 icon: (
                   <path
                     strokeLinecap="round"
@@ -298,7 +292,7 @@ export default function Home() {
             Sign up for Kuju Email and see how a modern email platform should
             work.
           </p>
-          <div className="flex flex-wrap justify-center gap-4">
+          <div className="flex flex-wrap items-center justify-center gap-6">
             <a
               href={URLS.KUJU_TRIAL_SIGNUP}
               className={`rounded-lg bg-kuju px-8 py-3 font-semibold text-white transition-colors hover:bg-kuju-dark ${
@@ -313,16 +307,10 @@ export default function Home() {
               Start 14-Day Trial
             </a>
             <Link
-              href="/kuju-email"
-              className="rounded-lg bg-accent px-8 py-3 font-semibold text-white transition-colors hover:bg-accent-dark"
-            >
-              Explore Kuju Email
-            </Link>
-            <Link
               href="/kuju-email/pricing"
-              className="rounded-lg border border-white/30 px-8 py-3 font-semibold text-white transition-colors hover:bg-white/10"
+              className="text-sm font-medium text-white underline-offset-4 transition-colors hover:text-kuju hover:underline"
             >
-              View Pricing
+              View pricing →
             </Link>
           </div>
         </div>

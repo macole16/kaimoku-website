@@ -5,7 +5,7 @@ import { loadModes } from "@/lib/modes";
 import { ModesShowcase } from "@/components/marketing/ModesShowcase";
 
 export const metadata: Metadata = {
-  title: "Kuju Email — Complete Email Platform | Kaimoku Technologies",
+  title: "Kuju Email: Complete Email Platform | Kaimoku Technologies",
   description:
     "Kuju Email is a complete email platform with IMAP, webmail, calendar, contacts, AI-powered productivity and security, and full admin control.",
 };
@@ -20,11 +20,11 @@ const features = [
       },
       {
         title: "Modern Webmail",
-        desc: "Full-featured browser-based client with four selectable UI modes — Standard, Magazine, Timeline, and Terminal. Compose, reply, forward, drag-and-drop attachments, folder management, auto-save drafts, forward-as-attachment (.eml), and browser push notifications.",
+        desc: "Full-featured browser-based client with four selectable UI modes: Standard, Magazine, Timeline, and Terminal. Compose, reply, forward, drag-and-drop attachments, folder management, auto-save drafts, forward-as-attachment (.eml), and browser push notifications.",
       },
       {
         title: "Command Palette & Natural Language Commands",
-        desc: 'Press Cmd+K for 17+ fuzzy-searchable commands. Also supports natural language commands — type "move this to archive" or "flag for follow-up" and the AI interprets and executes the action.',
+        desc: 'Press Cmd+K for 17+ fuzzy-searchable commands. Also supports natural language commands. Type "move this to archive" or "flag for follow-up" and the AI interprets and executes the action.',
       },
       {
         title: "Workspaces",
@@ -41,11 +41,11 @@ const features = [
     items: [
       {
         title: "AI Reply",
-        desc: "Generate contextual reply drafts with one click. The AI reads the conversation and drafts a relevant response — review, edit, and send.",
+        desc: "Generate contextual reply drafts with one click. The AI reads the conversation and drafts a relevant response. Review, edit, and send.",
       },
       {
         title: "AI Rewrite & Compose",
-        desc: "Rewrite messages with tone control — Professional, Friendly, Concise, or Formal. Full version history (v1, v2, v3...) with instant restore. Quoted text is preserved automatically.",
+        desc: "Rewrite messages with tone control: Professional, Friendly, Concise, or Formal. Full version history (v1, v2, v3...) with instant restore. Quoted text is preserved automatically.",
       },
       {
         title: "Natural Language Search",
@@ -107,7 +107,7 @@ const features = [
       },
       {
         title: "Smart Inbox (AI Categorization)",
-        desc: "Automatic intent classification — personal, newsletter, transactional, notification, calendar, task, financial, social — powered by a cost-optimized tiered AI model architecture (fast/standard/premium).",
+        desc: "Automatic intent classification across personal, newsletter, transactional, notification, calendar, task, financial, and social categories, powered by a cost-optimized tiered AI model architecture (fast/standard/premium).",
       },
       {
         title: "Tracking Protection",
@@ -115,7 +115,7 @@ const features = [
       },
       {
         title: "Virus Attachment Stripping",
-        desc: "When ClamAV detects an infected attachment, it's automatically stripped from the message while preserving the email body — so you receive the message safely without the malicious file.",
+        desc: "When ClamAV detects an infected attachment, it's automatically stripped from the message while preserving the email body, so you receive the message safely without the malicious file.",
       },
     ],
   },
@@ -153,7 +153,7 @@ const features = [
       },
       {
         title: "Delivery Pipeline Controls",
-        desc: "Configurable spam score thresholds per domain — set junk routing and hard drop thresholds separately. Quarantine auto-expiry with configurable retention. Drop statistics API for monitoring.",
+        desc: "Configurable spam score thresholds per domain: set junk routing and hard drop thresholds separately. Quarantine auto-expiry with configurable retention. Drop statistics API for monitoring.",
       },
       {
         title: "Analytics Dashboard",
@@ -199,15 +199,15 @@ const standoutFeatures = [
   },
   {
     title: "Complete Platform, One Service",
-    desc: "IMAP, webmail, REST API, CalDAV/CardDAV, workspaces, activity feed, vacation responder, AI productivity tools, and delivery handling — all fully integrated. No bolting together separate services.",
+    desc: "IMAP, webmail, REST API, CalDAV/CardDAV, workspaces, activity feed, vacation responder, AI productivity tools, and delivery handling, all fully integrated. No bolting together separate services.",
   },
   {
     title: "AI Security Built In, Not Bolted On",
-    desc: "Two-tier threat detection, Google Safe Browsing URL checks, message intelligence panels, tracking pixel detection, virus attachment stripping, and sender verification are native — not third-party add-ons.",
+    desc: "Two-tier threat detection, Google Safe Browsing URL checks, message intelligence panels, tracking pixel detection, virus attachment stripping, and sender verification are native, not third-party add-ons.",
   },
   {
     title: "Knows Your Documents Too",
-    desc: "Extract and AI-summarize PDF, DOCX, XLSX, CSV, and more — directly from email attachments. Extracted text is indexed so you can search inside attachments, not just email bodies.",
+    desc: "Extract and AI-summarize PDF, DOCX, XLSX, CSV, and more, directly from email attachments. Extracted text is indexed so you can search inside attachments, not just email bodies.",
   },
   {
     title: "True Multi-Tenant Isolation",
@@ -219,11 +219,11 @@ const standoutFeatures = [
   },
   {
     title: "14-Day Free Trial",
-    desc: "Sign up and get full Professional-level access for 14 days. No credit card required. Use your own domain during the trial — if you decide it's not for you, walk away with zero commitment.",
+    desc: "Sign up and get full Professional-level access for 14 days. No credit card required. Use your own domain during the trial. If you decide it's not for you, walk away with zero commitment.",
   },
   {
     title: "Domain Onboarding Wizard",
-    desc: "Add your domain in minutes. We auto-detect your DNS provider, guide you through setup with plain-English instructions, and verify everything is working. Come back anytime to finish — your progress is saved.",
+    desc: "Add your domain in minutes. We auto-detect your DNS provider, guide you through setup with plain-English instructions, and verify everything is working. Come back anytime to finish. Your progress is saved.",
   },
 ];
 
@@ -247,7 +247,7 @@ export default function KujuEmailPage() {
               administrative control. Fully managed so you can focus on your
               business.
             </p>
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-wrap items-center gap-6">
               <a
                 href={URLS.KUJU_TRIAL_SIGNUP}
                 className={`rounded-lg bg-kuju px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-kuju-dark ${
@@ -265,15 +265,9 @@ export default function KujuEmailPage() {
               </a>
               <Link
                 href="/kuju-email/pricing"
-                className="rounded-lg bg-accent px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-accent-dark"
+                className="text-sm font-medium text-white underline-offset-4 transition-colors hover:text-kuju hover:underline"
               >
-                View Plans & Pricing
-              </Link>
-              <Link
-                href="/kuju-email/guide"
-                className="rounded-lg border border-white/30 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/10"
-              >
-                Read the User Guide
+                View pricing →
               </Link>
             </div>
           </div>
@@ -359,7 +353,7 @@ export default function KujuEmailPage() {
             Start with a 14-day free trial on demo.kuju.email. Then choose a
             plan and bring your own domain.
           </p>
-          <div className="flex flex-wrap justify-center gap-4">
+          <div className="flex flex-wrap items-center justify-center gap-6">
             <a
               href={URLS.KUJU_TRIAL_SIGNUP}
               className={`rounded-lg bg-kuju px-8 py-3 font-semibold text-white transition-colors hover:bg-kuju-dark ${
@@ -375,15 +369,9 @@ export default function KujuEmailPage() {
             </a>
             <Link
               href="/kuju-email/pricing"
-              className="rounded-lg bg-accent px-8 py-3 font-semibold text-white transition-colors hover:bg-accent-dark"
+              className="text-sm font-medium text-white underline-offset-4 transition-colors hover:text-kuju hover:underline"
             >
-              View Pricing
-            </Link>
-            <Link
-              href="/kuju-email/guide"
-              className="rounded-lg border border-white/30 px-8 py-3 font-semibold text-white transition-colors hover:bg-white/10"
-            >
-              Read the Guide
+              View pricing →
             </Link>
           </div>
         </div>

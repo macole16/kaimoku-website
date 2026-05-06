@@ -47,12 +47,6 @@ export default function Header() {
           >
             API Docs
           </Link>
-          <Link
-            href="/kuju-email/pricing"
-            className="rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-accent-dark"
-          >
-            Get Started
-          </Link>
         </nav>
 
         <button
@@ -122,13 +116,6 @@ export default function Header() {
               onClick={() => setMobileOpen(false)}
             >
               API Docs
-            </Link>
-            <Link
-              href="/kuju-email/pricing"
-              className="inline-block rounded-lg bg-accent px-4 py-2 text-center text-sm font-semibold text-white"
-              onClick={() => setMobileOpen(false)}
-            >
-              Get Started
             </Link>
           </nav>
         </div>

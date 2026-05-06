@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { URLS, isComingSoon } from "@/lib/constants";
 
 export default function Footer() {
   return (
@@ -15,8 +16,8 @@ export default function Footer() {
               </span>
             </div>
             <p className="text-sm leading-relaxed text-slate-400">
-              Building modern, reliable software for organizations that
-              value security, transparency, and a better email experience.
+              Building modern, reliable software for organizations that value
+              security, transparency, and a better email experience.
             </p>
           </div>
 
@@ -50,12 +51,21 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link
-                  href="/kuju-email/pricing"
-                  className="text-sm text-slate-400 transition-colors hover:text-white"
+                <a
+                  href={URLS.KUJU_TRIAL_SIGNUP}
+                  className={`text-sm text-slate-400 transition-colors hover:text-white ${
+                    isComingSoon(URLS.KUJU_TRIAL_SIGNUP)
+                      ? "pointer-events-none opacity-60"
+                      : ""
+                  }`}
+                  title={
+                    isComingSoon(URLS.KUJU_TRIAL_SIGNUP)
+                      ? "Coming soon"
+                      : undefined
+                  }
                 >
                   Try Kuju Email
-                </Link>
+                </a>
               </li>
             </ul>
           </div>
