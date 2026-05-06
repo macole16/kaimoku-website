@@ -1,223 +1,92 @@
 import Link from "next/link";
 import { URLS, isComingSoon } from "@/lib/constants";
+import { loadProducts } from "@/lib/products";
+import { ProductsList } from "@/components/marketing/ProductsList";
 
 export default function Home() {
+  const products = loadProducts();
   return (
     <>
-      {/* Hero */}
+      {/* Hero - Kaimoku brand statement (Curator's Reading Room voice) */}
       <section className="bg-gradient-to-br from-primary via-primary-light to-primary px-6 py-24 text-white md:py-32">
         <div className="mx-auto max-w-7xl">
           <div className="max-w-3xl">
-            <h1 className="mb-6 text-4xl font-bold leading-tight tracking-tight md:text-6xl">
-              Email done right.
-              <br />
-              <span className="text-accent">Managed for you.</span>
+            <p className="mb-6 text-sm font-medium uppercase tracking-[0.2em] text-kuju">
+              Kaimoku Technologies
+            </p>
+            <h1
+              className="mb-8 text-5xl font-light leading-[1.05] tracking-tight md:text-7xl"
+              style={{ fontFamily: "var(--font-display)" }}
+            >
+              <span className="block text-kuju">開目</span>
+              <span className="mt-2 block italic text-white">
+                Opening one&rsquo;s eyes.
+              </span>
             </h1>
-            <p className="mb-10 max-w-2xl text-lg leading-relaxed text-slate-300 md:text-xl">
-              Kaimoku Technologies builds modern, reliable software for
-              organizations that value security, transparency, and a better
-              email experience.
+            <p className="mb-10 max-w-2xl text-lg leading-[1.7] text-slate-300 md:text-xl">
+              Kaimoku Technologies builds software that pays attention to the
+              things software has stopped paying attention to. We start with
+              email.
             </p>
             <div className="flex flex-wrap items-center gap-6">
-              <a
-                href={URLS.KUJU_TRIAL_SIGNUP}
-                className={`rounded-lg bg-kuju px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-kuju-dark ${
-                  isComingSoon(URLS.KUJU_TRIAL_SIGNUP)
-                    ? "pointer-events-none opacity-60"
-                    : ""
-                }`}
-                title={
-                  isComingSoon(URLS.KUJU_TRIAL_SIGNUP)
-                    ? "Coming soon"
-                    : undefined
-                }
-              >
-                Start 14-Day Trial
-              </a>
               <Link
                 href="/kuju-email"
-                className="text-sm font-medium text-white underline-offset-4 transition-colors hover:text-kuju hover:underline"
+                className="rounded-lg bg-kuju px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-kuju-dark"
               >
                 Explore Kuju Email →
               </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* About */}
-      <section id="about" className="px-6 py-20 md:py-28">
-        <div className="mx-auto max-w-7xl">
-          <div className="mx-auto max-w-3xl text-center">
-            <h2 className="mb-4 text-3xl font-bold text-primary md:text-4xl">
-              Who We Are
-            </h2>
-            <p className="mb-6 text-lg leading-relaxed text-slate-600">
-              Kaimoku Technologies, LLC is a software company focused on
-              building tools that make email better. We specialize in email and
-              communications, delivering the security, features, and control
-              that modern organizations deserve.
-            </p>
-            <p className="text-lg leading-relaxed text-slate-600">
-              Our name,{" "}
-              <span className="font-semibold text-primary">Kaimoku</span>{" "}
-              (開目), means &ldquo;opening one&rsquo;s eyes&rdquo; in Japanese.
-              It reflects our belief that organizations should have clear
-              visibility into the systems they depend on.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* What We Do */}
-      <section className="bg-surface px-6 py-20 md:py-28">
-        <div className="mx-auto max-w-7xl">
-          <h2 className="mb-12 text-center text-3xl font-bold text-primary md:text-4xl">
-            What We Build
-          </h2>
-          <div className="mx-auto max-w-4xl">
-            <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm md:p-12">
-              <div className="mb-4 flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-kuju/10">
-                  <svg
-                    className="h-6 w-6 text-kuju-dark"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={1.5}
-                      d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"
-                    />
-                  </svg>
-                </div>
-                <h3 className="text-2xl font-bold text-primary">Kuju Email</h3>
-              </div>
-              <p className="mb-6 text-lg leading-relaxed text-slate-600">
-                A complete email platform with IMAP, webmail, calendar,
-                contacts, AI-powered productivity tools, and built-in security,
-                delivered as a managed service so you can focus on what matters.
-                Connect your existing Gmail, Outlook, or IMAP accounts to manage
-                all your email in one place.
-              </p>
-              <div className="mb-8 grid gap-4 sm:grid-cols-3">
-                {[
-                  "Full IMAP & Webmail",
-                  "Calendar & Contacts",
-                  "Connect Gmail & Outlook",
-                  "AI Reply & Compose",
-                  "AI Threat Detection",
-                  "Workspaces",
-                  "Standard, Magazine, Timeline + Terminal modes",
-                  "Natural Language Search",
-                  "Contact Intelligence",
-                  "Smart Inbox & Tasks",
-                  "Vacation Responder",
-                  "14-Day Free Trial",
-                ].map((feature) => (
-                  <div key={feature} className="flex items-center gap-2">
-                    <svg
-                      className="h-5 w-5 flex-shrink-0 text-kuju"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M5 13l4 4L19 7"
-                      />
-                    </svg>
-                    <span className="text-sm text-slate-700">{feature}</span>
-                  </div>
-                ))}
-              </div>
               <Link
-                href="/kuju-email"
-                className="inline-flex items-center gap-2 rounded-lg bg-kuju px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-kuju-dark"
+                href="#about"
+                className="text-sm font-medium text-white underline-offset-4 transition-colors hover:text-kuju hover:underline"
               >
-                Learn about Kuju Email
-                <svg
-                  className="h-4 w-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 5l7 7-7 7"
-                  />
-                </svg>
+                What we believe ↓
               </Link>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Move Your Domain */}
-      <section className="px-6 py-20 md:py-28">
+      {/* About - what Kaimoku believes about software */}
+      <section id="about" className="px-6 py-20 md:py-28">
         <div className="mx-auto max-w-7xl">
-          <div className="mx-auto max-w-3xl text-center">
-            <h2 className="mb-4 text-3xl font-bold text-primary md:text-4xl">
-              Move Your Domain to Kuju
+          <div className="mx-auto max-w-3xl">
+            <h2 className="mb-8 text-center text-3xl font-bold text-primary md:text-4xl">
+              What we believe
             </h2>
-            <p className="mb-12 text-lg text-slate-600">
-              Switch to Kuju Email in three steps. No downtime, no data loss.
-            </p>
-          </div>
-          <div className="grid gap-8 md:grid-cols-3">
-            {[
-              {
-                step: "1",
-                title: "Start Your Trial",
-                desc: "Sign up for a 14-day free trial on demo.kuju.email. Full Professional-level access. All features, no restrictions.",
-              },
-              {
-                step: "2",
-                title: "Choose a Plan & Bring Your Domain",
-                desc: "Pick the tier that fits. Point your MX, SPF, and DKIM records to Kuju. We provide the exact values to copy into your DNS provider.",
-              },
-              {
-                step: "3",
-                title: "You're Live",
-                desc: "Email flows through Kuju immediately. Import your existing mail anytime. Invite your team and start using the full platform.",
-              },
-            ].map((s) => (
-              <div
-                key={s.step}
-                className="rounded-xl border border-slate-200 p-8"
-              >
-                <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-full bg-kuju/10 text-lg font-bold text-kuju-dark">
-                  {s.step}
-                </div>
-                <h3 className="mb-3 text-xl font-bold text-primary">
-                  {s.title}
-                </h3>
-                <p className="leading-relaxed text-slate-600">{s.desc}</p>
-              </div>
-            ))}
-          </div>
-          <div className="mt-10 text-center">
-            <Link
-              href="/kuju-email/pricing"
-              className="inline-block rounded-lg bg-accent px-8 py-3 font-semibold text-white transition-colors hover:bg-accent-dark"
-            >
-              View Plans
-            </Link>
+            <div className="space-y-6 text-lg leading-[1.7] text-slate-700">
+              <p>
+                Kaimoku Technologies builds software for the parts of work
+                software has forgotten: the email thread that matters, the
+                calendar entry that should have been pulled from the message
+                above it, the contact who hasn&rsquo;t been heard from in seven
+                months. We treat the small things as the work.
+              </p>
+              <p>
+                Our name,{" "}
+                <span className="font-semibold text-primary">Kaimoku</span>{" "}
+                <span className="italic text-primary">(開目)</span>, means
+                &ldquo;opening one&rsquo;s eyes.&rdquo; It is both an
+                instruction and a promise: the tools we build should let you see
+                what is actually in front of you, not what a generic interface
+                assumes you would want to see.
+              </p>
+              <p>
+                We start with email because email is where most attention goes.
+                We do not plan to stop there.
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
+      {/* Products */}
+      <ProductsList products={products} />
+
       {/* Values */}
-      <section id="values" className="bg-surface px-6 py-20 md:py-28">
+      <section id="values" className="px-6 py-20 md:py-28">
         <div className="mx-auto max-w-7xl">
           <h2 className="mb-12 text-center text-3xl font-bold text-primary md:text-4xl">
-            Our Values
+            Our values
           </h2>
           <div className="grid gap-8 md:grid-cols-3">
             {[
@@ -286,11 +155,10 @@ export default function Home() {
       <section className="bg-gradient-to-r from-primary to-primary-light px-6 py-20">
         <div className="mx-auto max-w-3xl text-center">
           <h2 className="mb-4 text-3xl font-bold text-white md:text-4xl">
-            Ready to take control of your email?
+            Try Kuju Email
           </h2>
           <p className="mb-8 text-lg text-slate-300">
-            Sign up for Kuju Email and see how a modern email platform should
-            work.
+            Fourteen days, full Professional access, no credit card.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-6">
             <a
