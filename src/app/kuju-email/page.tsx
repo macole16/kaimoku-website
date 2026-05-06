@@ -10,220 +10,48 @@ export const metadata: Metadata = {
     "Kuju Email is a complete email platform with IMAP, webmail, calendar, contacts, AI-powered productivity and security, and full admin control.",
 };
 
-const features = [
+const standoutFeatures = [
   {
-    category: "Email Access",
-    items: [
-      {
-        title: "Full IMAP Server",
-        desc: "RFC 3501 compliant with server-side SORT, THREAD, and full-text SEARCH. Works with Thunderbird, Apple Mail, Outlook, K-9 Mail, and any standard client. Push notifications via IMAP IDLE.",
-      },
-      {
-        title: "Modern Webmail",
-        desc: "Full-featured browser-based client with four selectable UI modes: Standard, Magazine, Timeline, and Terminal. Compose, reply, forward, drag-and-drop attachments, folder management, auto-save drafts, forward-as-attachment (.eml), and browser push notifications.",
-      },
-      {
-        title: "Command Palette & Natural Language Commands",
-        desc: 'Press Cmd+K for 17+ fuzzy-searchable commands. Also supports natural language commands. Type "move this to archive" or "flag for follow-up" and the AI interprets and executes the action.',
-      },
-      {
-        title: "Workspaces",
-        desc: "Organize email by project with tag-based grouping. Messages can belong to multiple workspaces while staying in their original folders. Set auto-assign rules by sender domain, participant, or subject keyword.",
-      },
-      {
-        title: "Vacation Responder",
-        desc: "Smart auto-reply with AI calendar detection. Set a custom subject and message, configure date ranges, and let the system automatically detect vacation events. Deduplicates replies per sender and skips mailing lists, spam, and BCC messages.",
-      },
-    ],
+    title: "AI security stack",
+    desc: "Two-tier spam and phishing detection, Google Safe Browsing URL checks on every link, message intelligence with SPF/DKIM/DMARC and relay-hop tracing, and virus attachments stripped automatically while the message body still arrives.",
   },
   {
-    category: "AI Productivity",
-    items: [
-      {
-        title: "AI Reply",
-        desc: "Generate contextual reply drafts with one click. The AI reads the conversation and drafts a relevant response. Review, edit, and send.",
-      },
-      {
-        title: "AI Rewrite & Compose",
-        desc: "Rewrite messages with tone control: Professional, Friendly, Concise, or Formal. Full version history (v1, v2, v3...) with instant restore. Quoted text is preserved automatically.",
-      },
-      {
-        title: "Natural Language Search",
-        desc: 'Search your inbox the way you think. Type queries like "invoices from last month" or "unread emails with attachments" and the AI interprets them into precise searches with timezone-aware date resolution.',
-      },
-      {
-        title: "AI Task Extraction",
-        desc: 'Automatically extract action items, deadlines, and follow-ups from emails. Tasks appear in a dedicated sidebar view with pending/completed filters and one-click "Add to Calendar" for detected dates. Inline date detection highlights dates right in email bodies.',
-      },
-      {
-        title: "Attachment Knowledge Extraction",
-        desc: "Extract text from and AI-summarize document attachments. Supports PDF, DOCX, XLSX, CSV, plain text, HTML, Markdown, JSON, and XML (up to 10 MB). Extracted text is indexed for search so you can find content inside attachments.",
-      },
-      {
-        title: "Waiting-On-Reply Tracker",
-        desc: 'Automatically detects sent messages expecting a reply. Tracks aging with green/yellow/red indicators, auto-matches incoming replies, and offers a "Nudge" button to generate follow-up drafts.',
-      },
-      {
-        title: "Inbox Summary Dashboard",
-        desc: "At-a-glance inbox health: mail volume, security counts, productivity metrics, AI classification breakdown, top 10 senders with display names, response rate, and recent quarantine list.",
-      },
-    ],
+    title: "Multi-domain, multi-tenant",
+    desc: "Per-domain admin delegation, branded webmail hostnames with automatic TLS, retention policies, partitioned storage, and per-domain spam thresholds. Tenants are fully isolated.",
   },
   {
-    category: "Calendar & Contacts",
-    items: [
-      {
-        title: "Native CalDAV Calendar",
-        desc: 'Full RFC 4791 support with month/week/day views, multi-calendar with color coding, all-day events, and sync with Apple Calendar, Thunderbird, and any CalDAV client. AI-powered one-click "Add to Calendar" from detected dates in emails.',
-      },
-      {
-        title: "Native CardDAV Contacts",
-        desc: "RFC 6352 contact management with multi-value email and phone fields (with type labels), address fields, organization and job title, notes, multiple address books, and full-text search across all fields.",
-      },
-      {
-        title: "Contact Intelligence & People View",
-        desc: "AI-powered communication pattern analysis. See your top contacts ranked by frequency, identify dormant contacts, view per-contact stats (emails sent/received, last contact), and quick-add people to your address book from the People view.",
-      },
-      {
-        title: "Activity Feed",
-        desc: "A unified chronological stream combining messages, calendar events, and tasks in one view. Filter by type to focus on what matters. Available as a dedicated view in the sidebar.",
-      },
-    ],
+    title: "Connect existing accounts",
+    desc: "Bring Gmail, Outlook, or any IMAP mailbox into one inbox via Kuju Bridge. Send and receive without changing addresses. Use Kuju as the front-end for the email you already have.",
   },
   {
-    category: "AI-Powered Security",
-    items: [
-      {
-        title: "Message Intelligence Panel",
-        desc: "Tabbed security analysis with AI Insights and Security views: SPF/DKIM/DMARC verification, sender identity checks, relay hop tracing, URL inspection, ClamAV antivirus scanning, and AI threat assessment with evidence-based reasoning.",
-      },
-      {
-        title: "Google Safe Browsing",
-        desc: "Real-time URL threat checking against Google Safe Browsing API. Every link in an email is verified against malware, social engineering, unwanted software, and harmful app databases with threat level badges and cached results.",
-      },
-      {
-        title: "Two-Tier Spam & Phishing Detection",
-        desc: "Tier 1 heuristics run on every message with zero API dependency. Tier 2 LLM analysis provides deep content evaluation. User reclassifications automatically train the RSPAMD filter for continuous improvement.",
-      },
-      {
-        title: "Smart Inbox (AI Categorization)",
-        desc: "Automatic intent classification across personal, newsletter, transactional, notification, calendar, task, financial, and social categories, powered by a cost-optimized tiered AI model architecture (fast/standard/premium).",
-      },
-      {
-        title: "Tracking Protection",
-        desc: "Detects tracking pixels from services like Mailchimp, ConvertKit, and GitHub. Toggle to strip trackers from displayed messages with sender domain identification so you control what gets tracked.",
-      },
-      {
-        title: "Virus Attachment Stripping",
-        desc: "When ClamAV detects an infected attachment, it's automatically stripped from the message while preserving the email body, so you receive the message safely without the malicious file.",
-      },
-    ],
+    title: "Native CalDAV and CardDAV",
+    desc: 'RFC 4791 calendar and RFC 6352 contacts that sync with Apple Calendar, Thunderbird, and any standard client. AI one-click "add to calendar" from detected dates in messages.',
   },
   {
-    category: "Security & Authentication",
-    items: [
-      {
-        title: "Automatic DKIM Rotation",
-        desc: "Zero-downtime DKIM key rotation with three-phase lifecycle: generate, switch, cleanup. DNS propagation verification, configurable intervals (default 30 days), and support for PowerDNS and Cloudflare with auto-detection.",
-      },
-      {
-        title: "Modern Auth Methods",
-        desc: "TOTP two-factor authentication (Google Authenticator compatible), WebAuthn/FIDO2 passkeys for passwordless login, automatic JWT key rotation on configurable schedule, and CSRF protection with double-submit cookies.",
-      },
-      {
-        title: "Encrypted Secrets Storage",
-        desc: "AES-256-GCM encryption with Argon2id key derivation. Supports internal store, HashiCorp Vault/OpenBao, AWS Secrets Manager, GCP Secret Manager, and Azure Key Vault.",
-      },
-    ],
+    title: "Self-hosted option (coming soon)",
+    desc: "Run Kuju Email on your own infrastructure when compliance or data residency rules ask for it. The same managed platform, deployed where you choose.",
   },
   {
-    category: "Administration & Operations",
-    items: [
-      {
-        title: "Multi-Domain Multi-Tenant",
-        desc: "Full multi-domain support with per-domain configuration, admin delegation, account quotas, domain-partitioned storage, and per-domain API key isolation. Tenants are fully isolated.",
-      },
-      {
-        title: "Per-Domain Branding",
-        desc: "Custom logos, favicons, themes, CSS, and branded webmail URLs (webmail.yourdomain.com). Full dark mode with OS preference detection and user-level theme overrides.",
-      },
-      {
-        title: "Message Retention Policies",
-        desc: "Configure automatic message deletion by age at the domain level with per-folder and per-account overrides. Background cleanup worker handles batch deletion with storage reclamation on a configurable schedule.",
-      },
-      {
-        title: "Delivery Pipeline Controls",
-        desc: "Configurable spam score thresholds per domain: set junk routing and hard drop thresholds separately. Quarantine auto-expiry with configurable retention. Drop statistics API for monitoring.",
-      },
-      {
-        title: "Analytics Dashboard",
-        desc: "Delivery volume charts, status breakdown, spam score distribution, scan verdict breakdown, top senders and source IPs, and plugin token usage tracking with cost estimation. Time range selectors for 24h/7d/30d views.",
-      },
-      {
-        title: "Prometheus Monitoring",
-        desc: "Standard /metrics endpoint with application metrics (domains, accounts, messages, storage), compression stats, and Go runtime metrics. Grafana compatible.",
-      },
-      {
-        title: "Domain Aliases",
-        desc: "Add alias domains that share all users with your primary domain. Mail to user@alias.com delivers to user@primary.com. Free on all plans, with automatic DKIM and DNS configuration.",
-      },
-      {
-        title: "DNS Setup Guide",
-        desc: "Plain-English guide for non-technical users covering DNS options, step-by-step instructions, and a complete glossary of email terms like MX, SPF, DKIM, and DMARC.",
-      },
-    ],
-  },
-  {
-    category: "Extensibility",
-    items: [
-      {
-        title: "Plugin System",
-        desc: "gRPC subprocess architecture for plugins. Install and uninstall dynamically without restart. Built-in plugins for ClamAV antivirus, AI spam scanning, AI inbox categorization, webhook forwarding, and RSPAMD spam training.",
-      },
-      {
-        title: "Full REST API",
-        desc: "JWT-authenticated API for folders, messages, drafts, calendar, contacts, analysis, tasks, feed, workspaces, vacation, retention, and admin operations. Over 80 endpoints with OpenAPI specification.",
-      },
-      {
-        title: "Plus Addressing",
-        desc: "Create unlimited aliases on-the-fly with user+tag@domain. Messages are stored with the tag for easy filtering and organization. Catch-all delivery available per domain.",
-      },
-    ],
+    title: "Modern authentication",
+    desc: "TOTP two-factor, WebAuthn passkeys for passwordless login, automatic JWT key rotation, CSRF double-submit cookies, and encrypted secrets storage backed by Vault, OpenBao, AWS, GCP, or Azure.",
   },
 ];
 
-const standoutFeatures = [
+const onboardingSteps = [
   {
-    title: "AI That Actually Helps You Work",
-    desc: "One-click AI replies, tone-controlled rewrites, task extraction, attachment summarization, natural language search and commands, waiting-on-reply tracking with nudge, contact intelligence, and an inbox summary dashboard. AI is woven into every workflow.",
+    step: "1",
+    title: "Start your trial",
+    desc: "Sign up for a 14-day free trial on demo.kuju.email. Full Professional-level access. All features, no restrictions.",
   },
   {
-    title: "Complete Platform, One Service",
-    desc: "IMAP, webmail, REST API, CalDAV/CardDAV, workspaces, activity feed, vacation responder, AI productivity tools, and delivery handling, all fully integrated. No bolting together separate services.",
+    step: "2",
+    title: "Choose a plan and bring your domain",
+    desc: "Pick the tier that fits. Point your MX, SPF, and DKIM records to Kuju. We provide the exact values to copy into your DNS provider.",
   },
   {
-    title: "AI Security Built In, Not Bolted On",
-    desc: "Two-tier threat detection, Google Safe Browsing URL checks, message intelligence panels, tracking pixel detection, virus attachment stripping, and sender verification are native, not third-party add-ons.",
-  },
-  {
-    title: "Knows Your Documents Too",
-    desc: "Extract and AI-summarize PDF, DOCX, XLSX, CSV, and more, directly from email attachments. Extracted text is indexed so you can search inside attachments, not just email bodies.",
-  },
-  {
-    title: "True Multi-Tenant Isolation",
-    desc: "Per-domain admin delegation, API key isolation, partitioned storage, branded hostnames with automatic TLS, message retention policies, and separate spam thresholds. Tenants are fully isolated.",
-  },
-  {
-    title: "Self-Hosted Option Coming Soon",
-    desc: "Love the platform but need to run it on your own infrastructure? A self-hosted deployment option is on the roadmap for organizations with strict compliance or data residency requirements.",
-  },
-  {
-    title: "14-Day Free Trial",
-    desc: "Sign up and get full Professional-level access for 14 days. No credit card required. Use your own domain during the trial. If you decide it's not for you, walk away with zero commitment.",
-  },
-  {
-    title: "Domain Onboarding Wizard",
-    desc: "Add your domain in minutes. We auto-detect your DNS provider, guide you through setup with plain-English instructions, and verify everything is working. Come back anytime to finish. Your progress is saved.",
+    step: "3",
+    title: "You're live",
+    desc: "Email flows through Kuju immediately. Import your existing mail anytime. Invite your team and start using the full platform.",
   },
 ];
 
@@ -274,25 +102,24 @@ export default function KujuEmailPage() {
         </div>
       </section>
 
-      {/* Four Modes */}
+      {/* Four Modes - full-bleed per-mode sections (the structural spine) */}
       <ModesShowcase modes={modes} />
 
-      {/* What Sets Us Apart */}
-      <section className="px-6 py-20 md:py-28">
+      {/* Six standouts (was 8 + 32 = 40 cards; distilled to 6 per Pass 2 spec) */}
+      <section className="bg-surface px-6 py-20 md:py-28">
         <div className="mx-auto max-w-7xl">
           <h2 className="mb-4 text-center text-3xl font-bold text-primary md:text-4xl">
-            What Sets Kuju Email Apart
+            What sets Kuju Email apart
           </h2>
           <p className="mx-auto mb-12 max-w-2xl text-center text-lg text-slate-600">
-            Kuju Email isn&rsquo;t another email wrapper. It&rsquo;s a ground-up
-            email platform designed for organizations that need productivity,
-            security, and modern features.
+            Six things you get from day one. The full feature catalog lives in
+            the User Guide and API Docs.
           </p>
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {standoutFeatures.map((f) => (
               <div
                 key={f.title}
-                className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
+                className="rounded-xl border border-slate-200 bg-white p-8 shadow-sm transition-shadow hover:shadow-md"
               >
                 <h3 className="mb-3 text-lg font-bold text-primary">
                   {f.title}
@@ -303,40 +130,41 @@ export default function KujuEmailPage() {
               </div>
             ))}
           </div>
+          <p className="mx-auto mt-12 max-w-2xl text-center text-sm text-slate-500">
+            <Link
+              href="/kuju-email/guide"
+              className="underline-offset-4 hover:text-kuju hover:underline"
+            >
+              Read the full user guide →
+            </Link>
+          </p>
         </div>
       </section>
 
-      {/* Full Feature List */}
-      <section className="bg-surface px-6 py-20 md:py-28">
+      {/* Move Your Domain - relocated from homepage in Pass 2 */}
+      <section className="px-6 py-20 md:py-28">
         <div className="mx-auto max-w-7xl">
-          <h2 className="mb-4 text-center text-3xl font-bold text-primary md:text-4xl">
-            Complete Feature Set
-          </h2>
-          <p className="mx-auto mb-16 max-w-2xl text-center text-lg text-slate-600">
-            Everything you need to run a production email platform.
-          </p>
-
-          <div className="space-y-16">
-            {features.map((group) => (
-              <div key={group.category}>
-                <h3 className="mb-6 text-xl font-bold text-primary">
-                  {group.category}
-                </h3>
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                  {group.items.map((item) => (
-                    <div
-                      key={item.title}
-                      className="rounded-lg border border-slate-200 bg-white p-6"
-                    >
-                      <h4 className="mb-2 font-semibold text-slate-900">
-                        {item.title}
-                      </h4>
-                      <p className="text-sm leading-relaxed text-slate-600">
-                        {item.desc}
-                      </p>
-                    </div>
-                  ))}
+          <div className="mx-auto max-w-3xl text-center">
+            <h2 className="mb-4 text-3xl font-bold text-primary md:text-4xl">
+              Move your domain to Kuju
+            </h2>
+            <p className="mb-12 text-lg text-slate-600">
+              Switch to Kuju Email in three steps. No downtime, no data loss.
+            </p>
+          </div>
+          <div className="grid gap-8 md:grid-cols-3">
+            {onboardingSteps.map((s) => (
+              <div
+                key={s.step}
+                className="rounded-xl border border-slate-200 p-8"
+              >
+                <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-full bg-kuju/10 text-lg font-bold text-kuju-dark">
+                  {s.step}
                 </div>
+                <h3 className="mb-3 text-xl font-bold text-primary">
+                  {s.title}
+                </h3>
+                <p className="leading-relaxed text-slate-600">{s.desc}</p>
               </div>
             ))}
           </div>
