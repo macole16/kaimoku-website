@@ -2,12 +2,12 @@
 
 When kuju-mail capabilities change, sync the marketing site. The marketing
 copy on `/kuju-email` and `/` is partially data-driven (the four modes via
-`src/data/modes.yaml`) and partially inline (other feature blurbs). This
+`src/data/kuju-mail-modes.yaml`) and partially inline (other feature blurbs). This
 runbook covers both.
 
 ## Trigger 1 — A mode evolves (Standard, Magazine, Timeline, Terminal)
 
-1. Edit the relevant entry in `src/data/modes.yaml`. Update `body`,
+1. Edit the relevant entry in `src/data/kuju-mail-modes.yaml`. Update `body`,
    `highlights`, or `shippedIn` as needed. Don't add new modes here unless
    one ships in kuju-mail.
 2. `npm run build` to confirm the renderer picks it up.
@@ -52,7 +52,7 @@ After PR-B:
 
 ## Where things live
 
-- `src/data/modes.yaml` — the four UI modes (Standard / Magazine /
+- `src/data/kuju-mail-modes.yaml` — the four UI modes (Standard / Magazine /
   Timeline / Terminal)
 - `src/data/capabilities.yaml` — feature catalog (lands in PR-B)
 - `src/lib/modes.ts` — modes loader
