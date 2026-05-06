@@ -10,7 +10,7 @@ export interface Mode {
   audience: string;
   body: string;
   highlights: string[];
-  shipped_in: string;
+  shippedIn: string;
 }
 
 /**

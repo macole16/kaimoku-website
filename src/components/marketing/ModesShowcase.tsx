@@ -19,9 +19,7 @@ export function ModesShowcase({ modes }: { modes: Mode[] }) {
             >
               <div className="mb-2 flex items-baseline justify-between gap-3">
                 <h3 className="text-xl font-bold text-primary">{mode.name}</h3>
-                <span className="text-xs text-slate-500">
-                  {mode.shipped_in}
-                </span>
+                <span className="text-xs text-slate-500">{mode.shippedIn}</span>
               </div>
               <p className="mb-1 text-sm font-medium text-kuju-dark">
                 {mode.tagline}

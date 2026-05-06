@@ -1,5 +1,5 @@
 # Source of truth for the four kuju-mail UI modes shown on /kuju-email.
-# Schema: { id, name, tagline, audience, body, highlights[], shipped_in }.
+# Schema: { id, name, tagline, audience, body, highlights[], shippedIn }.
 # When a mode evolves, edit this file — the renderer picks it up at next build.
 # See docs/marketing-sync.md for the runbook.
 
@@ -17,7 +17,7 @@
     - AI Reply (drafting assistant)
     - MessageAnalysis — key points, decisions, action items
     - Activity Feed
-  shipped_in: "0.12-beta"
+  shippedIn: "0.12-beta"
 
 - id: magazine
   name: Magazine
@@ -32,7 +32,7 @@
     - Featured + entries layout per sender
     - Full-replacement reading lane
     - Keyboard navigation (j/k, J/K, Esc)
-  shipped_in: "0.13-beta"
+  shippedIn: "0.13-beta"
 
 - id: timeline
   name: Timeline
@@ -47,7 +47,7 @@
     - Briefing-strip layout
     - Per-day grouping with caught-up termination
     - Smart routing across modes
-  shipped_in: "0.13-beta"
+  shippedIn: "0.13-beta"
 
 - id: terminal
   name: Terminal
@@ -62,4 +62,4 @@
     - Vim-style keybindings
     - Command palette
     - Configurable color schemes
-  shipped_in: "0.12-beta"
+  shippedIn: "0.12-beta"
