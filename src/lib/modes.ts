@@ -14,14 +14,19 @@ export interface Mode {
 }
 
 /**
- * Load the 4 kuju-mail UI modes from src/data/modes.yaml.
+ * Load the 4 kuju-mail UI modes from src/data/kuju-mail-modes.yaml.
  *
  * Synchronous file read — safe for Next.js server components where this
  * executes at build / SSR time. Mirrors the loadApiDocs() pattern in
  * src/lib/api-docs.ts.
  */
 export function loadModes(): Mode[] {
-  const filePath = path.join(process.cwd(), "src", "data", "modes.yaml");
+  const filePath = path.join(
+    process.cwd(),
+    "src",
+    "data",
+    "kuju-mail-modes.yaml",
+  );
   const raw = fs.readFileSync(filePath, "utf-8");
   return yaml.parse(raw) as Mode[];
 }

@@ -1,0 +1,17 @@
+# Source of truth for Kaimoku Technologies' product catalog.
+# Schema: { id, name, tagline, description, href, status, shippedIn }.
+# Status values: shipped | beta | coming_soon.
+# When a product evolves, edit this file — the renderer picks it up at next build.
+# Designed to scale: add a new product as a new top-level entry. The
+# ProductsList component lays out cleanly at 1, 2, or 3+ entries.
+
+- id: kuju-mail
+  name: Kuju Email
+  tagline: A complete email platform with four UI modes.
+  description: |
+    Email infrastructure that pays attention. AI-powered productivity and
+    security, calendar and contacts, four selectable UI modes for the way
+    you work. Managed service or self-host (coming soon).
+  href: /kuju-email
+  status: shipped
+  shippedIn: "0.13-beta"
