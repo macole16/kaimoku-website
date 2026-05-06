@@ -60,8 +60,8 @@ export default function Home() {
             </h2>
             <p className="mb-6 text-lg leading-relaxed text-slate-600">
               Kaimoku Technologies, LLC is a software company focused on
-              building tools that make email better. We specialize in email
-              and communications &mdash; delivering the security, features, and
+              building tools that make email better. We specialize in email and
+              communications &mdash; delivering the security, features, and
               control that modern organizations deserve.
             </p>
             <p className="text-lg leading-relaxed text-slate-600">
@@ -102,11 +102,11 @@ export default function Home() {
                 <h3 className="text-2xl font-bold text-primary">Kuju Email</h3>
               </div>
               <p className="mb-6 text-lg leading-relaxed text-slate-600">
-                A complete email platform with IMAP, webmail, calendar, contacts,
-                AI-powered productivity tools, and built-in security &mdash;
-                delivered as a managed service so you can focus on what matters.
-                Connect your existing Gmail, Outlook, or IMAP accounts to manage
-                all your email in one place.
+                A complete email platform with IMAP, webmail, calendar,
+                contacts, AI-powered productivity tools, and built-in security
+                &mdash; delivered as a managed service so you can focus on what
+                matters. Connect your existing Gmail, Outlook, or IMAP accounts
+                to manage all your email in one place.
               </p>
               <div className="mb-8 grid gap-4 sm:grid-cols-3">
                 {[
@@ -116,7 +116,7 @@ export default function Home() {
                   "AI Reply & Compose",
                   "AI Threat Detection",
                   "Workspaces",
-                  "Terminal Mode",
+                  "Standard, Magazine, Timeline + Terminal modes",
                   "Natural Language Search",
                   "Contact Intelligence",
                   "Smart Inbox & Tasks",
@@ -295,7 +295,8 @@ export default function Home() {
             Ready to take control of your email?
           </h2>
           <p className="mb-8 text-lg text-slate-300">
-            Sign up for Kuju Email and see how a modern email platform should work.
+            Sign up for Kuju Email and see how a modern email platform should
+            work.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <a
@@ -306,9 +307,7 @@ export default function Home() {
                   : ""
               }`}
               title={
-                isComingSoon(URLS.KUJU_TRIAL_SIGNUP)
-                  ? "Coming soon"
-                  : undefined
+                isComingSoon(URLS.KUJU_TRIAL_SIGNUP) ? "Coming soon" : undefined
               }
             >
               Start 14-Day Trial
