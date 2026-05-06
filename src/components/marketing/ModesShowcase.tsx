@@ -123,15 +123,17 @@ function TimelineMode({ mode }: { mode: Mode }) {
           <p className="whitespace-pre-line text-base leading-[1.7] text-slate-700">
             {mode.body}
           </p>
-          <div className="text-xs">
+          <div aria-hidden="true" className="text-xs">
             <p className="mb-3 text-[10px] uppercase tracking-[0.2em] text-slate-400">
               Tuesday, before lunch
             </p>
             {inboxPreview.map((row, idx) => (
               <div
                 key={row.time}
-                className={`flex border-t border-slate-200 py-2 ${
-                  idx === 0 ? "border-t-2 border-foreground" : ""
+                className={`flex py-2 ${
+                  idx === 0
+                    ? "border-t-2 border-foreground"
+                    : "border-t border-slate-200"
                 }`}
               >
                 <span className="w-16 text-foreground" style={DISPLAY_FONT}>
