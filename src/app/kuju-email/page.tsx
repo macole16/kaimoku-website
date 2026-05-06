@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { URLS, isComingSoon } from "@/lib/constants";
+import { loadModes } from "@/lib/modes";
+import { ModesShowcase } from "@/components/marketing/ModesShowcase";
 
 export const metadata: Metadata = {
   title: "Kuju Email — Complete Email Platform | Kaimoku Technologies",
@@ -18,15 +20,11 @@ const features = [
       },
       {
         title: "Modern Webmail",
-        desc: "Full-featured browser-based client with compose, reply, forward, drag-and-drop attachments and message movement, folder management, auto-save drafts, forward-as-attachment (.eml), and browser push notifications.",
+        desc: "Full-featured browser-based client with four selectable UI modes — Standard, Magazine, Timeline, and Terminal. Compose, reply, forward, drag-and-drop attachments, folder management, auto-save drafts, forward-as-attachment (.eml), and browser push notifications.",
       },
       {
         title: "Command Palette & Natural Language Commands",
-        desc: "Press Cmd+K for 17+ fuzzy-searchable commands. Also supports natural language commands — type \"move this to archive\" or \"flag for follow-up\" and the AI interprets and executes the action.",
-      },
-      {
-        title: "Thread Views",
-        desc: "Three selectable conversation designs: Command-Centric (summary + actions), Document-Centric (structured AI sections with key points, decisions, and action items), or Timeline + Context Stream.",
+        desc: 'Press Cmd+K for 17+ fuzzy-searchable commands. Also supports natural language commands — type "move this to archive" or "flag for follow-up" and the AI interprets and executes the action.',
       },
       {
         title: "Workspaces",
@@ -51,11 +49,11 @@ const features = [
       },
       {
         title: "Natural Language Search",
-        desc: "Search your inbox the way you think. Type queries like \"invoices from last month\" or \"unread emails with attachments\" and the AI interprets them into precise searches with timezone-aware date resolution.",
+        desc: 'Search your inbox the way you think. Type queries like "invoices from last month" or "unread emails with attachments" and the AI interprets them into precise searches with timezone-aware date resolution.',
       },
       {
         title: "AI Task Extraction",
-        desc: "Automatically extract action items, deadlines, and follow-ups from emails. Tasks appear in a dedicated sidebar view with pending/completed filters and one-click \"Add to Calendar\" for detected dates. Inline date detection highlights dates right in email bodies.",
+        desc: 'Automatically extract action items, deadlines, and follow-ups from emails. Tasks appear in a dedicated sidebar view with pending/completed filters and one-click "Add to Calendar" for detected dates. Inline date detection highlights dates right in email bodies.',
       },
       {
         title: "Attachment Knowledge Extraction",
@@ -63,7 +61,7 @@ const features = [
       },
       {
         title: "Waiting-On-Reply Tracker",
-        desc: "Automatically detects sent messages expecting a reply. Tracks aging with green/yellow/red indicators, auto-matches incoming replies, and offers a \"Nudge\" button to generate follow-up drafts.",
+        desc: 'Automatically detects sent messages expecting a reply. Tracks aging with green/yellow/red indicators, auto-matches incoming replies, and offers a "Nudge" button to generate follow-up drafts.',
       },
       {
         title: "Inbox Summary Dashboard",
@@ -76,7 +74,7 @@ const features = [
     items: [
       {
         title: "Native CalDAV Calendar",
-        desc: "Full RFC 4791 support with month/week/day views, multi-calendar with color coding, all-day events, and sync with Apple Calendar, Thunderbird, and any CalDAV client. AI-powered one-click \"Add to Calendar\" from detected dates in emails.",
+        desc: 'Full RFC 4791 support with month/week/day views, multi-calendar with color coding, all-day events, and sync with Apple Calendar, Thunderbird, and any CalDAV client. AI-powered one-click "Add to Calendar" from detected dates in emails.',
       },
       {
         title: "Native CardDAV Contacts",
@@ -196,10 +194,6 @@ const features = [
 
 const standoutFeatures = [
   {
-    title: "Terminal Mode",
-    desc: "A keyboard-driven interface inspired by Mutt and Pine. Monospace layout, vim-style keybindings, command prompt, and customizable color schemes. For people who think email clients peaked in 1995.",
-  },
-  {
     title: "AI That Actually Helps You Work",
     desc: "One-click AI replies, tone-controlled rewrites, task extraction, attachment summarization, natural language search and commands, waiting-on-reply tracking with nudge, contact intelligence, and an inbox summary dashboard. AI is woven into every workflow.",
   },
@@ -234,6 +228,7 @@ const standoutFeatures = [
 ];
 
 export default function KujuEmailPage() {
+  const modes = loadModes();
   return (
     <>
       {/* Hero */}
@@ -285,6 +280,9 @@ export default function KujuEmailPage() {
         </div>
       </section>
 
+      {/* Four Modes */}
+      <ModesShowcase modes={modes} />
+
       {/* What Sets Us Apart */}
       <section className="px-6 py-20 md:py-28">
         <div className="mx-auto max-w-7xl">
@@ -292,9 +290,9 @@ export default function KujuEmailPage() {
             What Sets Kuju Email Apart
           </h2>
           <p className="mx-auto mb-12 max-w-2xl text-center text-lg text-slate-600">
-            Kuju Email isn&rsquo;t another email wrapper. It&rsquo;s a
-            ground-up email platform designed for organizations that need
-            productivity, security, and modern features.
+            Kuju Email isn&rsquo;t another email wrapper. It&rsquo;s a ground-up
+            email platform designed for organizations that need productivity,
+            security, and modern features.
           </p>
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {standoutFeatures.map((f) => (
@@ -358,7 +356,8 @@ export default function KujuEmailPage() {
             Ready to get started?
           </h2>
           <p className="mb-8 text-lg text-slate-300">
-            Start with a 14-day free trial on demo.kuju.email. Then choose a plan and bring your own domain.
+            Start with a 14-day free trial on demo.kuju.email. Then choose a
+            plan and bring your own domain.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <a
@@ -369,9 +368,7 @@ export default function KujuEmailPage() {
                   : ""
               }`}
               title={
-                isComingSoon(URLS.KUJU_TRIAL_SIGNUP)
-                  ? "Coming soon"
-                  : undefined
+                isComingSoon(URLS.KUJU_TRIAL_SIGNUP) ? "Coming soon" : undefined
               }
             >
               Start 14-Day Trial
