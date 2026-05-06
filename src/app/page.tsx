@@ -18,7 +18,9 @@ export default function Home() {
               className="mb-8 text-5xl font-light leading-[1.05] tracking-tight md:text-7xl"
               style={{ fontFamily: "var(--font-display)" }}
             >
-              <span className="block text-kuju">開目</span>
+              <span lang="ja" className="block text-kuju">
+                開目
+              </span>
               <span className="mt-2 block italic text-white">
                 Opening one&rsquo;s eyes.
               </span>
@@ -64,8 +66,10 @@ export default function Home() {
               <p>
                 Our name,{" "}
                 <span className="font-semibold text-primary">Kaimoku</span>{" "}
-                <span className="italic text-primary">(開目)</span>, means
-                &ldquo;opening one&rsquo;s eyes.&rdquo; It is both an
+                <span lang="ja" className="italic text-primary">
+                  (開目)
+                </span>
+                , means &ldquo;opening one&rsquo;s eyes.&rdquo; It is both an
                 instruction and a promise: the tools we build should let you see
                 what is actually in front of you, not what a generic interface
                 assumes you would want to see.
@@ -158,7 +162,7 @@ export default function Home() {
             Try Kuju Email
           </h2>
           <p className="mb-8 text-lg text-slate-300">
-            Fourteen days, full Professional access, no credit card.
+            14 days, full Professional access, no credit card.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-6">
             <a
