@@ -1,0 +1,65 @@
+# Source of truth for the four kuju-mail UI modes shown on /kuju-email.
+# Schema: { id, name, tagline, audience, body, highlights[], shipped_in }.
+# When a mode evolves, edit this file — the renderer picks it up at next build.
+# See docs/marketing-sync.md for the runbook.
+
+- id: standard
+  name: Standard
+  tagline: The default workhorse.
+  audience: Triage, reply, file. The mode you live in.
+  body: |
+    Smart Inbox lanes group messages by intent — Pinned, Waiting, CC'd,
+    Other. AI Reply drafts contextual responses you can edit and send.
+    MessageAnalysis extracts key points, decisions, and action items.
+    Activity Feed tracks what changed across your inbox.
+  highlights:
+    - Smart Inbox with intent-classified lanes
+    - AI Reply (drafting assistant)
+    - MessageAnalysis — key points, decisions, action items
+    - Activity Feed
+  shipped_in: "0.12-beta"
+
+- id: magazine
+  name: Magazine
+  tagline: An editorial reading room.
+  audience: Newsletters and long-form correspondence.
+  body: |
+    Sender-grouped layout. Each newsletter's most-recent issue gets a
+    featured headline and lede; older issues collapse into a quiet entries
+    list. A full-replacement reading lane opens in place — j/k to move
+    within a sender, J/K across senders, Esc to return.
+  highlights:
+    - Featured + entries layout per sender
+    - Full-replacement reading lane
+    - Keyboard navigation (j/k, J/K, Esc)
+  shipped_in: "0.13-beta"
+
+- id: timeline
+  name: Timeline
+  tagline: Scan and glance.
+  audience: When you want to see what's there, not act on it.
+  body: |
+    Dense single-line rows: time, sender, subject. Per-day grouping ends
+    at a quiet "Caught up" line. Hover a row to lazy-fetch a subject
+    preview. Smart routing sends newsletter taps to Magazine; everything
+    else opens in Standard.
+  highlights:
+    - Briefing-strip layout
+    - Per-day grouping with caught-up termination
+    - Smart routing across modes
+  shipped_in: "0.13-beta"
+
+- id: terminal
+  name: Terminal
+  tagline: For the keyboard.
+  audience: Power users. No pointer required.
+  body: |
+    A keyboard-driven interface inspired by Mutt and Pine. Vim-style
+    keybindings, command palette, structured monospace output, and
+    configurable color schemes. A full inbox without ever touching the
+    mouse.
+  highlights:
+    - Vim-style keybindings
+    - Command palette
+    - Configurable color schemes
+  shipped_in: "0.12-beta"
