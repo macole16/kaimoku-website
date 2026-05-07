@@ -172,20 +172,23 @@ export default function KujuEmailPage() {
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="bg-gradient-to-r from-primary to-primary-light px-6 py-20">
-        <div className="mx-auto max-w-3xl text-center">
-          <h2 className="mb-4 text-3xl font-bold text-white md:text-4xl">
-            Ready to get started?
+      {/* CTA — quiet outro on cream */}
+      <section className="border-t border-slate-200 px-6 py-24 md:py-32">
+        <div className="mx-auto max-w-3xl">
+          <h2
+            className="mb-4 text-3xl font-light leading-tight tracking-tight text-foreground md:text-4xl"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
+            Start where it makes sense.
           </h2>
-          <p className="mb-8 text-lg text-slate-300">
-            Start with a 14-day free trial on demo.kuju.email. Then choose a
-            plan and bring your own domain.
+          <p className="mb-8 text-lg leading-[1.7] text-slate-600">
+            14 days, full Professional access, on demo.kuju.email. Bring your
+            domain when you choose a plan.
           </p>
-          <div className="flex flex-wrap items-center justify-center gap-6">
+          <div className="flex flex-wrap items-center gap-6">
             <a
               href={URLS.KUJU_TRIAL_SIGNUP}
-              className={`rounded-lg bg-kuju px-8 py-3 font-semibold text-white transition-colors hover:bg-kuju-dark ${
+              className={`rounded-lg bg-kuju px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-kuju-dark ${
                 isComingSoon(URLS.KUJU_TRIAL_SIGNUP)
                   ? "pointer-events-none opacity-60"
                   : ""
@@ -198,7 +201,7 @@ export default function KujuEmailPage() {
             </a>
             <Link
               href="/kuju-email/pricing"
-              className="text-sm font-medium text-white underline-offset-4 transition-colors hover:text-kuju hover:underline"
+              className="text-sm font-medium text-foreground underline-offset-4 transition-colors hover:text-kuju hover:underline"
             >
               View pricing →
             </Link>
