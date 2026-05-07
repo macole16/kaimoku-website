@@ -7,7 +7,7 @@ import { ModesShowcase } from "@/components/marketing/ModesShowcase";
 export const metadata: Metadata = {
   title: "Kuju Email: Complete Email Platform | Kaimoku Technologies",
   description:
-    "Kuju Email is a complete email platform with IMAP, webmail, calendar, contacts, AI-powered productivity and security, and full admin control.",
+    "Kuju Email is one inbox in four UI modes (Standard, Magazine, Timeline, Terminal). IMAP and webmail, calendar and contacts, productivity and security woven into the workflow.",
 };
 
 const standoutFeatures = [
@@ -63,17 +63,18 @@ export default function KujuEmailPage() {
       <section className="bg-gradient-to-br from-primary via-primary-light to-primary px-6 py-24 text-white md:py-32">
         <div className="mx-auto max-w-7xl">
           <div className="max-w-3xl">
-            <div className="mb-4 inline-block rounded-full bg-kuju/20 px-4 py-1 text-sm font-medium text-kuju">
-              Email Platform
-            </div>
-            <h1 className="mb-6 text-4xl font-bold leading-tight tracking-tight md:text-6xl">
-              Kuju Email
+            <h1
+              className="mb-8 text-5xl font-light leading-[1.05] tracking-tight md:text-7xl"
+              style={{ fontFamily: "var(--font-display)" }}
+            >
+              <span className="block text-kuju">Kuju Email.</span>
+              <span className="mt-2 block italic text-white">
+                One inbox in four registers.
+              </span>
             </h1>
-            <p className="mb-10 max-w-2xl text-lg leading-relaxed text-slate-300 md:text-xl">
-              A complete, modern email platform with IMAP, webmail, calendar,
-              contacts, AI-powered productivity and security, and full
-              administrative control. Fully managed so you can focus on your
-              business.
+            <p className="mb-10 max-w-2xl text-lg leading-[1.7] text-slate-300 md:text-xl">
+              Pick the one that fits the moment, or move between them as the
+              work changes. Calendar, contacts, search, and security come along.
             </p>
             <div className="flex flex-wrap items-center gap-6">
               <a
