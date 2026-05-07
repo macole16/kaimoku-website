@@ -22,7 +22,7 @@ const publicSans = Public_Sans({
 export const metadata: Metadata = {
   title: "Kaimoku Technologies",
   description:
-    "Kaimoku Technologies builds modern, reliable software. Our flagship product Kuju Email is a complete email platform with AI-powered security, calendar, contacts, and full admin control.",
+    "Kaimoku Technologies builds software that pays attention to the things software has stopped paying attention to. Our first product is Kuju Email: one inbox in four UI modes, with calendar, contacts, security, and full admin control.",
 };
 
 export default function RootLayout({
