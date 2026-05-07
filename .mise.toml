@@ -1,0 +1,12 @@
+[tools]
+# Pinned to Vercel's Node 22 LTS line (2026-05-07). See
+# /Users/macole/github/CLAUDE.md "Tool versions (mise)" for the
+# workspace-wide convention.
+#
+# This repo deviates from the "pin to build host" rule because its real
+# build host is Vercel, not the kuju build agent. Vercel's default for
+# new projects is Node 22 LTS, and kaimoku-website's `@types/node: ^20`
+# is forward-compat with v22. The build host's apt-installed
+# `v22 LTS` (NodeSource `node_22.x` channel) also matches in case the
+# website ever migrates off Vercel.
+node = "22.11.0"
