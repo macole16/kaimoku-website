@@ -71,7 +71,7 @@ function MagazineMode({ mode }: { mode: Mode }) {
         </p>
         <p className="whitespace-pre-line text-xl leading-[1.7] text-slate-700">
           <span
-            className="float-left mr-2 mt-2 text-7xl font-bold leading-none text-kuju"
+            className="float-left mr-3 text-7xl font-semibold leading-[0.85] text-kuju"
             style={DISPLAY_FONT}
           >
             {dropCap}
