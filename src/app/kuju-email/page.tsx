@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 const standoutFeatures = [
   {
-    title: "AI security stack",
+    title: "Defense in depth, by default",
     desc: "Two-tier spam and phishing detection, Google Safe Browsing URL checks on every link, message intelligence with SPF/DKIM/DMARC and relay-hop tracing, and virus attachments stripped automatically while the message body still arrives.",
   },
   {
@@ -25,7 +25,7 @@ const standoutFeatures = [
   },
   {
     title: "Native CalDAV and CardDAV",
-    desc: 'RFC 4791 calendar and RFC 6352 contacts that sync with Apple Calendar, Thunderbird, and any standard client. AI one-click "add to calendar" from detected dates in messages.',
+    desc: 'RFC 4791 calendar and RFC 6352 contacts that sync with Apple Calendar, Thunderbird, and any standard client. One-click "add to calendar" from detected dates in messages.',
   },
   {
     title: "Self-hosted option (coming soon)",

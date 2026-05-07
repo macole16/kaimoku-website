@@ -9,9 +9,10 @@
   name: Kuju Email
   tagline: A complete email platform with four UI modes.
   description: |
-    Email infrastructure that pays attention. AI-powered productivity and
-    security, calendar and contacts, four selectable UI modes for the way
-    you work. Managed service or self-host (coming soon).
+    Email infrastructure that pays attention. Productivity and security
+    woven through the workflow, calendar and contacts that sync with any
+    standard client, four selectable UI modes for the way you work.
+    Managed service or self-host (coming soon).
   href: /kuju-email
   status: shipped
   shippedIn: "0.13-beta"
