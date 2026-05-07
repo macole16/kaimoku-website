@@ -8,14 +8,14 @@
   tagline: The default workhorse.
   audience: Triage, reply, file. The mode you live in.
   body: |
-    Smart Inbox lanes group messages by intent — Pinned, Waiting, CC'd,
-    Other. AI Reply drafts contextual responses you can edit and send.
+    Smart Inbox lanes group messages by intent: Pinned, Waiting, CC'd,
+    Other. Reply drafts read the thread first, then suggest a response you can edit.
     MessageAnalysis extracts key points, decisions, and action items.
     Activity Feed tracks what changed across your inbox.
   highlights:
     - Smart Inbox with intent-classified lanes
-    - AI Reply (drafting assistant)
-    - MessageAnalysis — key points, decisions, action items
+    - Reply drafts (with thread context)
+    - MessageAnalysis (key points, decisions, action items)
     - Activity Feed
   shippedIn: "0.12-beta"
 
@@ -26,7 +26,7 @@
   body: |
     Sender-grouped layout. Each newsletter's most-recent issue gets a
     featured headline and lede; older issues collapse into a quiet entries
-    list. A full-replacement reading lane opens in place — j/k to move
+    list. A full-replacement reading lane opens in place: j/k to move
     within a sender, J/K across senders, Esc to return.
   highlights:
     - Featured + entries layout per sender

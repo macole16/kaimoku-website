@@ -17,6 +17,14 @@ export default function Header() {
         </Link>
 
         <nav className="hidden items-center gap-8 md:flex">
+          {/*
+            Product nav items: extend this list when new Kaimoku products
+            ship. Today's catalog is one product (Kuju Email). Future
+            products follow the same href pattern (/<product-id>) and
+            should appear here in catalog order - see src/data/products.yaml.
+            When the catalog reaches 3+, consider a "Products" dropdown
+            instead of flat links.
+          */}
           <Link
             href="/"
             className="text-sm font-medium text-slate-600 transition-colors hover:text-primary"
