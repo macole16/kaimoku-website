@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { Lockup } from "@/components/Logo";
 
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -9,11 +10,12 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur-sm">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-sm font-bold text-white">
-            K
-          </div>
-          <span className="text-xl font-bold text-primary">Kaimoku</span>
+        <Link
+          href="/"
+          aria-label="Kaimoku — home"
+          className="inline-flex items-center"
+        >
+          <Lockup fontSize={28} />
         </Link>
 
         <nav className="hidden items-center gap-8 md:flex">

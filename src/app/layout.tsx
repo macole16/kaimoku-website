@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Spectral, Public_Sans } from "next/font/google";
+import { Spectral, Public_Sans, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -19,6 +19,16 @@ const publicSans = Public_Sans({
   display: "swap",
 });
 
+// Wordmark face for the brand lockup. Scoped to the Logo component via
+// --font-wordmark; not promoted to a global tier so site typography stays
+// Spectral/Public Sans.
+const cormorantGaramond = Cormorant_Garamond({
+  variable: "--font-wordmark",
+  subsets: ["latin"],
+  weight: ["400"],
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "Kaimoku Technologies",
   description:
@@ -33,7 +43,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${spectral.variable} ${publicSans.variable} antialiased`}
+        className={`${spectral.variable} ${publicSans.variable} ${cormorantGaramond.variable} antialiased`}
       >
         <Header />
         <main>{children}</main>
