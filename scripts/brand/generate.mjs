@@ -1,6 +1,6 @@
 // Generate Kaimoku brand assets from spec.mjs.
 // Writes:
-//   src/app/{icon.svg,apple-icon.png,favicon.ico}     -- Next.js auto-discovery (kaimoku.tech favicons)
+//   src/app/{icon.svg,apple-icon.png,favicon.ico}     -- Next.js auto-discovery (deployed site favicons)
 //   public/brand/v1/{icon.svg,logo-mark.svg,apple-icon.png,favicon.ico,MANIFEST.json}
 //   public/brand/latest/  (duplicate of v1; alias only — bump explicitly on major change)
 
@@ -81,7 +81,7 @@ const ico = await toIco(await Promise.all([
   renderSquarePng({ pxSize: 48, variant: 'full' }),
 ]));
 
-// Next.js auto-discovery for kaimoku.tech itself
+// Next.js auto-discovery for the deployed site (kaimoku-website.vercel.app)
 await writeFile(path.join(APP_DIR, 'icon.svg'), iconSvg);
 await writeFile(path.join(APP_DIR, 'apple-icon.png'), apple);
 await writeFile(path.join(APP_DIR, 'favicon.ico'), ico);

@@ -3,9 +3,11 @@
 Canonical home for Kaimoku brand asset generation. Outputs are committed to:
 
 - `src/app/{icon.svg,apple-icon.png,favicon.ico}` — Next.js auto-discovery
-  for `kaimoku.tech`'s own favicons.
+  for the deployed site's own favicons.
 - `public/brand/v1/` — versioned public URLs at
-  `https://kaimoku.tech/brand/v1/*` for cross-product consumption.
+  `https://kaimoku-website.vercel.app/brand/v1/*` for cross-product consumption.
+
+> Production domain `kaimoku.tech` is the eventual target (per Round 07 brand spec) but may not yet be DNS-mapped to the Vercel deploy. Verify with `dig +short kaimoku.tech` before switching consumer URLs.
 
 ## Source of truth
 
