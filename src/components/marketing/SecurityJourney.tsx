@@ -1,5 +1,7 @@
+// Client-side: scroll-triggered glide animation via IntersectionObserver.
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 
 // The four checks every inbound message passes through.
@@ -61,6 +63,36 @@ const CHECKPOINTS: readonly Checkpoint[] = [
 const glossaryHref = (id: string) => `/kuju-email/glossary#${id}`;
 
 export function SecurityJourney() {
+  const svgWrapRef = useRef<HTMLDivElement | null>(null);
+  const [hasGlided, setHasGlided] = useState(false);
+
+  useEffect(() => {
+    const node = svgWrapRef.current;
+    if (!node) return;
+
+    // Respect reduced motion: skip the glide entirely, leave message at rest.
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    if (prefersReducedMotion) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            setHasGlided(true);
+            observer.disconnect();
+            return;
+          }
+        }
+      },
+      { threshold: 0.4 },
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <section id="security" className="bg-surface px-6 py-20 md:py-28">
       <div className="mx-auto max-w-7xl">
@@ -81,7 +113,7 @@ export function SecurityJourney() {
         </div>
 
         {/* Desktop SVG diagram — hidden < md, visible ≥ md */}
-        <div className="hidden md:block">
+        <div ref={svgWrapRef} className="hidden md:block">
           <svg
             viewBox="0 0 880 220"
             className="mx-auto w-full max-w-5xl"
@@ -142,6 +174,26 @@ export function SecurityJourney() {
               opacity="0.5"
               className="text-primary"
             />
+
+            {/* Animated message glyph that glides from envelope to inbox.
+                Initially positioned at the envelope; receives the
+                .is-gliding class once the section is in view. */}
+            <g
+              className={
+                hasGlided
+                  ? "security-journey-glide is-gliding"
+                  : "security-journey-glide"
+              }
+            >
+              <rect
+                x="0"
+                y="98"
+                width="14"
+                height="10"
+                fill="var(--color-kuju)"
+                opacity="0.85"
+              />
+            </g>
 
             {/* Four checkpoints, programmatically positioned */}
             {CHECKPOINTS.map((cp, i) => {

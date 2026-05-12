@@ -41,3 +41,38 @@ body {
 html {
   scroll-behavior: smooth;
 }
+
+/* SecurityJourney glide animation. The small glyph starts at the envelope
+   (transform translateX(50px) ≈ envelope center) and slides to just before
+   the inbox (transform translateX(810px)) when .is-gliding is added. */
+@keyframes security-journey-glide {
+  from {
+    transform: translateX(50px);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.85;
+  }
+  to {
+    transform: translateX(810px);
+    opacity: 0.85;
+  }
+}
+
+.security-journey-glide {
+  transform: translateX(50px);
+  opacity: 0;
+}
+
+.security-journey-glide.is-gliding {
+  animation: security-journey-glide 1.6s ease-out forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .security-journey-glide {
+    /* Render at rest, in final inbox position, with no animation. */
+    transform: translateX(810px);
+    opacity: 0.85;
+    animation: none !important;
+  }
+}
