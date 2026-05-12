@@ -51,6 +51,14 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
+                <Link
+                  href="/kuju-email/glossary"
+                  className="text-sm text-slate-400 transition-colors hover:text-white"
+                >
+                  Security Glossary
+                </Link>
+              </li>
+              <li>
                 <a
                   href={URLS.KUJU_TRIAL_SIGNUP}
                   className={`text-sm text-slate-400 transition-colors hover:text-white ${
