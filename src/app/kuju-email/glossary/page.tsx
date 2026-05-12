@@ -20,7 +20,6 @@ export default function GlossaryPage() {
         <div className="mx-auto max-w-3xl">
           <p
             className="mb-3 text-xs font-medium uppercase tracking-[0.2em] text-slate-300"
-            style={{ fontFamily: "var(--font-body)" }}
           >
             Kuju Email · reference
           </p>
@@ -29,7 +28,6 @@ export default function GlossaryPage() {
           </h1>
           <p
             className="text-lg leading-[1.7] text-slate-300"
-            style={{ fontFamily: "var(--font-body)" }}
           >
             Plain definitions for the security terms we use across Kuju Email.
             We&apos;d rather teach you the words than hide them.
@@ -60,7 +58,6 @@ export default function GlossaryPage() {
               </h2>
               <p
                 className="mb-4 text-base leading-[1.75] text-slate-700"
-                style={{ fontFamily: "var(--font-body)" }}
               >
                 {entry.definition}
               </p>
