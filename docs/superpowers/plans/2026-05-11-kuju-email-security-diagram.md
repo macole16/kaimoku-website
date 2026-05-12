@@ -482,10 +482,7 @@ export function SecurityJourney() {
       <div className="mx-auto max-w-7xl">
         {/* Section heading */}
         <div className="mx-auto mb-12 max-w-2xl md:mb-16">
-          <p
-            className="mb-3 text-xs font-medium uppercase tracking-[0.2em] text-slate-500"
-            style={{ fontFamily: "var(--font-body)" }}
-          >
+          <p className="mb-3 text-xs font-medium uppercase tracking-[0.2em] text-slate-500">
             How a message reaches you
           </p>
           <h2 className="mb-5 text-3xl leading-[1.2] tracking-tight text-primary md:text-4xl">
@@ -493,10 +490,7 @@ export function SecurityJourney() {
             <br />
             before it reaches you.
           </h2>
-          <p
-            className="text-lg leading-[1.7] text-slate-600"
-            style={{ fontFamily: "var(--font-body)" }}
-          >
+          <p className="text-lg leading-[1.7] text-slate-600">
             We watch each arrival in four passes: the sender, the path, the
             contents, and the handoff. None of them ask you to think.
           </p>
@@ -513,10 +507,7 @@ export function SecurityJourney() {
               className="rounded border border-primary/60 bg-white p-4 shadow-sm"
             >
               <h3 className="mb-1 text-lg italic text-primary">{cp.label}</h3>
-              <p
-                className="mb-3 text-sm text-slate-500"
-                style={{ fontFamily: "var(--font-body)" }}
-              >
+              <p className="mb-3 text-sm text-slate-500">
                 {cp.question}
               </p>
               <ul className="space-y-1 text-xs">
@@ -539,10 +530,7 @@ export function SecurityJourney() {
         </ol>
 
         {/* Glossary link */}
-        <p
-          className="mx-auto mt-12 max-w-2xl text-center text-sm italic text-slate-600"
-          style={{ fontFamily: "var(--font-body)" }}
-        >
+        <p className="mx-auto mt-12 max-w-2xl text-center text-sm italic text-slate-600">
           Unfamiliar terms?{" "}
           <Link
             href="/kuju-email/glossary"
@@ -553,10 +541,7 @@ export function SecurityJourney() {
         </p>
 
         {/* Closer */}
-        <p
-          className="mx-auto mt-10 max-w-2xl border-t border-slate-200 pt-8 text-center text-sm italic leading-[1.7] text-slate-600"
-          style={{ fontFamily: "var(--font-body)" }}
-        >
+        <p className="mx-auto mt-10 max-w-2xl border-t border-slate-200 pt-8 text-center text-sm italic leading-[1.7] text-slate-600">
           Hidden detail isn&apos;t reassuring — visible, quiet detail is.
           We&apos;d rather teach you the words than hide them.
         </p>
