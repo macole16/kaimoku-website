@@ -3,6 +3,7 @@ import Link from "next/link";
 import { URLS, isComingSoon } from "@/lib/constants";
 import { loadModes } from "@/lib/modes";
 import { ModesShowcase } from "@/components/marketing/ModesShowcase";
+import { SecurityJourney } from "@/components/marketing/SecurityJourney";
 
 export const metadata: Metadata = {
   title: "Kuju Email: Complete Email Platform | Kaimoku Technologies",
@@ -128,6 +129,16 @@ export default function KujuEmailPage() {
                 <p className="text-sm leading-relaxed text-slate-600">
                   {f.desc}
                 </p>
+                {f.title === "Defense in depth, by default" && (
+                  <p className="mt-4 text-sm">
+                    <a
+                      href="#security"
+                      className="text-kuju underline-offset-4 hover:text-kuju-dark hover:underline"
+                    >
+                      See how a message reaches you →
+                    </a>
+                  </p>
+                )}
               </div>
             ))}
           </div>
@@ -141,6 +152,9 @@ export default function KujuEmailPage() {
           </p>
         </div>
       </section>
+
+      {/* Security journey — added per spec 2026-05-11 (issue github-8y9) */}
+      <SecurityJourney />
 
       {/* Move Your Domain - relocated from homepage in Pass 2 */}
       <section className="px-6 py-20 md:py-28">
