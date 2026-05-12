@@ -80,6 +80,165 @@ export function SecurityJourney() {
           </p>
         </div>
 
+        {/* Desktop SVG diagram — hidden < md, visible ≥ md */}
+        <div className="hidden md:block">
+          <svg
+            viewBox="0 0 880 220"
+            className="mx-auto w-full max-w-5xl"
+            role="img"
+            aria-labelledby="security-journey-title security-journey-desc"
+          >
+            <title id="security-journey-title">
+              How a message reaches you
+            </title>
+            <desc id="security-journey-desc">
+              A four-step journey diagram. An incoming message moves left to
+              right through four checkpoints — Identity (SPF, DKIM, DMARC,
+              relay-hop trace), Path (reputation checks, spam &amp; phishing
+              patterns), Contents (URL safe-browsing, virus stripping), and
+              Handoff (TLS in flight, encrypted at rest) — before landing in
+              the user&apos;s inbox.
+            </desc>
+
+            {/* Envelope (start) */}
+            <g>
+              <rect
+                x="20"
+                y="90"
+                width="44"
+                height="32"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.2"
+                className="text-primary"
+              />
+              <path
+                d="M 20 90 L 42 108 L 64 90"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.2"
+                className="text-primary"
+              />
+              <text
+                x="42"
+                y="148"
+                textAnchor="middle"
+                fontSize="11"
+                fontStyle="italic"
+                fill="currentColor"
+                className="text-slate-500"
+                style={{ fontFamily: "var(--font-display)" }}
+              >
+                a message
+              </text>
+            </g>
+
+            {/* Journey path */}
+            <path
+              d="M 70 106 L 820 106"
+              stroke="currentColor"
+              strokeWidth="0.6"
+              strokeDasharray="3 3"
+              opacity="0.5"
+              className="text-primary"
+            />
+
+            {/* Four checkpoints, programmatically positioned */}
+            {CHECKPOINTS.map((cp, i) => {
+              const x = 100 + i * 170;
+              const cx = x + 70;
+              return (
+                <g key={cp.label}>
+                  <rect
+                    x={x}
+                    y="76"
+                    width="140"
+                    height="60"
+                    fill="var(--color-surface)"
+                    stroke="currentColor"
+                    strokeWidth="1"
+                    className="text-primary"
+                  />
+                  <text
+                    x={cx}
+                    y="100"
+                    textAnchor="middle"
+                    fontSize="13"
+                    fontStyle="italic"
+                    fill="currentColor"
+                    className="text-primary"
+                    style={{ fontFamily: "var(--font-display)" }}
+                  >
+                    {cp.label}
+                  </text>
+                  <text
+                    x={cx}
+                    y="118"
+                    textAnchor="middle"
+                    fontSize="9"
+                    fill="currentColor"
+                    className="text-slate-500"
+                    style={{ fontFamily: "var(--font-body)" }}
+                  >
+                    {cp.question}
+                  </text>
+                  {cp.techniques.map((t, ti) => (
+                    <a
+                      key={t.glossaryId}
+                      href={glossaryHref(t.glossaryId)}
+                      className="text-kuju hover:text-kuju-dark"
+                    >
+                      <text
+                        x={cx}
+                        y={158 + ti * 12}
+                        textAnchor="middle"
+                        fontSize="8"
+                        fill="currentColor"
+                        textDecoration="underline"
+                        fontFamily="ui-monospace, Menlo, monospace"
+                        style={{ textDecorationStyle: "dotted" }}
+                      >
+                        {t.label}
+                      </text>
+                    </a>
+                  ))}
+                </g>
+              );
+            })}
+
+            {/* Arrow into inbox */}
+            <polygon
+              points="820,106 812,101 812,111"
+              fill="currentColor"
+              className="text-primary"
+            />
+
+            {/* Inbox (end) */}
+            <g>
+              <rect
+                x="820"
+                y="90"
+                width="36"
+                height="32"
+                fill="currentColor"
+                className="text-primary"
+              />
+              <text
+                x="838"
+                y="148"
+                textAnchor="middle"
+                fontSize="11"
+                fontStyle="italic"
+                fill="currentColor"
+                className="text-slate-500"
+                style={{ fontFamily: "var(--font-display)" }}
+              >
+                your inbox
+              </text>
+            </g>
+          </svg>
+        </div>
+
         {/* Mobile / SR semantic stack — desktop SVG (Task 5) will be hidden < md and visible ≥ md; this stack inverts that. */}
         <ol className="mx-auto max-w-md space-y-4 md:hidden">
           <li className="text-center text-sm italic text-slate-500">
