@@ -61,6 +61,23 @@ export default function GlossaryPage() {
               >
                 {entry.definition}
               </p>
+            {entry.examples && entry.examples.length > 0 && (
+              <div className="mb-4 space-y-3">
+                {entry.examples.map((ex) => (
+                  <div
+                    key={ex.label}
+                    className="border-l-2 border-slate-200 pl-4"
+                  >
+                    <p className="mb-1 text-xs italic text-slate-500">
+                      {ex.label}:
+                    </p>
+                    <pre className="overflow-x-auto whitespace-pre-wrap text-xs leading-relaxed text-slate-700">
+                      <code className="font-mono">{ex.body}</code>
+                    </pre>
+                  </div>
+                ))}
+              </div>
+            )}
               <p className="text-base italic leading-[1.7] text-slate-600">
                 <span className="not-italic font-medium text-primary">
                   Why it matters:
