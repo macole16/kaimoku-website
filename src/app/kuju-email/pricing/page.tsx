@@ -1,7 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useState } from "react";
 import { URLS, isComingSoon } from "@/lib/constants";
 
 const tiers = [
@@ -188,10 +187,6 @@ const faqs = [
 
 function PricingPageInner() {
   const [annual, setAnnual] = useState(false);
-  const searchParams = useSearchParams();
-  // accountRef is the trial user's account ID, passed from the upgrade banner.
-  // Will be included in Polar checkout metadata for conversion tracking.
-  const accountRef = searchParams.get("ref") || "";
 
   return (
     <>
@@ -440,9 +435,5 @@ function PricingPageInner() {
 }
 
 export default function PricingPage() {
-  return (
-    <Suspense>
-      <PricingPageInner />
-    </Suspense>
-  );
+  return <PricingPageInner />;
 }
