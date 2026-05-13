@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { URLS, isComingSoon } from "@/lib/constants";
+import { Lockup } from "@/components/Logo";
 
 export default function Footer() {
   return (
@@ -7,13 +8,8 @@ export default function Footer() {
       <div className="mx-auto max-w-7xl px-6 py-12">
         <div className="grid gap-8 md:grid-cols-4">
           <div>
-            <div className="mb-4 flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 text-sm font-bold text-white">
-                K
-              </div>
-              <span className="text-lg font-bold text-white">
-                Kaimoku Technologies
-              </span>
+            <div className="mb-4">
+              <Lockup fontSize={28} ink="#FFFFFF" />
             </div>
             <p className="text-sm leading-relaxed text-slate-400">
               Building modern, reliable software for organizations that value
