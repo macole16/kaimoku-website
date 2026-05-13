@@ -4,7 +4,7 @@ import { Lockup } from "@/components/Logo";
 
 export default function Footer() {
   return (
-    <footer className="border-t border-slate-200 bg-primary text-slate-300">
+    <footer className="border-t border-slate-200 bg-surface-deep text-slate-300">
       <div className="mx-auto max-w-7xl px-6 py-12">
         <div className="grid gap-8 md:grid-cols-4">
           <div>

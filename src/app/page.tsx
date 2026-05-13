@@ -8,17 +8,17 @@ export default function Home() {
   return (
     <>
       {/* Hero - Kaimoku brand statement (Curator's Reading Room voice) */}
-      <section className="bg-gradient-to-br from-primary via-primary-light to-primary px-6 py-24 text-white md:py-32">
+      <section className="bg-gradient-to-br from-surface-deep via-surface-mist to-surface-deep px-6 py-24 text-white md:py-32">
         <div className="mx-auto max-w-7xl">
           <div className="max-w-3xl">
-            <p className="mb-6 text-sm font-medium uppercase tracking-[0.2em] text-kuju">
+            <p className="mb-6 text-sm font-medium uppercase tracking-[0.2em] text-kuju-light">
               Kaimoku Technologies
             </p>
             <h1
               className="mb-8 text-5xl font-light leading-[1.05] tracking-tight md:text-7xl"
               style={{ fontFamily: "var(--font-display)" }}
             >
-              <span lang="ja" className="block text-kuju">
+              <span lang="ja" className="block text-kuju-light">
                 開目
               </span>
               <span className="mt-2 block italic text-white">
@@ -39,7 +39,7 @@ export default function Home() {
               </Link>
               <Link
                 href="#about"
-                className="text-sm font-medium text-white underline-offset-4 transition-colors hover:text-kuju hover:underline"
+                className="text-sm font-medium text-white underline-offset-4 transition-colors hover:text-kuju-light hover:underline"
               >
                 What we believe ↓
               </Link>

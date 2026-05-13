@@ -6,13 +6,31 @@
   --font-sans: var(--font-body);
   --font-display: var(--font-display);
 
-  /* Brand — Sumi Green (墨), kuju-mail's accent (Restrained color strategy: one accent ≤10%) */
-  --color-primary: oklch(0.36 0.06 158);
-  --color-primary-light: oklch(0.46 0.07 158);
-  --color-accent: oklch(0.46 0.07 158);
+  /* Brand — Sumi Green (墨), kuju-mail's documented accent.
+     Two roles, two token groups:
+       • primary / kuju  → canonical Sumi Green (#1F6B4F) for headline text
+         and CTA buttons. Stays dark so text-primary on paper and white text
+         on bg-kuju both clear WCAG AA.
+       • surface-*       → softer sage for large fills (hero gradients,
+         Footer). Sage covers >10% of those surfaces, so it has to be
+         lighter — drenching the page in canonical Sumi reads like an
+         ink wash. */
+  --color-primary: oklch(0.42 0.075 158);
+  --color-primary-light: oklch(0.52 0.085 158);
+  --color-accent: oklch(0.52 0.085 158);
   --color-accent-dark: oklch(0.36 0.06 158);
-  --color-kuju: oklch(0.46 0.07 158);
+  --color-kuju: oklch(0.42 0.075 158);
   --color-kuju-dark: oklch(0.36 0.06 158);
+  /* Hero/footer accent — luminous mint, only for use on sage surface fills.
+     Mirrors kuju-mail's sumi-green-night (#34D399) for cross-surface
+     consistency, dialed to lower chroma for marketing calm. */
+  --color-kuju-light: oklch(0.88 0.08 162);
+
+  /* Sage surface tones — for hero gradients, Footer, and any place green
+     covers more than the One Mark Rule allows. */
+  --color-surface-mist: oklch(0.55 0.05 158);
+  --color-surface-cloud: oklch(0.65 0.045 158);
+  --color-surface-deep: oklch(0.42 0.075 158);
 
   /* Stone — warm tinted neutrals (chroma 0.005, hue 158 toward Sumi Green) */
   --color-surface: oklch(0.97 0.005 158);

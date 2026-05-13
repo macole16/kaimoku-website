@@ -61,14 +61,14 @@ export default function KujuEmailPage() {
   return (
     <>
       {/* Hero */}
-      <section className="bg-gradient-to-br from-primary via-primary-light to-primary px-6 py-24 text-white md:py-32">
+      <section className="bg-gradient-to-br from-surface-deep via-surface-mist to-surface-deep px-6 py-24 text-white md:py-32">
         <div className="mx-auto max-w-7xl">
           <div className="max-w-3xl">
             <h1
               className="mb-8 text-5xl font-light leading-[1.05] tracking-tight md:text-7xl"
               style={{ fontFamily: "var(--font-display)" }}
             >
-              <span className="block text-kuju">Kuju Email.</span>
+              <span className="block text-kuju-light">Kuju Email.</span>
               <span className="mt-2 block italic text-white">
                 One inbox in four registers.
               </span>
@@ -95,7 +95,7 @@ export default function KujuEmailPage() {
               </a>
               <Link
                 href="/kuju-email/pricing"
-                className="text-sm font-medium text-white underline-offset-4 transition-colors hover:text-kuju hover:underline"
+                className="text-sm font-medium text-white underline-offset-4 transition-colors hover:text-kuju-light hover:underline"
               >
                 View pricing →
               </Link>

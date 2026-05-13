@@ -16,7 +16,7 @@ export default function GlossaryPage() {
   return (
     <>
       {/* Hero — quiet intro band, matches /kuju-email/guide visual rhythm */}
-      <section className="bg-primary px-6 py-20 text-white md:py-24">
+      <section className="bg-gradient-to-br from-surface-deep via-surface-mist to-surface-deep px-6 py-20 text-white md:py-24">
         <div className="mx-auto max-w-3xl">
           <p
             className="mb-3 text-xs font-medium uppercase tracking-[0.2em] text-slate-300"
@@ -24,7 +24,7 @@ export default function GlossaryPage() {
             Kuju Email · reference
           </p>
           <h1 className="mb-6 text-4xl font-light leading-tight tracking-tight md:text-5xl">
-            <em className="text-kuju">Email security glossary.</em>
+            <em className="text-kuju-light">Email security glossary.</em>
           </h1>
           <p
             className="text-lg leading-[1.7] text-slate-300"

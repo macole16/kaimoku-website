@@ -161,10 +161,10 @@ function TerminalMode({ mode }: { mode: Mode }) {
   return (
     <section className="border-t border-slate-200 bg-stone-900 px-6 py-24 md:py-32">
       <div className="mx-auto max-w-3xl">
-        <p className="mb-6 font-mono text-xs uppercase tracking-[0.2em] text-kuju">
+        <p className="mb-6 font-mono text-xs uppercase tracking-[0.2em] text-kuju-light">
           terminal mode · for the keyboard
         </p>
-        <h2 className="mb-6 font-mono text-4xl font-normal leading-tight tracking-tight text-kuju md:text-5xl">
+        <h2 className="mb-6 font-mono text-4xl font-normal leading-tight tracking-tight text-kuju-light md:text-5xl">
           {mode.tagline}
         </h2>
         <p className="mb-8 font-mono text-sm italic leading-relaxed text-stone-400">
@@ -185,7 +185,7 @@ function TerminalMode({ mode }: { mode: Mode }) {
         <ul className="mt-8 space-y-2 font-mono text-sm text-stone-400">
           {mode.highlights.map((h) => (
             <li key={h} className="flex gap-3">
-              <span className="text-kuju">›</span>
+              <span className="text-kuju-light">›</span>
               <span className="leading-relaxed">{h}</span>
             </li>
           ))}
