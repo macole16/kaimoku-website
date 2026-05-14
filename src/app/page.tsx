@@ -80,14 +80,18 @@ export default function Home() {
               </p>
               <p>
                 Our name,{" "}
-                <span className="font-semibold text-primary">Kaimoku</span>{" "}
-                <span lang="ja" className="italic text-primary">
-                  (開目)
+                <span className="font-semibold text-primary">Kaimoku</span>, is
+                made from the character to open,{" "}
+                <span lang="ja" className="text-primary">
+                  開く
                 </span>
-                , means &ldquo;opening one&rsquo;s eyes.&rdquo; It is both an
-                instruction and a promise: the tools we build should let you see
-                what is actually in front of you, not what a generic interface
-                assumes you would want to see.
+                , and the character for eye,{" "}
+                <span lang="ja" className="text-primary">
+                  目
+                </span>
+                . It reflects both an instruction and a promise: the tools we
+                build should let you see what is actually in front of you, not
+                what a generic interface assumes you would want to see.
               </p>
               <p>
                 We start with email because email is where most attention goes.
