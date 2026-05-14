@@ -8,7 +8,7 @@ import { SecurityJourney } from "@/components/marketing/SecurityJourney";
 export const metadata: Metadata = {
   title: "Kuju Email: Complete Email Platform | Kaimoku Technologies",
   description:
-    "Kuju Email is one inbox in four UI modes (Standard, Magazine, Timeline, Terminal). IMAP and webmail, calendar and contacts, productivity and security woven into the workflow.",
+    "Kuju Email is one inbox, many UI modes. IMAP and webmail, calendar and contacts, productivity and security woven into the workflow.",
 };
 
 const standoutFeatures = [
@@ -70,7 +70,7 @@ export default function KujuEmailPage() {
             >
               <span className="block text-kuju-light">Kuju Email.</span>
               <span className="mt-2 block italic text-white">
-                One inbox in four registers.
+                One inbox. Many modes.
               </span>
             </h1>
             <p className="mb-10 max-w-2xl text-lg leading-[1.7] text-slate-300 md:text-xl">
@@ -104,7 +104,7 @@ export default function KujuEmailPage() {
         </div>
       </section>
 
-      {/* Four Modes - full-bleed per-mode sections (the structural spine) */}
+      {/* Modes - full-bleed per-mode sections (the structural spine) */}
       <ModesShowcase modes={modes} />
 
       {/* Six standouts (was 8 + 32 = 40 cards; distilled to 6 per Pass 2 spec) */}

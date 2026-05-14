@@ -1,7 +1,7 @@
 # Marketing sync
 
 When kuju-mail capabilities change, sync the marketing site. The marketing
-copy on `/kuju-email` and `/` is partially data-driven (the four modes via
+copy on `/kuju-email` and `/` is partially data-driven (the modes via
 `src/data/kuju-mail-modes.yaml`) and partially inline (other feature blurbs). This
 runbook covers both.
 
@@ -52,8 +52,8 @@ After PR-B:
 
 ## Where things live
 
-- `src/data/kuju-mail-modes.yaml` — the four UI modes (Standard / Magazine /
-  Timeline / Terminal)
+- `src/data/kuju-mail-modes.yaml` — the kuju-mail UI modes (Standard /
+  Magazine / Timeline / Terminal today)
 - `src/data/capabilities.yaml` — feature catalog (lands in PR-B)
 - `src/lib/modes.ts` — modes loader
 - `src/components/marketing/ModesShowcase.tsx` — modes renderer

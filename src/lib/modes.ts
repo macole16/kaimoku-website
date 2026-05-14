@@ -14,7 +14,7 @@ export interface Mode {
 }
 
 /**
- * Load the 4 kuju-mail UI modes from src/data/kuju-mail-modes.yaml.
+ * Load the kuju-mail UI modes from src/data/kuju-mail-modes.yaml.
  *
  * Synchronous file read — safe for Next.js server components where this
  * executes at build / SSR time. Mirrors the loadApiDocs() pattern in
