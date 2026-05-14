@@ -17,7 +17,7 @@ import type { Product } from "@/lib/products";
  */
 export function ProductsList({ products }: { products: Product[] }) {
   return (
-    <section className="bg-surface px-6 py-20 md:py-28">
+    <section className="bg-paper px-6 py-20 md:py-28">
       <div className="mx-auto max-w-3xl divide-y divide-slate-300">
         {products.map((p) => (
           <article key={p.id} className="space-y-4 py-8 first:pt-0 last:pb-0">

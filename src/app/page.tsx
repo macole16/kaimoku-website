@@ -42,7 +42,7 @@ export default function Home() {
                 href="/kuju-email"
                 className="text-sm font-medium text-foreground underline-offset-4 transition-colors hover:text-kuju hover:underline"
               >
-                See Kuju Email
+                See Kuju Email &rarr;
               </Link>
               <Link
                 href="#about"

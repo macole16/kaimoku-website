@@ -14,5 +14,5 @@
     standard client, UI modes for the way you work. Managed service or
     self-host (coming soon).
   href: /kuju-email
-  status: shipped
-  shippedIn: "0.13-beta"
+  status: beta
+  shippedIn: "0.13"
