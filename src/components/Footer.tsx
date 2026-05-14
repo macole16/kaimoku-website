@@ -11,7 +11,7 @@ export default function Footer() {
             <div className="mb-4">
               <Lockup fontSize={28} ink="#FFFFFF" />
             </div>
-            <p className="text-sm leading-relaxed text-slate-400">
+            <p className="text-sm leading-relaxed text-slate-300">
               Building modern, reliable software for organizations that value
               security, transparency, and a better email experience.
             </p>
@@ -25,7 +25,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/kuju-email"
-                  className="text-sm text-slate-400 transition-colors hover:text-white"
+                  className="text-sm text-slate-300 transition-colors hover:text-white"
                 >
                   Kuju Email
                 </Link>
@@ -33,7 +33,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/kuju-email/pricing"
-                  className="text-sm text-slate-400 transition-colors hover:text-white"
+                  className="text-sm text-slate-300 transition-colors hover:text-white"
                 >
                   Pricing
                 </Link>
@@ -41,7 +41,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/kuju-email/guide"
-                  className="text-sm text-slate-400 transition-colors hover:text-white"
+                  className="text-sm text-slate-300 transition-colors hover:text-white"
                 >
                   User Guide
                 </Link>
@@ -49,7 +49,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/kuju-email/glossary"
-                  className="text-sm text-slate-400 transition-colors hover:text-white"
+                  className="text-sm text-slate-300 transition-colors hover:text-white"
                 >
                   Security Glossary
                 </Link>
@@ -57,7 +57,7 @@ export default function Footer() {
               <li>
                 <a
                   href={URLS.KUJU_TRIAL_SIGNUP}
-                  className={`text-sm text-slate-400 transition-colors hover:text-white ${
+                  className={`text-sm text-slate-300 transition-colors hover:text-white ${
                     isComingSoon(URLS.KUJU_TRIAL_SIGNUP)
                       ? "pointer-events-none opacity-60"
                       : ""
@@ -82,7 +82,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/#about"
-                  className="text-sm text-slate-400 transition-colors hover:text-white"
+                  className="text-sm text-slate-300 transition-colors hover:text-white"
                 >
                   About
                 </Link>
@@ -90,7 +90,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/#values"
-                  className="text-sm text-slate-400 transition-colors hover:text-white"
+                  className="text-sm text-slate-300 transition-colors hover:text-white"
                 >
                   Values
                 </Link>
@@ -106,7 +106,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/legal/terms"
-                  className="text-sm text-slate-400 transition-colors hover:text-white"
+                  className="text-sm text-slate-300 transition-colors hover:text-white"
                 >
                   Terms of Service
                 </Link>
@@ -114,7 +114,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/legal/privacy"
-                  className="text-sm text-slate-400 transition-colors hover:text-white"
+                  className="text-sm text-slate-300 transition-colors hover:text-white"
                 >
                   Privacy Policy
                 </Link>
@@ -122,7 +122,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/legal/acceptable-use"
-                  className="text-sm text-slate-400 transition-colors hover:text-white"
+                  className="text-sm text-slate-300 transition-colors hover:text-white"
                 >
                   Acceptable Use Policy
                 </Link>
@@ -131,7 +131,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-12 flex flex-col items-center gap-4 border-t border-slate-700 pt-8 text-sm text-slate-400 sm:flex-row sm:justify-between">
+        <div className="mt-12 flex flex-col items-center gap-4 border-t border-slate-700 pt-8 text-sm text-slate-300 sm:flex-row sm:justify-between">
           <p>
             &copy; {new Date().getFullYear()} Kaimoku Technologies, LLC. All
             rights reserved.
