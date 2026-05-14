@@ -43,7 +43,7 @@ export function ProductsList({ products }: { products: Product[] }) {
             <p>
               <Link
                 href={p.href}
-                className="text-sm font-medium text-primary underline-offset-4 transition-colors hover:text-kuju hover:underline"
+                className="text-sm font-medium text-primary underline-offset-4 transition-colors hover:text-primary-light hover:underline"
               >
                 Learn about {p.name}
               </Link>

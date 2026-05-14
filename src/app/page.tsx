@@ -40,13 +40,13 @@ export default function Home() {
             <div className="flex flex-wrap items-center gap-6">
               <Link
                 href="/kuju-email"
-                className="text-sm font-medium text-foreground underline-offset-4 transition-colors hover:text-kuju hover:underline"
+                className="text-sm font-medium text-foreground underline-offset-4 transition-colors hover:text-primary hover:underline"
               >
                 See Kuju Email &rarr;
               </Link>
               <Link
                 href="#about"
-                className="text-sm font-medium text-foreground underline-offset-4 transition-colors hover:text-kuju hover:underline"
+                className="text-sm font-medium text-foreground underline-offset-4 transition-colors hover:text-primary hover:underline"
               >
                 What we believe
               </Link>

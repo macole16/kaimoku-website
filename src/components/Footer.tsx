@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { URLS, isComingSoon } from "@/lib/constants";
 import { Lockup } from "@/components/Logo";
 
 export default function Footer() {
@@ -53,22 +52,6 @@ export default function Footer() {
                 >
                   Security Glossary
                 </Link>
-              </li>
-              <li>
-                <a
-                  href={URLS.KUJU_TRIAL_SIGNUP}
-                  aria-disabled={isComingSoon(URLS.KUJU_TRIAL_SIGNUP)}
-                  className={`text-sm text-slate-300 transition-colors hover:text-white ${
-                    isComingSoon(URLS.KUJU_TRIAL_SIGNUP)
-                      ? "pointer-events-none opacity-60"
-                      : ""
-                  }`}
-                >
-                  Try Kuju Email
-                  {isComingSoon(URLS.KUJU_TRIAL_SIGNUP) && (
-                    <span className="ml-1 text-xs">(coming soon)</span>
-                  )}
-                </a>
               </li>
             </ul>
           </div>
