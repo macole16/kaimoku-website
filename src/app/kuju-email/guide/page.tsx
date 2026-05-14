@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "User Guide — Kuju Email | Kaimoku Technologies",
+  title: "User Guide · Kuju Email",
   description:
     "Comprehensive user guide for Kuju Email. Learn how to set up, configure, and use every feature.",
 };

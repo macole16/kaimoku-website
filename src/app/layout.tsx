@@ -30,7 +30,10 @@ const cormorantGaramond = Cormorant_Garamond({
 });
 
 export const metadata: Metadata = {
-  title: "Kaimoku Technologies",
+  title: {
+    default: "Kaimoku Technologies",
+    template: "%s · Kaimoku",
+  },
   description:
     "Kaimoku Technologies builds software that pays attention to the things software has stopped paying attention to. Our first product is Kuju Email: secure, transparent business email.",
 };

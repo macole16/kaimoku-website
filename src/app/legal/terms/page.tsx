@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Terms of Service — Kaimoku Technologies",
+  title: "Terms of Service",
   description:
     "Terms of Service for Kuju Email and Kaimoku Technologies services.",
 };

@@ -27,7 +27,7 @@ export default function Home() {
               <span lang="ja" className="block text-primary">
                 開目
               </span>
-              <span className="mt-2 block italic text-foreground">
+              <span className="mt-2 block font-normal italic text-foreground">
                 Opening one&rsquo;s eyes.
               </span>
             </h1>

@@ -6,7 +6,7 @@ import { ModesShowcase } from "@/components/marketing/ModesShowcase";
 import { SecurityJourney } from "@/components/marketing/SecurityJourney";
 
 export const metadata: Metadata = {
-  title: "Kuju Email: Complete Email Platform | Kaimoku Technologies",
+  title: "Kuju Email",
   description:
     "Kuju Email is one inbox, many UI modes. IMAP and webmail, calendar and contacts, productivity and security woven into the workflow.",
 };

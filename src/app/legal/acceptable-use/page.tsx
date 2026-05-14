@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Acceptable Use Policy — Kaimoku Technologies",
+  title: "Acceptable Use Policy",
   description:
     "Acceptable Use Policy for Kuju Email and Kaimoku Technologies services.",
 };

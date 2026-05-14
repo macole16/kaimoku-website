@@ -7,7 +7,7 @@ import { EndpointGroup } from "@/components/docs/EndpointGroup";
 import { CodeBlock } from "@/components/docs/CodeBlock";
 
 export const metadata: Metadata = {
-  title: "API Documentation — Kuju Email | Kaimoku Technologies",
+  title: "API Documentation · Kuju Email",
   description:
     "Complete REST API reference for Kuju Email. Authentication, endpoints, request/response formats, and examples.",
 };
@@ -51,9 +51,9 @@ const sectionIntro: Record<string, React.ReactNode> = {
 const subsectionProse: Record<string, React.ReactNode> = {
   dav: (
     <p className="mb-4 leading-relaxed text-slate-700">
-      Standard CalDAV and CardDAV endpoints are available for syncing
-      calendars and contacts with third-party clients. Authentication
-      uses HTTP Basic Auth with your email and password.
+      Standard CalDAV and CardDAV endpoints are available for syncing calendars
+      and contacts with third-party clients. Authentication uses HTTP Basic Auth
+      with your email and password.
     </p>
   ),
   "admin-kumomta": (
@@ -241,8 +241,8 @@ function ProseSubsection({ id }: { id: string }) {
             <code className="rounded bg-slate-100 px-1.5 py-0.5 text-sm">
               user+tag@domain
             </code>{" "}
-            are automatically placed in a folder named after the tag (created
-            if needed). Spam routing takes priority.
+            are automatically placed in a folder named after the tag (created if
+            needed). Spam routing takes priority.
           </p>
         </>
       );
@@ -275,9 +275,7 @@ function ProseSubsection({ id }: { id: string }) {
                 </code>
               ))}
             </div>
-            <h4 className="mb-2 font-semibold text-slate-900">
-              Size limits:
-            </h4>
+            <h4 className="mb-2 font-semibold text-slate-900">Size limits:</h4>
             <ul className="space-y-1 text-sm text-slate-700">
               <li>Images: 512 KB</li>
               <li>CSS / JSON: 64 KB</li>
@@ -314,7 +312,9 @@ function ProseSubsection({ id }: { id: string }) {
           <div className="mb-6 rounded-lg border border-slate-200 bg-slate-50 p-6">
             <ul className="space-y-3 text-sm text-slate-700">
               <li>
-                <strong className="text-slate-900">&quot;password&quot; (default):</strong>{" "}
+                <strong className="text-slate-900">
+                  &quot;password&quot; (default):
+                </strong>{" "}
                 Admin sets the password. Account is immediately active.
               </li>
               <li>
@@ -327,7 +327,8 @@ function ProseSubsection({ id }: { id: string }) {
                 <code className="rounded bg-slate-200 px-1 py-0.5 text-xs">
                   pending_invite
                 </code>
-                . An invite email is sent; the recipient sets their own password.
+                . An invite email is sent; the recipient sets their own
+                password.
               </li>
             </ul>
           </div>
@@ -355,18 +356,14 @@ function ProseSectionBody({ id }: { id: string }) {
   if (id !== "examples") return null;
   return (
     <>
-      <p className="mb-2 text-sm font-semibold text-slate-700">
-        Login:
-      </p>
+      <p className="mb-2 text-sm font-semibold text-slate-700">Login:</p>
       <CodeBlock>
         {`curl -s -X POST http://localhost:8080/api/auth/login \\
   -H "Content-Type: application/json" \\
   -d '{"email":"admin@example.com","password":"secret"}'`}
       </CodeBlock>
 
-      <p className="mb-2 text-sm font-semibold text-slate-700">
-        List folders:
-      </p>
+      <p className="mb-2 text-sm font-semibold text-slate-700">List folders:</p>
       <CodeBlock>
         {`curl -s http://localhost:8080/api/folders \\
   -H "Authorization: Bearer $TOKEN"`}
@@ -493,8 +490,8 @@ export default function DocsPage() {
             Kuju Email API Reference
           </h1>
           <p className="mb-12 text-lg text-slate-600">
-            Complete REST API documentation for integrating with Kuju Email.
-            All endpoints return JSON and accept JSON request bodies.
+            Complete REST API documentation for integrating with Kuju Email. All
+            endpoints return JSON and accept JSON request bodies.
           </p>
 
           {sections.map((section) => (
@@ -522,8 +519,7 @@ export default function DocsPage() {
                     {hasProse && <ProseSubsection id={sub.id} />}
 
                     {/* Endpoint listing */}
-                    {hasEndpoints &&
-                      renderEndpoints(sub.id, sub.endpoints)}
+                    {hasEndpoints && renderEndpoints(sub.id, sub.endpoints)}
                   </div>
                 );
               })}
