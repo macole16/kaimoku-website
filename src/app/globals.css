@@ -8,13 +8,16 @@
 
   /* Brand — Sumi Green (墨), kuju-mail's documented accent.
      Two roles, two token groups:
-       • primary / kuju  → canonical Sumi Green (#1F6B4F) for headline text
-         and CTA buttons. Stays dark so text-primary on paper and white text
-         on bg-kuju both clear WCAG AA.
+       • primary / kuju  → Sumi Green for headline text and CTA buttons.
+         Tailwind compiles oklch(0.42 0.075 158) to sRGB #23593d, which
+         is slightly darker / less saturated than kuju-mail's literal
+         brand reference #1F6B4F. The visual was approved post-critique
+         as the right balance for marketing-tier paper backgrounds; if
+         strict cross-product brand parity is needed later, retune the
+         OKLCH source until it resolves to #1F6B4F (try L=0.45 C=0.085).
        • surface-*       → softer sage for large fills (hero gradients,
          Footer). Sage covers >10% of those surfaces, so it has to be
-         lighter — drenching the page in canonical Sumi reads like an
-         ink wash. */
+         lighter than the primary token. */
   --color-primary: oklch(0.42 0.075 158);
   --color-primary-light: oklch(0.52 0.085 158);
   --color-accent: oklch(0.52 0.085 158);
