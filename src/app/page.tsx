@@ -1,34 +1,45 @@
 import Link from "next/link";
 import { URLS, isComingSoon } from "@/lib/constants";
 import { loadProducts } from "@/lib/products";
+import { Mark } from "@/components/Logo";
 import { ProductsList } from "@/components/marketing/ProductsList";
 
 export default function Home() {
   const products = loadProducts();
   return (
     <>
-      {/* Hero - Kaimoku brand statement (Curator's Reading Room voice) */}
-      <section className="bg-gradient-to-br from-surface-deep via-surface-mist to-surface-deep px-6 py-24 text-white md:py-32">
-        <div className="mx-auto max-w-7xl">
+      {/* Hero — paper + watermark Mark (Curator's Reading Room).
+          Kaimoku-tier brand identity leads; Sumi Green is reserved for
+          the brand mark and CTA. Mark watermark bleeds off the right
+          edge as ornament; type does the work. */}
+      <section className="relative overflow-hidden bg-paper px-6 py-24 text-foreground md:py-32">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute right-[-7%] top-1/2 hidden -translate-y-1/2 opacity-[0.10] md:block"
+        >
+          <Mark size={560} />
+        </div>
+        <div className="relative mx-auto max-w-7xl">
           <div className="max-w-3xl">
-            <p className="mb-6 text-sm font-medium uppercase tracking-[0.2em] text-kuju-light">
+            <p className="mb-6 text-sm font-medium uppercase tracking-[0.2em] text-primary">
               Kaimoku Technologies
             </p>
             <h1
               className="mb-8 text-5xl font-light leading-[1.05] tracking-tight md:text-7xl"
               style={{ fontFamily: "var(--font-display)" }}
             >
-              <span lang="ja" className="block text-kuju-light">
+              <span lang="ja" className="block text-primary">
                 開目
               </span>
-              <span className="mt-2 block italic text-white">
+              <span className="mt-2 block italic text-foreground">
                 Opening one&rsquo;s eyes.
               </span>
             </h1>
-            <p className="mb-10 max-w-2xl text-lg leading-[1.7] text-slate-300 md:text-xl">
+            <p className="mb-10 max-w-2xl text-lg leading-[1.7] text-slate-700 md:text-xl">
               Kaimoku Technologies builds software that pays attention to the
-              things software has stopped paying attention to. We start with
-              email.
+              things software has stopped paying attention to. We start with{" "}
+              <span className="font-semibold text-primary">Kuju Email</span>:
+              secure, transparent business email.
             </p>
             <div className="flex flex-wrap items-center gap-6">
               <Link
@@ -39,7 +50,7 @@ export default function Home() {
               </Link>
               <Link
                 href="#about"
-                className="text-sm font-medium text-white underline-offset-4 transition-colors hover:text-kuju-light hover:underline"
+                className="text-sm font-medium text-foreground underline-offset-4 transition-colors hover:text-kuju hover:underline"
               >
                 What we believe ↓
               </Link>

@@ -36,6 +36,10 @@
 
   /* Stone — warm tinted neutrals (chroma 0.005, hue 158 toward Sumi Green) */
   --color-surface: oklch(0.97 0.005 158);
+
+  /* Kaimoku brand paper — warm cream from Round 07 spec (#F4F1EA).
+     Used on the homepage hero where Kaimoku-tier brand identity leads. */
+  --color-paper: oklch(0.95 0.012 80);
 }
 
 :root {
