@@ -68,6 +68,13 @@ body {
   font-family: var(--font-sans), system-ui, sans-serif;
 }
 
+html {
+  /* Clear the sticky header (~64–72px) when in-page anchors jump.
+     Without this, smooth-scroll lands the target H2 flush with the
+     header bar. 5rem ≈ 80px gives a tight breathing buffer. */
+  scroll-padding-top: 5rem;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   html {
     scroll-behavior: smooth;
