@@ -40,9 +40,9 @@ export default function Home() {
             <div className="flex flex-wrap items-center gap-6">
               <Link
                 href="/kuju-email"
-                className="rounded-lg bg-kuju px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-kuju-dark"
+                className="text-sm font-medium text-foreground underline-offset-4 transition-colors hover:text-kuju hover:underline"
               >
-                Explore Kuju Email
+                See Kuju Email
               </Link>
               <Link
                 href="#about"
