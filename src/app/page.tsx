@@ -51,7 +51,7 @@ export default function Home() {
       {/* About - what Kaimoku believes about software */}
       <section id="about" className="px-6 py-20 md:py-28">
         <div className="mx-auto max-w-7xl">
-          <div className="mx-auto max-w-3xl">
+          <div className="mx-auto max-w-prose">
             <h2 className="mb-8 text-center text-3xl font-bold text-primary md:text-4xl">
               What we believe
             </h2>
@@ -86,47 +86,41 @@ export default function Home() {
       {/* Products */}
       <ProductsList products={products} />
 
-      {/* Values */}
+      {/* Values — asymmetric left-rail label, narrow prose body */}
       <section id="values" className="px-6 py-20 md:py-28">
-        <div className="mx-auto max-w-7xl">
-          <h2 className="mb-12 text-center text-3xl font-bold text-primary md:text-4xl">
+        <div className="mx-auto max-w-5xl">
+          <h2 className="mb-16 text-center text-3xl font-bold text-primary md:text-4xl">
             Our values
           </h2>
-          <div className="mx-auto max-w-3xl space-y-10 text-lg leading-[1.7] text-slate-700">
-            <p>
-              <span
-                className="mr-3 text-2xl italic text-primary"
-                style={{ fontFamily: "var(--font-display)" }}
+          <dl className="space-y-12 md:space-y-16">
+            {[
+              {
+                label: "Ownership.",
+                body: "Your email should work for you. We give organizations full control over their email experience: powerful admin tools, transparent operations, no surprises.",
+              },
+              {
+                label: "Transparency.",
+                body: "Clear pricing, honest documentation, and visible operations. Kuju Email surfaces what is happening with your mail in plain sight: delivery analytics, spam statistics, audit logs.",
+              },
+              {
+                label: "Security.",
+                body: "Email is a high-value target. Two-tier threat detection, automatic DKIM rotation, encrypted secrets storage, and multi-layer spam filtering, as standard.",
+              },
+            ].map(({ label, body }) => (
+              <div
+                key={label}
+                className="grid gap-3 md:grid-cols-[12rem_minmax(0,1fr)] md:gap-12"
               >
-                Ownership.
-              </span>
-              Your email should work for you. We give organizations full control
-              over their email experience: powerful admin tools, transparent
-              operations, no surprises.
-            </p>
-            <p>
-              <span
-                className="mr-3 text-2xl italic text-primary"
-                style={{ fontFamily: "var(--font-display)" }}
-              >
-                Transparency.
-              </span>
-              Clear pricing, honest documentation, and visible operations. Kuju
-              Email surfaces what is happening with your mail in plain sight:
-              delivery analytics, spam statistics, audit logs.
-            </p>
-            <p>
-              <span
-                className="mr-3 text-2xl italic text-primary"
-                style={{ fontFamily: "var(--font-display)" }}
-              >
-                Security.
-              </span>
-              Email is a high-value target. Two-tier threat detection, automatic
-              DKIM rotation, encrypted secrets storage, and multi-layer spam
-              filtering, as standard.
-            </p>
-          </div>
+                <dt
+                  className="text-2xl italic text-primary md:text-right"
+                  style={{ fontFamily: "var(--font-display)" }}
+                >
+                  {label}
+                </dt>
+                <dd className="text-lg leading-[1.7] text-slate-700">{body}</dd>
+              </div>
+            ))}
+          </dl>
         </div>
       </section>
 
