@@ -7,24 +7,36 @@
   --font-display: var(--font-display);
 
   /* Brand — Sumi Green (墨), kuju-mail's documented accent.
-     Two roles, two token groups:
-       • primary / kuju  → Sumi Green for headline text and CTA buttons.
-         Tailwind compiles oklch(0.42 0.075 158) to sRGB #23593d, which
-         is slightly darker / less saturated than kuju-mail's literal
-         brand reference #1F6B4F. The visual was approved post-critique
-         as the right balance for marketing-tier paper backgrounds; if
-         strict cross-product brand parity is needed later, retune the
-         OKLCH source until it resolves to #1F6B4F (try L=0.45 C=0.085).
-       • surface-*       → softer sage for large fills (hero gradients,
-         Footer). Sage covers >10% of those surfaces, so it has to be
-         lighter than the primary token. */
+
+     Two parallel namespaces, intentionally:
+       • primary / primary-light  → parent-brand (Kaimoku) voice.
+         Used for headlines, body marks, the Mark watermark, soft halos.
+       • kuju / kuju-dark / kuju-light → product-brand (Kuju Email).
+         Used for product CTAs, in-product accent links, mint on dark.
+
+     Today primary and kuju resolve to the same OKLCH because Kuju is
+     the only product. The dual naming is preserved so a second product
+     can land its own accent without a global rename.
+
+     Tailwind compiles oklch(0.42 0.075 158) to sRGB #23593d, slightly
+     darker / less saturated than kuju-mail's literal brand reference
+     #1F6B4F. The visual was approved post-critique as the right balance
+     for marketing-tier paper backgrounds; retune the OKLCH source if
+     strict cross-product parity is needed later (try L=0.45 C=0.085).
+
+     The surface-* tokens below are a separate role: softer sage for
+     large fills (hero gradients, Footer) where green covers >10% of
+     the surface and the One Mark Rule's primary tone would be too loud.
+
+     Removed (2026-05-14, /impeccable critique cleanup): --color-accent
+     and --color-accent-dark were duplicates of primary-light and
+     kuju-dark respectively. Migration: text-accent → text-primary-light,
+     bg-accent → bg-primary-light, hover:bg-accent-dark → hover:bg-kuju-dark. */
   --color-primary: oklch(0.42 0.075 158);
   --color-primary-light: oklch(0.52 0.085 158);
-  --color-accent: oklch(0.52 0.085 158);
-  --color-accent-dark: oklch(0.36 0.06 158);
   --color-kuju: oklch(0.42 0.075 158);
   --color-kuju-dark: oklch(0.36 0.06 158);
-  /* Hero/footer accent — luminous mint, only for use on sage surface fills.
+  /* Luminous mint — only for use on sage surface fills (dark backgrounds).
      Mirrors kuju-mail's sumi-green-night (#34D399) for cross-surface
      consistency, dialed to lower chroma for marketing calm. */
   --color-kuju-light: oklch(0.88 0.08 162);

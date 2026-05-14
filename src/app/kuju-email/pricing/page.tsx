@@ -48,10 +48,7 @@ const tiers = [
     highlight: true,
     ctaHref: URLS.CHECKOUT_SMALL_BUSINESS,
     ctaLabel: "Start 14-Day Trial",
-    extras: [
-      "+$1/GB/mo for extra storage",
-      "Premium AI: +$5/account/mo",
-    ],
+    extras: ["+$1/GB/mo for extra storage", "Premium AI: +$5/account/mo"],
     features: [
       "Everything in Individual / Family, plus:",
       "AI attachment summarization",
@@ -210,9 +207,9 @@ function PricingPageInner() {
               Try everything free for 14 days
             </p>
             <p className="mb-4 text-slate-600">
-              Full Professional-level access on demo.kuju.email. All features, no
-              restrictions, no credit card required. Bring your own domain when
-              you&rsquo;re ready to go live.
+              Full Professional-level access on demo.kuju.email. All features,
+              no restrictions, no credit card required. Bring your own domain
+              when you&rsquo;re ready to go live.
             </p>
             <a
               href={URLS.KUJU_TRIAL_SIGNUP}
@@ -275,8 +272,8 @@ function PricingPageInner() {
               } else if (tier.pricingModel === "platform-fee") {
                 priceDisplay = annual ? tier.annualPrice : tier.price;
                 const fee = annual
-                  ? (tier as typeof tiers[2]).annualPlatformFee
-                  : (tier as typeof tiers[2]).platformFee;
+                  ? (tier as (typeof tiers)[2]).annualPlatformFee
+                  : (tier as (typeof tiers)[2]).platformFee;
                 priceSubtext = `+ ${fee}/mo platform fee`;
               } else {
                 priceDisplay = annual ? tier.annualPrice : tier.price;
@@ -287,12 +284,12 @@ function PricingPageInner() {
                   key={tier.name}
                   className={`flex flex-col rounded-2xl border p-8 ${
                     tier.highlight
-                      ? "border-accent bg-white shadow-lg shadow-accent/10 ring-2 ring-accent"
+                      ? "border-primary-light bg-white shadow-lg shadow-primary-light/10 ring-2 ring-primary-light"
                       : "border-slate-200 bg-white"
                   }`}
                 >
                   {tier.highlight && (
-                    <div className="mb-4 inline-block self-start rounded-full bg-accent/10 px-3 py-1 text-xs font-semibold text-accent">
+                    <div className="mb-4 inline-block self-start rounded-full bg-primary-light/10 px-3 py-1 text-xs font-semibold text-primary-light">
                       Most Popular
                     </div>
                   )}
@@ -388,7 +385,7 @@ function PricingPageInner() {
                     <span
                       className={`mt-8 block cursor-not-allowed rounded-lg py-3 text-center text-sm font-semibold opacity-60 ${
                         tier.highlight
-                          ? "bg-accent text-white"
+                          ? "bg-primary-light text-white"
                           : "bg-slate-100 text-slate-800"
                       }`}
                       title="Coming soon"
@@ -400,7 +397,7 @@ function PricingPageInner() {
                       href={tier.ctaHref}
                       className={`mt-8 block rounded-lg py-3 text-center text-sm font-semibold transition-colors ${
                         tier.highlight
-                          ? "bg-accent text-white hover:bg-accent-dark"
+                          ? "bg-primary-light text-white hover:bg-kuju-dark"
                           : "bg-slate-100 text-slate-800 hover:bg-slate-200"
                       }`}
                     >

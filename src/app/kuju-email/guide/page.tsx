@@ -313,21 +313,21 @@ export default function GuidePage() {
             <p className="mb-4 leading-relaxed text-slate-700">
               Drag and drop files directly into the compose window, or click the
               attachment button to browse. Attached files are shown with their
-              name and size. When reading messages, click attachments to download
-              them.
+              name and size. When reading messages, click attachments to
+              download them.
             </p>
 
             <SubHeading id="folders">Folders &amp; Drag-and-Drop</SubHeading>
             <p className="mb-4 leading-relaxed text-slate-700">
               Standard folders (Inbox, Sent, Drafts, Junk, Trash) are created
               automatically. You can create custom folders for organization.
-              Drag and drop messages directly from the message list onto
-              folders in the sidebar — the target folder highlights on hover
-              and folder counts update automatically. The Trash folder includes
-              an Empty Trash button for one-click permanent deletion with a
-              confirmation dialog. Folders display unread counts (red badge)
-              and total counts (gray), and support IMAP SPECIAL-USE attributes
-              for compatibility with all clients.
+              Drag and drop messages directly from the message list onto folders
+              in the sidebar — the target folder highlights on hover and folder
+              counts update automatically. The Trash folder includes an Empty
+              Trash button for one-click permanent deletion with a confirmation
+              dialog. Folders display unread counts (red badge) and total counts
+              (gray), and support IMAP SPECIAL-USE attributes for compatibility
+              with all clients.
             </p>
 
             <SubHeading id="search">Search &amp; Natural Language</SubHeading>
@@ -337,9 +337,8 @@ export default function GuidePage() {
               fast results.
             </p>
             <p className="mb-4 leading-relaxed text-slate-700">
-              Kuju Email also supports{" "}
-              <strong>natural language search</strong> — type queries the way you
-              think and the AI interprets them:
+              Kuju Email also supports <strong>natural language search</strong>{" "}
+              — type queries the way you think and the AI interprets them:
             </p>
             <div className="mb-4 overflow-x-auto rounded-lg bg-slate-900 p-4">
               <code className="text-sm text-slate-200">
@@ -422,9 +421,9 @@ export default function GuidePage() {
                   workspace, or use the Command Palette to assign
                 </li>
                 <li>
-                  <strong>Auto-assign rules:</strong> Set rules to
-                  automatically assign messages by sender domain, participant
-                  email, or subject keyword
+                  <strong>Auto-assign rules:</strong> Set rules to automatically
+                  assign messages by sender domain, participant email, or
+                  subject keyword
                 </li>
                 <li>
                   <strong>View:</strong> Click a workspace to see all messages
@@ -440,11 +439,11 @@ export default function GuidePage() {
             <SubHeading id="notifications">Browser Notifications</SubHeading>
             <p className="mb-4 leading-relaxed text-slate-700">
               Enable desktop notifications to be alerted when new messages
-              arrive. Click the bell icon in the toolbar to toggle
-              notifications on or off. Your browser will ask for permission the
-              first time. Click a notification to jump directly to the webmail
-              tab. Notifications work in Chrome, Firefox, Safari, and Edge
-              while the webmail tab is open.
+              arrive. Click the bell icon in the toolbar to toggle notifications
+              on or off. Your browser will ask for permission the first time.
+              Click a notification to jump directly to the webmail tab.
+              Notifications work in Chrome, Firefox, Safari, and Edge while the
+              webmail tab is open.
             </p>
 
             <SubHeading id="intelligence">Message Intelligence</SubHeading>
@@ -478,8 +477,8 @@ export default function GuidePage() {
                   checking against Google&rsquo;s malware, social engineering,
                   unwanted software, and harmful app databases. Results are
                   cached for 24 hours with a refresh button for re-checking.
-                  Threat level badges show safe (green) or specific threat
-                  types (red)
+                  Threat level badges show safe (green) or specific threat types
+                  (red)
                 </li>
                 <li>
                   <strong>Antivirus:</strong> On-demand ClamAV scanning of
@@ -496,12 +495,12 @@ export default function GuidePage() {
 
             <SubHeading id="tracking">Tracking Protection</SubHeading>
             <p className="mb-4 leading-relaxed text-slate-700">
-              Kuju Email detects tracking pixels embedded in emails from services
-              like Mailchimp, ConvertKit, GitHub, and others. When trackers are
-              detected, you&rsquo;ll see a notification showing which service is
-              tracking. Toggle the protection on to strip tracking pixels from
-              displayed messages — you control whether senders can track your
-              opens.
+              Kuju Email detects tracking pixels embedded in emails from
+              services like Mailchimp, ConvertKit, GitHub, and others. When
+              trackers are detected, you&rsquo;ll see a notification showing
+              which service is tracking. Toggle the protection on to strip
+              tracking pixels from displayed messages — you control whether
+              senders can track your opens.
             </p>
           </section>
 
@@ -576,8 +575,8 @@ export default function GuidePage() {
               Waiting-On-Reply Tracker
             </SubHeading>
             <p className="mb-4 leading-relaxed text-slate-700">
-              Kuju Email automatically detects sent messages that are waiting for
-              a reply using heuristic classification. When a reply comes in,
+              Kuju Email automatically detects sent messages that are waiting
+              for a reply using heuristic classification. When a reply comes in,
               it&rsquo;s auto-matched and the tracker updates.
             </p>
             <div className="mb-6 rounded-lg border border-slate-200 bg-slate-50 p-6">
@@ -605,8 +604,8 @@ export default function GuidePage() {
               Contact Intelligence
             </SubHeading>
             <p className="mb-4 leading-relaxed text-slate-700">
-              The <strong>People</strong> view provides AI-powered
-              communication pattern analysis:
+              The <strong>People</strong> view provides AI-powered communication
+              pattern analysis:
             </p>
             <ul className="mb-4 list-inside list-disc space-y-2 text-slate-700">
               <li>
@@ -788,8 +787,11 @@ export default function GuidePage() {
             <div className="mb-6 rounded-lg border border-slate-200 bg-slate-50 p-6">
               <ol className="list-inside list-decimal space-y-2 text-sm text-slate-700">
                 <li>
-                  Go to <strong>Account Settings &rarr; Account Actions &rarr;
-                  Add Mail Account</strong>
+                  Go to{" "}
+                  <strong>
+                    Account Settings &rarr; Account Actions &rarr; Add Mail
+                    Account
+                  </strong>
                 </li>
                 <li>Enter your name, email address, and password</li>
                 <li>
@@ -803,8 +805,8 @@ export default function GuidePage() {
                   SMTP: hostname, port <strong>587</strong>, STARTTLS
                 </li>
                 <li>
-                  For CalDAV/CardDAV support, use the TbSync or CardBook
-                  add-ons with the well-known URLs
+                  For CalDAV/CardDAV support, use the TbSync or CardBook add-ons
+                  with the well-known URLs
                 </li>
               </ol>
             </div>
@@ -820,12 +822,10 @@ export default function GuidePage() {
                   <strong>IMAP</strong>
                 </li>
                 <li>
-                  Incoming server: your hostname, port <strong>993</strong>,
-                  SSL
+                  Incoming server: your hostname, port <strong>993</strong>, SSL
                 </li>
                 <li>
-                  Outgoing server: your hostname, port <strong>587</strong>,
-                  TLS
+                  Outgoing server: your hostname, port <strong>587</strong>, TLS
                 </li>
                 <li>Enter your full email address as the username</li>
               </ol>
@@ -934,8 +934,8 @@ export default function GuidePage() {
             <SubHeading id="vacation">Vacation Responder</SubHeading>
             <p className="mb-4 leading-relaxed text-slate-700">
               Set up an automatic out-of-office reply from the{" "}
-              <strong>Vacation</strong> entry in the sidebar. Configure a
-              custom subject and message, and optionally set a date range.
+              <strong>Vacation</strong> entry in the sidebar. Configure a custom
+              subject and message, and optionally set a date range.
             </p>
             <div className="mb-6 rounded-lg border border-slate-200 bg-slate-50 p-6">
               <h4 className="mb-3 font-semibold text-slate-900">
@@ -943,9 +943,9 @@ export default function GuidePage() {
               </h4>
               <ul className="space-y-2 text-sm text-slate-700">
                 <li>
-                  <strong>AI calendar detection:</strong> Automatically
-                  detects vacation-related all-day events on your calendar
-                  and suggests enabling the responder
+                  <strong>AI calendar detection:</strong> Automatically detects
+                  vacation-related all-day events on your calendar and suggests
+                  enabling the responder
                 </li>
                 <li>
                   <strong>Per-sender deduplication:</strong> Each sender
@@ -1014,9 +1014,15 @@ export default function GuidePage() {
               Customize the look and feel of webmail for your domain:
             </p>
             <ul className="mb-4 list-inside list-disc space-y-2 text-slate-700">
-              <li>Upload a custom logo (SVG, PNG, JPEG) and favicon (SVG, ICO)</li>
-              <li>Set a custom app name that replaces &ldquo;Kuju Email&rdquo;</li>
-              <li>Upload custom CSS with CSS variable overrides for full control</li>
+              <li>
+                Upload a custom logo (SVG, PNG, JPEG) and favicon (SVG, ICO)
+              </li>
+              <li>
+                Set a custom app name that replaces &ldquo;Kuju Email&rdquo;
+              </li>
+              <li>
+                Upload custom CSS with CSS variable overrides for full control
+              </li>
               <li>Upload files individually or as ZIP/tar.gz archives</li>
             </ul>
 
@@ -1050,9 +1056,8 @@ export default function GuidePage() {
                   record is published
                 </li>
                 <li>
-                  <strong>Switch:</strong> After DNS propagation is verified
-                  (1h default verification window), signing switches to the new
-                  key
+                  <strong>Switch:</strong> After DNS propagation is verified (1h
+                  default verification window), signing switches to the new key
                 </li>
                 <li>
                   <strong>Cleanup:</strong> The old key is removed after a
@@ -1079,9 +1084,9 @@ export default function GuidePage() {
             <p className="mb-4 leading-relaxed text-slate-700">
               Configure automatic message deletion based on age to manage
               storage and comply with data retention requirements. Set policies
-              at the domain level with optional per-folder overrides (e.g.,
-              keep Inbox messages for 365 days but Trash for 30 days).
-              Individual accounts can also have their own overrides.
+              at the domain level with optional per-folder overrides (e.g., keep
+              Inbox messages for 365 days but Trash for 30 days). Individual
+              accounts can also have their own overrides.
             </p>
             <p className="mb-4 leading-relaxed text-slate-700">
               A background cleanup worker runs on a configurable schedule
@@ -1097,12 +1102,12 @@ export default function GuidePage() {
             </p>
             <ul className="mb-4 list-inside list-disc space-y-2 text-slate-700">
               <li>
-                <strong>Junk threshold</strong> (default 5.0): Messages
-                scoring above this are routed to the Junk folder
+                <strong>Junk threshold</strong> (default 5.0): Messages scoring
+                above this are routed to the Junk folder
               </li>
               <li>
-                <strong>Drop threshold</strong> (default 15.0): Messages
-                scoring above this are hard-rejected and never delivered
+                <strong>Drop threshold</strong> (default 15.0): Messages scoring
+                above this are hard-rejected and never delivered
               </li>
               <li>
                 <strong>Quarantine expiry</strong> (default 30 days):
@@ -1155,8 +1160,8 @@ export default function GuidePage() {
                 detection breakdown with token usage and cost tracking
               </li>
               <li>
-                <strong>Per-domain delivery statistics</strong> for
-                multi-tenant environments
+                <strong>Per-domain delivery statistics</strong> for multi-tenant
+                environments
               </li>
             </ul>
           </section>
@@ -1165,7 +1170,7 @@ export default function GuidePage() {
           <div className="border-t border-slate-200 pt-8 text-center">
             <Link
               href="/kuju-email"
-              className="text-sm font-medium text-accent hover:text-accent-dark"
+              className="text-sm font-medium text-primary-light hover:text-kuju-dark"
             >
               &larr; Back to Kuju Email overview
             </Link>
