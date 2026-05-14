@@ -20,12 +20,11 @@ export default function Header() {
 
         <nav className="hidden items-center gap-8 md:flex">
           {/*
-            Product nav items: extend this list when new Kaimoku products
-            ship. Today's catalog is one product (Kuju Email). Future
-            products follow the same href pattern (/<product-id>) and
-            should appear here in catalog order - see src/data/products.yaml.
-            When the catalog reaches 3+, consider a "Products" dropdown
-            instead of flat links.
+            Parent-tier nav: one slot per Kaimoku product. Today's catalog
+            is one product (Kuju Email); product-internal nav (pricing,
+            guide, docs) lives on /kuju-email/* not at this tier — see
+            src/data/products.yaml. When catalog reaches 3+ products,
+            consider a "Products" dropdown.
           */}
           <Link
             href="/"
@@ -38,24 +37,6 @@ export default function Header() {
             className="text-sm font-medium text-slate-600 transition-colors hover:text-primary"
           >
             Kuju Email
-          </Link>
-          <Link
-            href="/kuju-email/pricing"
-            className="text-sm font-medium text-slate-600 transition-colors hover:text-primary"
-          >
-            Pricing
-          </Link>
-          <Link
-            href="/kuju-email/guide"
-            className="text-sm font-medium text-slate-600 transition-colors hover:text-primary"
-          >
-            User Guide
-          </Link>
-          <Link
-            href="/kuju-email/docs"
-            className="text-sm font-medium text-slate-600 transition-colors hover:text-primary"
-          >
-            API Docs
           </Link>
         </nav>
 
@@ -105,27 +86,6 @@ export default function Header() {
               onClick={() => setMobileOpen(false)}
             >
               Kuju Email
-            </Link>
-            <Link
-              href="/kuju-email/pricing"
-              className="text-sm font-medium text-slate-600"
-              onClick={() => setMobileOpen(false)}
-            >
-              Pricing
-            </Link>
-            <Link
-              href="/kuju-email/guide"
-              className="text-sm font-medium text-slate-600"
-              onClick={() => setMobileOpen(false)}
-            >
-              User Guide
-            </Link>
-            <Link
-              href="/kuju-email/docs"
-              className="text-sm font-medium text-slate-600"
-              onClick={() => setMobileOpen(false)}
-            >
-              API Docs
             </Link>
           </nav>
         </div>
