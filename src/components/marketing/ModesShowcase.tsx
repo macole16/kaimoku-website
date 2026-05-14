@@ -218,13 +218,9 @@ export function ModesShowcase({ modes }: { modes: Mode[] }) {
     <>
       <section className="px-6 py-20 md:py-28">
         <div className="mx-auto max-w-3xl text-center">
-          <h2 className="mb-4 text-4xl font-light leading-tight tracking-tight text-foreground md:text-5xl">
+          <h2 className="text-4xl font-light leading-tight tracking-tight text-foreground md:text-5xl">
             The mode follows the moment.
           </h2>
-          <p className="text-lg italic leading-relaxed text-slate-500">
-            Four worlds. The same inbox. Pick the one that fits, or move between
-            them as the work changes.
-          </p>
         </div>
       </section>
       {modes.map((mode) => {
