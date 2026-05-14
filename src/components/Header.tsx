@@ -8,7 +8,7 @@ export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur-sm">
+    <header className="sticky top-0 z-50 border-b border-slate-200 bg-paper">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
         <Link
           href="/"
@@ -71,7 +71,7 @@ export default function Header() {
       </div>
 
       {mobileOpen && (
-        <div className="border-t border-slate-200 bg-white px-6 py-4 md:hidden">
+        <div className="border-t border-slate-200 bg-paper px-6 py-4 md:hidden">
           <nav className="flex flex-col gap-4">
             <Link
               href="/"
