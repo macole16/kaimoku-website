@@ -59,8 +59,12 @@ export default function Home() {
         </div>
       </section>
 
-      {/* About - what Kaimoku believes about software */}
-      <section id="about" className="px-6 py-20 md:py-28">
+      {/* About — extends the hero's paper warmth one section deeper, so the
+          page reads as a clear two-act structure: warm philosophy (hero +
+          about) then cool product/values/conversion (surface, transparent,
+          surface-deep). Avoids the warm/cool/warm temperature flip flagged
+          by /impeccable critique #4. */}
+      <section id="about" className="bg-paper px-6 py-20 md:py-28">
         <div className="mx-auto max-w-7xl">
           <div className="mx-auto max-w-prose">
             <h2 className="mb-8 text-center text-3xl font-bold text-primary md:text-4xl">
@@ -137,22 +141,28 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CTA - quiet outro on cream */}
-      <section className="border-t border-slate-200 px-6 py-24 md:py-32">
+      {/* CTA — inverted outro on surface-deep, gives the page a tonal arc
+          (warm paper philosophy → cool sage product/values → ink-green close)
+          rather than echoing the hero on the same surface. */}
+      <section className="bg-surface-deep px-6 py-24 text-white md:py-32">
         <div className="mx-auto max-w-3xl">
+          <p className="mb-6 text-sm font-medium uppercase tracking-[0.2em] text-kuju-light">
+            When you&rsquo;re ready
+          </p>
           <h2
-            className="mb-4 text-3xl font-light leading-tight tracking-tight text-foreground md:text-4xl"
+            className="mb-6 text-3xl font-light italic leading-tight tracking-tight md:text-4xl"
             style={{ fontFamily: "var(--font-display)" }}
           >
             Try Kuju Email.
           </h2>
-          <p className="mb-8 text-lg leading-[1.7] text-slate-600">
-            14 days, full Professional access, no credit card.
+          <p className="mb-10 text-lg leading-[1.7] text-slate-300">
+            Two weeks. The Professional tier, in full. We don&rsquo;t ask for a
+            card.
           </p>
           <div className="flex flex-wrap items-center gap-6">
             <a
               href={URLS.KUJU_TRIAL_SIGNUP}
-              className={`rounded-lg bg-kuju px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-kuju-dark ${
+              className={`rounded-lg bg-paper px-6 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-white ${
                 isComingSoon(URLS.KUJU_TRIAL_SIGNUP)
                   ? "pointer-events-none opacity-60"
                   : ""
@@ -165,7 +175,7 @@ export default function Home() {
             </a>
             <Link
               href="/kuju-email/pricing"
-              className="text-sm font-medium text-foreground underline-offset-4 transition-colors hover:text-kuju hover:underline"
+              className="text-sm font-medium text-white underline-offset-4 transition-colors hover:text-kuju-light hover:underline"
             >
               View pricing
             </Link>
