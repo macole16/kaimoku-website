@@ -2,12 +2,16 @@ import Link from "next/link";
 import type { Product } from "@/lib/products";
 
 /**
- * Homepage products section. Renders one full-width card per Kaimoku product.
+ * Homepage products section. Renders each Kaimoku product as a typographic
+ * block on the section's tinted surface — no card chrome.
  *
- * One product today (Kuju Email) — the layout is single-column max-w-3xl, so
- * 1 entry doesn't read as "the grid is missing two products." Future entries
- * stack underneath naturally; switch to a multi-column layout only when
- * adding the third product (YAGNI until then).
+ * One product today (Kuju Email). The card-on-tinted-surface treatment
+ * recurred across multiple /impeccable critique passes as reading like
+ * "the grid is missing two products"; dropping the chrome lets type
+ * carry the section the same way the hero and Values sections do.
+ *
+ * When a second product ships, entries stack with a hairline rule
+ * between them.
  */
 export function ProductsList({ products }: { products: Product[] }) {
   return (
@@ -16,14 +20,16 @@ export function ProductsList({ products }: { products: Product[] }) {
         <h2 className="mb-12 text-center text-3xl font-light italic text-primary md:text-4xl">
           What we build
         </h2>
-        <div className="mx-auto max-w-3xl space-y-8">
+        <div className="mx-auto max-w-3xl divide-y divide-slate-300">
           {products.map((p) => (
-            <article
-              key={p.id}
-              className="rounded-2xl border border-slate-200 bg-white p-8 md:p-12"
-            >
-              <div className="mb-3 flex items-baseline justify-between gap-3">
-                <h3 className="text-2xl font-bold text-primary">{p.name}</h3>
+            <article key={p.id} className="space-y-4 py-8 first:pt-0 last:pb-0">
+              <div className="flex items-baseline justify-between gap-3">
+                <h3
+                  className="text-3xl italic text-primary"
+                  style={{ fontFamily: "var(--font-display)" }}
+                >
+                  {p.name}
+                </h3>
                 <span className="text-xs text-slate-500">
                   {p.status === "shipped"
                     ? `Shipped ${p.shippedIn}`
@@ -32,18 +38,20 @@ export function ProductsList({ products }: { products: Product[] }) {
                       : "Coming soon"}
                 </span>
               </div>
-              <p className="mb-4 text-base font-medium text-kuju-dark">
+              <p className="text-base font-medium text-kuju-dark">
                 {p.tagline}
               </p>
-              <p className="mb-6 whitespace-pre-line text-base leading-relaxed text-slate-600">
+              <p className="whitespace-pre-line text-base leading-relaxed text-slate-600">
                 {p.description}
               </p>
-              <Link
-                href={p.href}
-                className="text-sm font-medium text-primary underline-offset-4 transition-colors hover:text-kuju hover:underline"
-              >
-                Learn about {p.name}
-              </Link>
+              <p>
+                <Link
+                  href={p.href}
+                  className="text-sm font-medium text-primary underline-offset-4 transition-colors hover:text-kuju hover:underline"
+                >
+                  Learn about {p.name}
+                </Link>
+              </p>
             </article>
           ))}
         </div>

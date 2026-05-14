@@ -40,9 +40,12 @@
   /* Stone — warm tinted neutrals (chroma 0.005, hue 158 toward Sumi Green) */
   --color-surface: oklch(0.97 0.005 158);
 
-  /* Kaimoku brand paper — warm cream from Round 07 spec (#F4F1EA).
-     Used on the homepage hero where Kaimoku-tier brand identity leads. */
-  --color-paper: oklch(0.95 0.012 80);
+  /* Kaimoku brand paper — Round 07 spec hex declared directly. The OKLCH
+     source we tried (oklch 0.95 0.012 80) compiled to #f3eee6, off by one
+     step per channel from the brand reference. Brand colors take exception
+     to the OKLCH-everywhere rule: byte-equal cross-product parity matters
+     more than perceptual color math for a single fixed reference. */
+  --color-paper: #f4f1ea;
 }
 
 :root {
@@ -65,8 +68,10 @@ body {
   font-family: var(--font-sans), system-ui, sans-serif;
 }
 
-html {
-  scroll-behavior: smooth;
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
 }
 
 /* SecurityJourney glide animation. The small glyph starts at the envelope
