@@ -64,7 +64,7 @@ export default function Home() {
       <section id="about" className="bg-paper px-6 py-20 md:py-28">
         <div className="mx-auto max-w-7xl">
           <div className="mx-auto max-w-prose">
-            <h2 className="mb-8 text-center text-3xl font-bold text-primary md:text-4xl">
+            <h2 className="mb-8 text-center text-3xl font-light italic text-primary md:text-4xl">
               What we believe
             </h2>
             <div className="space-y-6 text-lg leading-[1.7] text-slate-700">
@@ -105,7 +105,7 @@ export default function Home() {
       {/* Values — asymmetric left-rail label, narrow prose body */}
       <section id="values" className="px-6 py-20 md:py-28">
         <div className="mx-auto max-w-5xl">
-          <h2 className="mb-16 text-center text-3xl font-bold text-primary md:text-4xl">
+          <h2 className="mb-16 text-center text-3xl font-light italic text-primary md:text-4xl">
             Our values
           </h2>
           <dl className="space-y-12 md:space-y-16">
@@ -163,16 +163,19 @@ export default function Home() {
           <div className="flex flex-wrap items-center gap-6">
             <a
               href={URLS.KUJU_TRIAL_SIGNUP}
+              aria-disabled={isComingSoon(URLS.KUJU_TRIAL_SIGNUP)}
               className={`rounded-lg bg-paper px-6 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-white ${
                 isComingSoon(URLS.KUJU_TRIAL_SIGNUP)
                   ? "pointer-events-none opacity-60"
                   : ""
               }`}
-              title={
-                isComingSoon(URLS.KUJU_TRIAL_SIGNUP) ? "Coming soon" : undefined
-              }
             >
               Start 14-Day Trial
+              {isComingSoon(URLS.KUJU_TRIAL_SIGNUP) && (
+                <span className="ml-2 font-normal opacity-70">
+                  (coming soon)
+                </span>
+              )}
             </a>
             <Link
               href="/kuju-email/pricing"

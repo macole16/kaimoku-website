@@ -13,7 +13,7 @@ export function ProductsList({ products }: { products: Product[] }) {
   return (
     <section className="bg-surface px-6 py-20 md:py-28">
       <div className="mx-auto max-w-7xl">
-        <h2 className="mb-12 text-center text-3xl font-bold text-primary md:text-4xl">
+        <h2 className="mb-12 text-center text-3xl font-light italic text-primary md:text-4xl">
           What we build
         </h2>
         <div className="mx-auto max-w-3xl space-y-8">
