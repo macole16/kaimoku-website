@@ -27,8 +27,10 @@
   --color-kuju-light: oklch(0.88 0.08 162);
 
   /* Sage surface tones — for hero gradients, Footer, and any place green
-     covers more than the One Mark Rule allows. */
-  --color-surface-mist: oklch(0.55 0.05 158);
+     covers more than the One Mark Rule allows. Mist sits at L=0.47 so
+     white text and kuju-light eyebrows clear WCAG AA across the entire
+     gradient sweep, not just at the deep edges. */
+  --color-surface-mist: oklch(0.47 0.06 158);
   --color-surface-cloud: oklch(0.65 0.045 158);
   --color-surface-deep: oklch(0.42 0.075 158);
 
