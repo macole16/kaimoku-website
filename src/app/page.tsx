@@ -66,13 +66,7 @@ export default function Home() {
               What we believe
             </h2>
             <div className="space-y-6 text-lg leading-[1.7] text-slate-700">
-              <p>
-                Kaimoku Technologies builds software for the parts of work
-                software has forgotten: the email thread that matters, the
-                calendar entry that should have been pulled from the message
-                above it, the contact who hasn&rsquo;t been heard from in seven
-                months. We treat the small things as the work.
-              </p>
+              <p>Kaimoku Technologies builds software.</p>
               <p>
                 Our name,{" "}
                 <span className="font-semibold text-primary">Kaimoku</span>, is
@@ -90,7 +84,6 @@ export default function Home() {
               </p>
               <p>
                 We start with email because email is where most attention goes.
-                We do not plan to stop there.
               </p>
             </div>
           </div>
