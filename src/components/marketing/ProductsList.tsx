@@ -13,12 +13,9 @@ export function ProductsList({ products }: { products: Product[] }) {
   return (
     <section className="bg-surface px-6 py-20 md:py-28">
       <div className="mx-auto max-w-7xl">
-        <h2 className="mb-4 text-center text-3xl font-bold text-primary md:text-4xl">
+        <h2 className="mb-12 text-center text-3xl font-bold text-primary md:text-4xl">
           What we build
         </h2>
-        <p className="mx-auto mb-12 max-w-2xl text-center text-lg text-slate-600">
-          Software that pays attention to the small things. We start with email.
-        </p>
         <div className="mx-auto max-w-3xl space-y-8">
           {products.map((p) => (
             <article

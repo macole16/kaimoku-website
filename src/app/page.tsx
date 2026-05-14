@@ -21,9 +21,6 @@ export default function Home() {
         </div>
         <div className="relative mx-auto max-w-7xl">
           <div className="max-w-3xl">
-            <p className="mb-6 text-sm font-medium uppercase tracking-[0.2em] text-primary">
-              Kaimoku Technologies
-            </p>
             <h1
               className="mb-8 text-5xl font-light leading-[1.05] tracking-tight md:text-7xl"
               style={{ fontFamily: "var(--font-display)" }}
@@ -114,16 +111,16 @@ export default function Home() {
           <dl className="space-y-12 md:space-y-16">
             {[
               {
-                label: "Ownership.",
+                label: "Yours.",
                 body: "Your email should work for you. We give organizations full control over their email experience: powerful admin tools, transparent operations, no surprises.",
               },
               {
-                label: "Transparency.",
-                body: "Clear pricing, honest documentation, and visible operations. Kuju Email surfaces what is happening with your mail in plain sight: delivery analytics, spam statistics, audit logs.",
+                label: "In plain sight.",
+                body: "Clear pricing, honest documentation, visible operations. Kuju Email surfaces what is happening with your mail: delivery analytics, spam statistics, audit logs.",
               },
               {
-                label: "Security.",
-                body: "Email is a high-value target. Two-tier threat detection, automatic DKIM rotation, encrypted secrets storage, and multi-layer spam filtering, as standard.",
+                label: "Defended.",
+                body: "Email is a high-value target. We treat it that way: layered threat detection, automatic key rotation, encrypted storage, spam filtering at every hop. Quietly, as standard.",
               },
             ].map(({ label, body }) => (
               <div
