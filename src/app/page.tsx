@@ -15,7 +15,7 @@ export default function Home() {
       <section className="relative overflow-hidden bg-paper px-6 py-24 text-foreground md:py-32">
         <div
           aria-hidden
-          className="pointer-events-none absolute right-[-7%] top-1/2 hidden -translate-y-1/2 opacity-[0.10] md:block"
+          className="pointer-events-none absolute right-[-7%] top-1/2 hidden -translate-y-1/2 opacity-[0.15] md:block"
         >
           <Mark size={560} />
         </div>
@@ -46,13 +46,13 @@ export default function Home() {
                 href="/kuju-email"
                 className="rounded-lg bg-kuju px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-kuju-dark"
               >
-                Explore Kuju Email →
+                Explore Kuju Email
               </Link>
               <Link
                 href="#about"
                 className="text-sm font-medium text-foreground underline-offset-4 transition-colors hover:text-kuju hover:underline"
               >
-                What we believe ↓
+                What we believe
               </Link>
             </div>
           </div>
@@ -128,7 +128,9 @@ export default function Home() {
                 >
                   {label}
                 </dt>
-                <dd className="text-lg leading-[1.7] text-slate-700">{body}</dd>
+                <dd className="max-w-prose text-lg leading-[1.7] text-slate-700">
+                  {body}
+                </dd>
               </div>
             ))}
           </dl>
@@ -165,7 +167,7 @@ export default function Home() {
               href="/kuju-email/pricing"
               className="text-sm font-medium text-foreground underline-offset-4 transition-colors hover:text-kuju hover:underline"
             >
-              View pricing →
+              View pricing
             </Link>
           </div>
         </div>
