@@ -94,19 +94,35 @@ html {
 }
 
 /* SecurityJourney glide animation. The small glyph starts at the envelope
-   (transform translateX(50px) ≈ envelope center) and slides to just before
-   the inbox (transform translateX(810px)) when .is-gliding is added. */
+   (translateX 50px ≈ envelope center) and slides to just before the inbox
+   (translateX 810px). Loops on a 15s cycle:
+     0  → 4s     glide envelope → inbox
+     4  → 4.5s   brief dwell at inbox (the 'delivered' beat)
+     4.5s        fade out
+     4.5 → 15s   10s rest, invisible at start position
+   .is-gliding is added once the section enters the viewport
+   (IntersectionObserver in SecurityJourney.tsx); from then on the
+   loop runs continuously. */
 @keyframes security-journey-glide {
-  from {
+  0% {
     transform: translateX(50px);
     opacity: 0;
   }
-  10% {
+  3% {
     opacity: 0.85;
   }
-  to {
+  27% {
     transform: translateX(810px);
     opacity: 0.85;
+  }
+  30% {
+    transform: translateX(810px);
+    opacity: 0;
+  }
+  31%,
+  100% {
+    transform: translateX(50px);
+    opacity: 0;
   }
 }
 
@@ -116,7 +132,8 @@ html {
 }
 
 .security-journey-glide.is-gliding {
-  animation: security-journey-glide 1.6s ease-out forwards;
+  animation: security-journey-glide 15s cubic-bezier(0.23, 1, 0.32, 1)
+    infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
