@@ -113,6 +113,10 @@ export default function Home() {
                 label: "Defended.",
                 body: "Email is a high-value target. We treat it that way: layered threat detection, automatic key rotation, encrypted storage, spam filtering at every hop. Quietly, as standard.",
               },
+              {
+                label: "Attended.",
+                body: "Every system we run is instrumented. Metrics, structured logs, health checks — we watch our services continuously so we catch issues before they reach you. Observability is not a dashboard you buy; it is how we build.",
+              },
             ].map(({ label, body }) => (
               <div
                 key={label}
