@@ -7,7 +7,10 @@ import {
   hasVolumeCurve,
   marginalSeatRate,
   seatCap,
+  sellsAddOn,
   formatMoney,
+  DEFAULT_OPTIONS,
+  type Options,
   type PricingModel,
 } from "@/lib/pricing";
 
@@ -20,7 +23,6 @@ interface Tier {
   storagePerAccount: string;
   /** Shown only where the fixed-cost story needs explaining. */
   costNote?: string;
-  highlight: boolean;
   ctaHref: string;
   ctaLabel: string;
   extras: string[];
@@ -38,13 +40,19 @@ const tiers: Tier[] = [
       seatRate: 5,
       annualSeatRate: 4.15,
       maxSeats: 10,
+      extras: {
+        includedStorageGB: 5,
+        extraStoragePerGB: 1,
+        annualExtraStoragePerGB: 0.83,
+        premiumAIPerSeat: 5,
+        annualPremiumAIPerSeat: 4.15,
+      },
     },
     anchors: [5, 8, 10],
     desc: "For individuals and families. Full email platform with AI.",
     storagePerAccount: "5 GB",
     costNote:
       "A household plan, capped at 10 mailboxes. Past that you are a business, and Small Business is the tier with the API, workspaces and admin delegation to match.",
-    highlight: false,
     ctaHref: URLS.CHECKOUT_INDIVIDUAL,
     ctaLabel: "Available at launch",
     extras: [
@@ -72,11 +80,18 @@ const tiers: Tier[] = [
       seatRate: 5,
       annualSeatRate: 4.15,
       minSeats: 5,
+      maxSeats: 25,
+      extras: {
+        includedStorageGB: 10,
+        extraStoragePerGB: 1,
+        annualExtraStoragePerGB: 0.83,
+        premiumAIPerSeat: 5,
+        annualPremiumAIPerSeat: 4.15,
+      },
     },
     anchors: [5, 10, 25],
     desc: "For growing teams. AI productivity, API access, and extensibility.",
     storagePerAccount: "10 GB",
-    highlight: true,
     ctaHref: URLS.CHECKOUT_SMALL_BUSINESS,
     ctaLabel: "Available at launch",
     extras: ["+$1/GB/mo for extra storage", "Premium AI: +$5/account/mo"],
@@ -102,13 +117,21 @@ const tiers: Tier[] = [
       seatRate: 5,
       annualSeatRate: 4.15,
       minSeats: 10,
+      extras: {
+        includedStorageGB: 10,
+        extraStoragePerGB: 1,
+        annualExtraStoragePerGB: 0.83,
+        premiumAIPerSeat: 5,
+        annualPremiumAIPerSeat: 4.15,
+        extendedRetentionPerGB: 0.5,
+        annualExtendedRetentionPerGB: 0.41,
+      },
     },
     anchors: [10, 25, 50],
     desc: "For compliance-conscious teams. Archiving, retention, and advanced security.",
     storagePerAccount: "10 GB",
     costNote:
       "The platform fee covers archiving, the retention engine, and analytics. It is fixed, so it does not grow with your team, and every seat you add costs less than the last.",
-    highlight: false,
     ctaHref: URLS.CHECKOUT_PROFESSIONAL,
     ctaLabel: "Available at launch",
     extras: [
@@ -139,13 +162,23 @@ const tiers: Tier[] = [
       seatRate: 5,
       annualSeatRate: 4.15,
       minSeats: 25,
+      extras: {
+        includedStorageGB: 10,
+        extraStoragePerGB: 1,
+        annualExtraStoragePerGB: 0.83,
+        premiumAIPerSeat: 5,
+        annualPremiumAIPerSeat: 4.15,
+        managedBackupsPerSeat: 7,
+        annualManagedBackupsPerSeat: 5.8,
+        extendedRetentionPerGB: 0.5,
+        annualExtendedRetentionPerGB: 0.41,
+      },
     },
     anchors: [25, 100, 250],
     desc: "For organizations with identity, audit and residency requirements.",
     storagePerAccount: "10 GB default",
     costNote:
       "From its 25-account minimum upward, Enterprise is exactly $175/month more than Professional at the same account count, and stays $175 more however large you grow. SSO and audit logging cost us the same whether you have 30 mailboxes or 3,000, so we do not charge for them per seat.",
-    highlight: false,
     ctaHref: URLS.CHECKOUT_ENTERPRISE,
     ctaLabel: "Available at launch",
     extras: [
@@ -167,6 +200,22 @@ const tiers: Tier[] = [
 
 /** Seat counts offered as one-tap presets on the seat control. */
 const SEAT_PRESETS = [5, 10, 25, 50, 100];
+
+/**
+ * Storage-per-mailbox presets. `null` is "whatever the tier includes" and is
+ * the default, because tiers have different allowances (5 GB on
+ * Individual / Family, 10 GB elsewhere) and any fixed number would silently
+ * bill one of them for storage the buyer never asked for.
+ */
+const STORAGE_PRESETS: (number | null)[] = [null, 25, 50, 100, 250];
+
+/** Paid extras offered globally; each tier applies only the ones it sells. */
+const ADD_ONS: { key: "premiumAI" | "managedBackups" | "extendedRetention"; label: string }[] =
+  [
+    { key: "premiumAI", label: "Premium AI (+$5/mailbox)" },
+    { key: "extendedRetention", label: "Extended retention (+$0.50/GB)" },
+    { key: "managedBackups", label: "Managed backups (+$7/mailbox)" },
+  ];
 
 const faqs = [
   {
@@ -222,6 +271,9 @@ const faqs = [
 function PricingPageInner() {
   const [annual, setAnnual] = useState(false);
   const [seats, setSeats] = useState(10);
+  const [opts, setOpts] = useState<Options>(DEFAULT_OPTIONS);
+  const setOpt = <K extends keyof Options>(k: K, v: Options[K]) =>
+    setOpts((o) => ({ ...o, [k]: v }));
 
   return (
     <>
@@ -302,9 +354,82 @@ function PricingPageInner() {
                 />
               </div>
             </div>
-            <p className="mt-3 text-center text-xs text-slate-500">
+            {/* Storage. One global control against per-tier allowances: a tier
+                whose included storage already covers the request simply adds
+                nothing, so Individual / Family (5 GB) starts charging before
+                the others (10 GB) without needing its own input. */}
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-x-4 gap-y-3 border-t border-slate-100 pt-6">
+              <label
+                htmlFor="storage-gb"
+                className="text-sm font-medium text-slate-700"
+              >
+                Storage per mailbox
+              </label>
+              <div className="flex flex-wrap items-center gap-2">
+                {STORAGE_PRESETS.map((g) => (
+                  <button
+                    key={g ?? "included"}
+                    type="button"
+                    onClick={() => setOpt("storagePerSeatGB", g)}
+                    aria-pressed={opts.storagePerSeatGB === g}
+                    className={`min-w-[3.5rem] rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors ${
+                      opts.storagePerSeatGB === g
+                        ? "bg-kuju text-white"
+                        : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                    }`}
+                  >
+                    {g === null ? "Included" : `${g} GB`}
+                  </button>
+                ))}
+                <input
+                  id="storage-gb"
+                  type="number"
+                  min={1}
+                  max={2000}
+                  value={opts.storagePerSeatGB ?? ""}
+                  placeholder="GB"
+                  onWheel={(e) => e.currentTarget.blur()}
+                  onChange={(e) => {
+                    const raw = e.target.value.trim();
+                    if (raw === "") return setOpt("storagePerSeatGB", null);
+                    const n = Number(raw);
+                    if (Number.isFinite(n))
+                      setOpt(
+                        "storagePerSeatGB",
+                        Math.min(2000, Math.max(1, Math.round(n))),
+                      );
+                  }}
+                  className="w-24 rounded-lg border border-slate-300 px-3 py-1.5 text-sm text-slate-900 focus:border-kuju focus:outline-none focus:ring-1 focus:ring-kuju"
+                  aria-label="Exact storage per mailbox in GB"
+                />
+              </div>
+            </div>
+
+            {/* Paid extras. Shown once rather than per card; a tier that does
+                not sell one is labelled instead of silently ignoring it. */}
+            <fieldset className="mt-6 border-t border-slate-100 pt-6">
+              <legend className="sr-only">Optional paid add-ons</legend>
+              <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
+                {ADD_ONS.map(({ key, label }) => (
+                  <label
+                    key={key}
+                    className="flex cursor-pointer items-center gap-2 text-sm text-slate-700"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={opts[key]}
+                      onChange={(e) => setOpt(key, e.target.checked)}
+                      className="h-4 w-4 rounded border-slate-300 text-kuju focus:ring-kuju"
+                    />
+                    {label}
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+
+            <p className="mt-4 text-center text-xs text-slate-500">
               Every price below is the real monthly total at this team size,
-              add-ons excluded.
+              including whatever you select here.
             </p>
           </div>
 
@@ -348,30 +473,24 @@ function PricingPageInner() {
 
           {/* Tier cards */}
           <div className="grid gap-6 lg:grid-cols-4">
-            {tiers.map((tier) => {
+            {tiers.map((tier, tierIndex) => {
               const comingSoon = isComingSoon(tier.ctaHref);
-              const q = quote(tier.model, seats, annual);
+              const q = quote(tier.model, seats, annual, opts);
               const showPerSeat = hasVolumeCurve(tier.model);
               const overflow = marginalSeatRate(tier.model, annual);
               const cap = seatCap(tier.model);
+              // The first tier further down the list that can actually be
+              // bought at this size. Named rather than assumed, so a card over
+              // its cap never points at itself.
+              const nextUp = tiers
+                .slice(tierIndex + 1)
+                .find((t) => quote(t.model, seats, annual, opts).available);
 
               return (
                 <div
                   key={tier.name}
-                  className={`relative flex flex-col rounded-2xl border p-8 ${
-                    tier.highlight
-                      ? "border-primary-light bg-white shadow-lg shadow-primary-light/10 ring-2 ring-primary-light"
-                      : "border-slate-200 bg-white"
-                  }`}
+                  className="relative flex flex-col rounded-2xl border border-slate-200 bg-white p-8"
                 >
-                  {/* Absolutely positioned on purpose: in the flow this badge
-                      pushed one card's price ~40px below the other three,
-                      breaking the horizontal scan the whole layout exists for. */}
-                  {tier.highlight && (
-                    <div className="absolute right-6 top-6 rounded-full bg-primary-light/10 px-3 py-1 text-xs font-semibold text-primary-light">
-                      Most Popular
-                    </div>
-                  )}
                   <h3 className="text-xl font-bold text-primary">
                     {tier.name}
                   </h3>
@@ -397,13 +516,45 @@ function PricingPageInner() {
                         {q.breakdown}
                       </p>
 
-                      <p className="mt-1 text-xs text-slate-500">
+                      {/* Selected extras, itemised. The headline above is the
+                          true total, so without this the number would be
+                          unauditable: you could see it move and not see why. */}
+                      {q.lines.length > 0 && (
+                        <dl className="mt-2 space-y-0.5">
+                          <div className="flex justify-between gap-2 text-xs text-slate-500">
+                            <dt>Base plan</dt>
+                            <dd>{formatMoney(q.baseMonthly)}</dd>
+                          </div>
+                          {q.lines.map((l) => (
+                            <div
+                              key={l.label}
+                              className="flex justify-between gap-2 text-xs text-slate-500"
+                            >
+                              <dt>{l.label}</dt>
+                              <dd>+{formatMoney(l.amount)}</dd>
+                            </div>
+                          ))}
+                        </dl>
+                      )}
+
+                      <p className="mt-2 text-xs text-slate-500">
                         {q.billedSeats} {q.billedSeats === 1 ? "seat" : "seats"}
                         {showPerSeat && (
                           <> &middot; {formatMoney(q.perSeat)} per mailbox</>
                         )}
                         {annual && <> &middot; billed annually</>}
                       </p>
+
+                      {/* Naming what a tier does NOT sell matters more than
+                          silently omitting it: an unchanged price after ticking
+                          a box otherwise reads as a broken calculator. */}
+                      {ADD_ONS.filter(
+                        (a) => opts[a.key] && !sellsAddOn(tier.model, a.key),
+                      ).map((a) => (
+                        <p key={a.key} className="mt-1 text-xs text-slate-400">
+                          {a.label.split(" (")[0]} is not offered on this plan.
+                        </p>
+                      ))}
 
                       {q.floorNote && (
                         <p className="mt-2 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600">
@@ -417,7 +568,9 @@ function PricingPageInner() {
                         {q.reason}
                       </p>
                       <p className="mt-2 text-sm text-slate-600">
-                        For {seats} mailboxes, see Small Business.
+                        {nextUp
+                          ? `For ${seats} mailboxes, see ${nextUp.name}.`
+                          : `For ${seats} mailboxes, talk to us.`}
                       </p>
                     </>
                   )}
@@ -437,7 +590,7 @@ function PricingPageInner() {
                     </p>
                     <dl className="space-y-1">
                       {tier.anchors.map((n) => {
-                        const a = quote(tier.model, n, annual);
+                        const a = quote(tier.model, n, annual, opts);
                         if (!a.available) return null;
                         return (
                           <div
@@ -473,8 +626,8 @@ function PricingPageInner() {
                   )}
 
                   <p className="mt-4 text-xs text-slate-500">
-                    {tier.storagePerAccount} storage per account &middot;
-                    unlimited domains &amp; aliases
+                    {tier.storagePerAccount} storage included per account
+                    &middot; unlimited domains &amp; aliases
                   </p>
 
                   {/* Features */}
@@ -516,11 +669,7 @@ function PricingPageInner() {
                   {/* CTA */}
                   {comingSoon ? (
                     <span
-                      className={`mt-8 block cursor-not-allowed rounded-lg py-3 text-center text-sm font-semibold opacity-60 ${
-                        tier.highlight
-                          ? "bg-primary-light text-white"
-                          : "bg-slate-100 text-slate-800"
-                      }`}
+                      className="mt-8 block cursor-not-allowed rounded-lg bg-slate-100 py-3 text-center text-sm font-semibold text-slate-800 opacity-60"
                       title="Coming soon"
                     >
                       {tier.ctaLabel}
@@ -528,11 +677,7 @@ function PricingPageInner() {
                   ) : (
                     <a
                       href={tier.ctaHref}
-                      className={`mt-8 block rounded-lg py-3 text-center text-sm font-semibold transition-colors ${
-                        tier.highlight
-                          ? "bg-primary-light text-white hover:bg-kuju-dark"
-                          : "bg-slate-100 text-slate-800 hover:bg-slate-200"
-                      }`}
+                      className="mt-8 block rounded-lg bg-slate-100 py-3 text-center text-sm font-semibold text-slate-800 transition-colors hover:bg-slate-200"
                     >
                       {tier.ctaLabel}
                     </a>

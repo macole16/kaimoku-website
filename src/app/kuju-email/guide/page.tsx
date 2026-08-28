@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PreLaunchNotice } from "@/components/PreLaunchNotice";
 
 export const metadata: Metadata = {
   title: "User Guide · Kuju Email",
@@ -144,7 +145,9 @@ const tocSections = [
 
 export default function GuidePage() {
   return (
-    <div className="mx-auto max-w-7xl px-6 py-12">
+    <>
+      <PreLaunchNotice what="This guide" />
+      <div className="mx-auto max-w-7xl px-6 py-12">
       <div className="lg:grid lg:grid-cols-[280px_1fr] lg:gap-12">
         {/* Sidebar TOC */}
         <aside className="hidden lg:block">
@@ -1177,6 +1180,7 @@ export default function GuidePage() {
           </div>
         </article>
       </div>
-    </div>
+      </div>
+    </>
   );
 }
