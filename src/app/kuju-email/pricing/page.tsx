@@ -129,16 +129,18 @@ const tiers: Tier[] = [
   {
     name: "Enterprise",
     model: {
-      kind: "spend-floor",
-      seatRate: 7,
-      annualSeatRate: 5.8,
-      minSpend: 300,
+      kind: "platform-plus-seat",
+      platformFee: 250,
+      annualPlatformFee: 208.3,
+      seatRate: 5,
+      annualSeatRate: 4.15,
+      minSeats: 25,
     },
-    anchors: [50, 100, 200],
-    desc: "Self-serve a la carte. Build the plan your organization needs.",
+    anchors: [25, 100, 250],
+    desc: "For organizations with identity, audit and residency requirements.",
     storagePerAccount: "10 GB default",
     costNote:
-      "Priced above Professional at every size. You move here for SSO, audit logging and dedicated infrastructure, not to save money on seats.",
+      "Enterprise is Professional plus a flat $175/month, at any size. SSO and audit logging cost us the same whether you have 30 mailboxes or 3,000, so we do not charge for them per seat.",
     highlight: false,
     ctaHref: URLS.CHECKOUT_ENTERPRISE,
     ctaLabel: "Available at launch",
@@ -180,8 +182,8 @@ const faqs = [
     a: "Professional is $75/month plus $5/account/month, so the smallest Professional plan (10 accounts) is $125/month. At that size the platform fee is most of the bill, which is why we show it rather than quote you a per-account rate. It covers archiving infrastructure, retention policies, advanced analytics and LLM-powered spam scanning: systems that cost us the same whether you have 10 accounts or 100. Because it does not grow with your team, your effective per-mailbox cost falls as you add people, from $12.50 at 10 accounts to $6.50 at 50.",
   },
   {
-    q: "How does Enterprise a la carte work?",
-    a: "Enterprise is $7/account/month against a $300/month minimum spend, with add-ons priced individually. It is more expensive than Professional at every team size, so choose it for what it unlocks (SSO, audit logging, managed backups, dedicated infrastructure) rather than to reduce your per-seat cost.",
+    q: "How does Enterprise pricing work?",
+    a: "Enterprise is $250/month plus $5/account/month, with a 25-account minimum, so the smallest Enterprise plan is $375/month. It is deliberately the same shape as Professional and the same $5/account rate, which makes the upgrade a flat $175/month at any size. We price it that way because SSO, audit logging and dedicated infrastructure cost us the same whether you have 30 mailboxes or 3,000. Charging for them per account would mean a 500-person organization paid roughly ten times a 50-person one for identical infrastructure. Add-ons such as managed backups and extended retention are still priced individually.",
   },
   {
     q: "What is Premium AI?",
