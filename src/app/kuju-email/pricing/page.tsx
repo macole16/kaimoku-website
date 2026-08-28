@@ -140,7 +140,7 @@ const tiers: Tier[] = [
     desc: "For organizations with identity, audit and residency requirements.",
     storagePerAccount: "10 GB default",
     costNote:
-      "Enterprise is Professional plus a flat $175/month, at any size. SSO and audit logging cost us the same whether you have 30 mailboxes or 3,000, so we do not charge for them per seat.",
+      "From its 25-account minimum upward, Enterprise is exactly $175/month more than Professional at the same account count, and stays $175 more however large you grow. SSO and audit logging cost us the same whether you have 30 mailboxes or 3,000, so we do not charge for them per seat.",
     highlight: false,
     ctaHref: URLS.CHECKOUT_ENTERPRISE,
     ctaLabel: "Available at launch",
