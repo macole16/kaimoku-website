@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { loadApiDocs, type EndpointData } from "@/lib/api-docs";
+import { PreLaunchNotice } from "@/components/PreLaunchNotice";
 import { SectionHeading } from "@/components/docs/SectionHeading";
 import { SubHeading } from "@/components/docs/SubHeading";
 import { Endpoint } from "@/components/docs/Endpoint";
@@ -448,7 +449,9 @@ export default function DocsPage() {
   const { sections, toc } = loadApiDocs();
 
   return (
-    <div className="mx-auto max-w-7xl px-6 py-12">
+    <>
+      <PreLaunchNotice what="These API docs" />
+      <div className="mx-auto max-w-7xl px-6 py-12">
       <div className="lg:grid lg:grid-cols-[280px_1fr] lg:gap-12">
         {/* Sidebar TOC */}
         <aside className="hidden lg:block">
@@ -527,6 +530,7 @@ export default function DocsPage() {
           ))}
         </article>
       </div>
-    </div>
+      </div>
+    </>
   );
 }
