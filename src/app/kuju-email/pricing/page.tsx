@@ -2,18 +2,44 @@
 
 import { useState } from "react";
 import { URLS, isComingSoon } from "@/lib/constants";
+import {
+  quote,
+  hasVolumeCurve,
+  marginalSeatRate,
+  formatMoney,
+  type PricingModel,
+} from "@/lib/pricing";
 
-const tiers = [
+interface Tier {
+  name: string;
+  model: PricingModel;
+  /** Seat counts shown as concrete anchor prices under the card. */
+  anchors: number[];
+  desc: string;
+  storagePerAccount: string;
+  /** Shown only where the fixed-cost story needs explaining. */
+  costNote?: string;
+  highlight: boolean;
+  ctaHref: string;
+  ctaLabel: string;
+  extras: string[];
+  features: string[];
+}
+
+const tiers: Tier[] = [
   {
     name: "Individual / Family",
-    pricingModel: "base" as const,
-    price: "$10",
-    annualPrice: "$8.30",
-    period: "/month",
+    model: {
+      kind: "base-plus-seat",
+      base: 10,
+      annualBase: 8.3,
+      includedSeats: 5,
+      seatRate: 5,
+      annualSeatRate: 4.15,
+    },
+    anchors: [5, 10, 15],
     desc: "For individuals and families. Full email platform with AI.",
-    accounts: "5 included",
     storagePerAccount: "5 GB",
-    extraAccountPrice: "$5/account/mo",
     highlight: false,
     ctaHref: URLS.CHECKOUT_INDIVIDUAL,
     ctaLabel: "Available at launch",
@@ -37,14 +63,15 @@ const tiers = [
   },
   {
     name: "Small Business",
-    pricingModel: "per-account" as const,
-    price: "$5",
-    annualPrice: "$4.15",
-    period: "/account/month",
+    model: {
+      kind: "per-seat",
+      seatRate: 5,
+      annualSeatRate: 4.15,
+      minSeats: 5,
+    },
+    anchors: [5, 10, 25],
     desc: "For growing teams. AI productivity, API access, and extensibility.",
-    accounts: "5 minimum",
     storagePerAccount: "10 GB",
-    extraAccountPrice: null,
     highlight: true,
     ctaHref: URLS.CHECKOUT_SMALL_BUSINESS,
     ctaLabel: "Available at launch",
@@ -64,16 +91,19 @@ const tiers = [
   },
   {
     name: "Professional",
-    pricingModel: "platform-fee" as const,
-    price: "$5",
-    annualPrice: "$4.15",
-    period: "/account/month",
-    platformFee: "$75",
-    annualPlatformFee: "$62.50",
+    model: {
+      kind: "platform-plus-seat",
+      platformFee: 75,
+      annualPlatformFee: 62.5,
+      seatRate: 5,
+      annualSeatRate: 4.15,
+      minSeats: 10,
+    },
+    anchors: [10, 25, 50],
     desc: "For compliance-conscious teams. Archiving, retention, and advanced security.",
-    accounts: "10 minimum",
     storagePerAccount: "10 GB",
-    extraAccountPrice: null,
+    costNote:
+      "The platform fee covers archiving, the retention engine, and analytics. It is fixed, so it does not grow with your team, and every seat you add costs less than the last.",
     highlight: false,
     ctaHref: URLS.CHECKOUT_PROFESSIONAL,
     ctaLabel: "Available at launch",
@@ -98,15 +128,17 @@ const tiers = [
   },
   {
     name: "Enterprise",
-    pricingModel: "alacarte" as const,
-    price: "$7",
-    annualPrice: "$5.80",
-    period: "/account/month",
+    model: {
+      kind: "spend-floor",
+      seatRate: 7,
+      annualSeatRate: 5.8,
+      minSpend: 300,
+    },
+    anchors: [50, 100, 200],
     desc: "Self-serve a la carte. Build the plan your organization needs.",
-    accounts: "Custom",
     storagePerAccount: "10 GB default",
-    minimumSpend: "$300/mo minimum spend",
-    extraAccountPrice: null,
+    costNote:
+      "Priced above Professional at every size. You move here for SSO, audit logging and dedicated infrastructure, not to save money on seats.",
     highlight: false,
     ctaHref: URLS.CHECKOUT_ENTERPRISE,
     ctaLabel: "Available at launch",
@@ -127,6 +159,9 @@ const tiers = [
   },
 ];
 
+/** Seat counts offered as one-tap presets on the seat control. */
+const SEAT_PRESETS = [5, 10, 25, 50, 100];
+
 const faqs = [
   {
     q: "How will the 14-day trial work?",
@@ -142,11 +177,11 @@ const faqs = [
   },
   {
     q: "What's the Professional platform fee?",
-    a: "Professional has a $75/month platform fee plus $5/account/month. The platform fee covers archiving infrastructure, retention policies, advanced analytics, and LLM-powered spam scanning — systems that cost the same whether you have 10 or 100 users.",
+    a: "Professional is $75/month plus $5/account/month, so the smallest Professional plan (10 accounts) is $125/month. At that size the platform fee is most of the bill, which is why we show it rather than quote you a per-account rate. It covers archiving infrastructure, retention policies, advanced analytics and LLM-powered spam scanning: systems that cost us the same whether you have 10 accounts or 100. Because it does not grow with your team, your effective per-mailbox cost falls as you add people, from $12.50 at 10 accounts to $6.50 at 50.",
   },
   {
     q: "How does Enterprise a la carte work?",
-    a: "Enterprise is fully self-serve — pick the components you need from the menu. There's a $300/month minimum spend. Accounts are $7/month each, and you can add managed backups, extended retention, and Premium AI as needed.",
+    a: "Enterprise is $7/account/month against a $300/month minimum spend, with add-ons priced individually. It is more expensive than Professional at every team size, so choose it for what it unlocks (SSO, audit logging, managed backups, dedicated infrastructure) rather than to reduce your per-seat cost.",
   },
   {
     q: "What is Premium AI?",
@@ -180,6 +215,7 @@ const faqs = [
 
 function PricingPageInner() {
   const [annual, setAnnual] = useState(false);
+  const [seats, setSeats] = useState(10);
 
   return (
     <>
@@ -191,7 +227,8 @@ function PricingPageInner() {
           <p className="mx-auto max-w-2xl text-lg text-slate-300">
             Kuju Email is not open yet. This is the pricing we intend to launch
             with, published early because you deserve to know the shape of the
-            bill before you invest a migration in us. No hidden fees.
+            bill before you invest a migration in us. Set your team size below
+            and every plan shows its real monthly total, platform fees included.
           </p>
         </div>
       </section>
@@ -214,6 +251,55 @@ function PricingPageInner() {
             >
               Get notified at launch
             </a>
+          </div>
+
+          {/* Seat control — the page's primary input. Every price below is
+              recomputed from it, so the headline figure is the real bill for
+              THIS team rather than an abstract per-seat rate. */}
+          <div className="mb-10 rounded-2xl border border-slate-200 bg-white px-6 py-6">
+            <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-3">
+              <label
+                htmlFor="seat-count"
+                className="text-sm font-medium text-slate-700"
+              >
+                How many mailboxes?
+              </label>
+              <div className="flex flex-wrap items-center gap-2">
+                {SEAT_PRESETS.map((n) => (
+                  <button
+                    key={n}
+                    type="button"
+                    onClick={() => setSeats(n)}
+                    aria-pressed={seats === n}
+                    className={`min-w-[3rem] rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors ${
+                      seats === n
+                        ? "bg-kuju text-white"
+                        : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                    }`}
+                  >
+                    {n}
+                  </button>
+                ))}
+                <input
+                  id="seat-count"
+                  type="number"
+                  min={1}
+                  max={5000}
+                  value={seats}
+                  onChange={(e) => {
+                    const n = Number(e.target.value);
+                    if (Number.isFinite(n)) setSeats(Math.min(5000, Math.max(1, Math.round(n))));
+                  }}
+                  onWheel={(e) => e.currentTarget.blur()}
+                  className="w-24 rounded-lg border border-slate-300 px-3 py-1.5 text-sm text-slate-900 focus:border-kuju focus:outline-none focus:ring-1 focus:ring-kuju"
+                  aria-label="Exact number of mailboxes"
+                />
+              </div>
+            </div>
+            <p className="mt-3 text-center text-xs text-slate-500">
+              Every price below is the real monthly total at this team size,
+              add-ons excluded.
+            </p>
           </div>
 
           {/* Billing toggle */}
@@ -252,86 +338,110 @@ function PricingPageInner() {
           <div className="grid gap-6 lg:grid-cols-4">
             {tiers.map((tier) => {
               const comingSoon = isComingSoon(tier.ctaHref);
-
-              /* Build price display based on pricing model */
-              let priceDisplay: string;
-              let priceSubtext: string | null = null;
-
-              if (tier.pricingModel === "base") {
-                priceDisplay = annual ? tier.annualPrice : tier.price;
-              } else if (tier.pricingModel === "platform-fee") {
-                priceDisplay = annual ? tier.annualPrice : tier.price;
-                const fee = annual
-                  ? (tier as (typeof tiers)[2]).annualPlatformFee
-                  : (tier as (typeof tiers)[2]).platformFee;
-                priceSubtext = `+ ${fee}/mo platform fee`;
-              } else {
-                priceDisplay = annual ? tier.annualPrice : tier.price;
-              }
+              const q = quote(tier.model, seats, annual);
+              const showPerSeat = hasVolumeCurve(tier.model);
+              const overflow = marginalSeatRate(tier.model, annual);
 
               return (
                 <div
                   key={tier.name}
-                  className={`flex flex-col rounded-2xl border p-8 ${
+                  className={`relative flex flex-col rounded-2xl border p-8 ${
                     tier.highlight
                       ? "border-primary-light bg-white shadow-lg shadow-primary-light/10 ring-2 ring-primary-light"
                       : "border-slate-200 bg-white"
                   }`}
                 >
+                  {/* Absolutely positioned on purpose: in the flow this badge
+                      pushed one card's price ~40px below the other three,
+                      breaking the horizontal scan the whole layout exists for. */}
                   {tier.highlight && (
-                    <div className="mb-4 inline-block self-start rounded-full bg-primary-light/10 px-3 py-1 text-xs font-semibold text-primary-light">
+                    <div className="absolute right-6 top-6 rounded-full bg-primary-light/10 px-3 py-1 text-xs font-semibold text-primary-light">
                       Most Popular
                     </div>
                   )}
                   <h3 className="text-xl font-bold text-primary">
                     {tier.name}
                   </h3>
+                  {/* True monthly total for the selected team size. This is
+                      the headline on purpose: a per-seat rate understates the
+                      Professional bill 2.5x at its own minimum. */}
                   <div className="mt-4 flex items-baseline gap-1">
                     <span className="text-4xl font-bold text-slate-900">
-                      {priceDisplay}
+                      {formatMoney(q.monthly)}
                     </span>
-                    {tier.period && (
-                      <span className="text-slate-500">{tier.period}</span>
-                    )}
+                    <span className="text-slate-500">/month</span>
                   </div>
-                  {priceSubtext && (
-                    <p className="mt-1 text-sm font-medium text-kuju-dark">
-                      {priceSubtext}
+
+                  {/* The sum, spelled out. Naming the platform fee here is the
+                      whole point of this layout. */}
+                  <p className="mt-1 text-sm font-medium text-kuju-dark">
+                    {q.breakdown}
+                  </p>
+
+                  <p className="mt-1 text-xs text-slate-500">
+                    {q.billedSeats} {q.billedSeats === 1 ? "seat" : "seats"}
+                    {showPerSeat && (
+                      <> &middot; {formatMoney(q.perSeat)} per mailbox</>
+                    )}
+                    {annual && <> &middot; billed annually</>}
+                  </p>
+
+                  {q.floorNote && (
+                    <p className="mt-2 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600">
+                      {q.floorNote}
                     </p>
                   )}
-                  {annual && (
-                    <p className="mt-1 text-xs text-slate-500">
-                      Billed annually
-                    </p>
-                  )}
+
                   <p className="mt-3 text-sm text-slate-600">{tier.desc}</p>
 
-                  {/* Plan limits */}
-                  <div className="mt-6 grid grid-cols-2 gap-2 border-t border-slate-100 pt-6">
-                    <div className="text-center">
-                      <div className="text-lg font-bold text-primary">
-                        {tier.accounts}
-                      </div>
-                      <div className="text-xs text-slate-500">accounts</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-lg font-bold text-primary">
-                        {tier.storagePerAccount}
-                      </div>
-                      <div className="text-xs text-slate-500">per account</div>
-                    </div>
+                  {/* Anchor prices — three concrete monthly totals, so there
+                      is something memorable to quote even after the seat
+                      control moves. The effective per-seat column appears only
+                      where the curve is real: it falls for the platform-fee
+                      model, is flat for per-seat models, and RISES for
+                      base-plus-seat, where showing it would punish the
+                      cheapest tier for growing. */}
+                  <div className="mt-6 border-t border-slate-100 pt-6">
+                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      At a glance
+                    </p>
+                    <dl className="space-y-1">
+                      {tier.anchors.map((n) => {
+                        const a = quote(tier.model, n, annual);
+                        return (
+                          <div
+                            key={n}
+                            className="flex items-baseline justify-between gap-2 text-sm"
+                          >
+                            <dt className="text-slate-500">{n} seats</dt>
+                            <dd className="font-semibold text-slate-900">
+                              {formatMoney(a.monthly)}
+                              {showPerSeat && (
+                                <span className="ml-1 font-normal text-slate-500">
+                                  ({formatMoney(a.perSeat)}/seat)
+                                </span>
+                              )}
+                            </dd>
+                          </div>
+                        );
+                      })}
+                    </dl>
+                    <p className="mt-2 text-xs text-slate-500">
+                      +{formatMoney(overflow)} per additional seat
+                    </p>
                   </div>
 
-                  {/* Minimum spend note (Enterprise) */}
-                  {"minimumSpend" in tier && (tier as any).minimumSpend && (
-                    <p className="mt-2 text-center text-xs font-medium text-kuju-dark">
-                      {(tier as any).minimumSpend}
+                  {/* Why the number looks like this. Present only where the
+                      cost structure is genuinely counterintuitive. */}
+                  {tier.costNote && (
+                    <p className="mt-4 text-xs leading-relaxed text-slate-600">
+                      {tier.costNote}
                     </p>
                   )}
 
-                  {/* Unlimited domains note */}
-                  <p className="mt-3 text-center text-xs text-slate-500">
-                    Unlimited domains &amp; aliases included
+                  <p className="mt-4 text-xs text-slate-500">
+                    {tier.storagePerAccount} storage per account &middot;
+                    unlimited domains &amp; aliases
                   </p>
 
                   {/* Features */}
