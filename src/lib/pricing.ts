@@ -30,7 +30,8 @@ export type PricingModel =
       minSeats: number;
     }
   /**
-   * Fixed platform fee plus a per-seat rate, with a seat floor. Professional.
+   * Fixed platform fee plus a per-seat rate, with a seat floor. Professional
+   * and Enterprise.
    *
    * The platform fee buys infrastructure whose cost does not move with
    * headcount (archiving, retention engine, analytics). That is why this is the
@@ -44,13 +45,6 @@ export type PricingModel =
       seatRate: number;
       annualSeatRate: number;
       minSeats: number;
-    }
-  /** Per-seat against a monthly spend floor. Enterprise. */
-  | {
-      kind: "spend-floor";
-      seatRate: number;
-      annualSeatRate: number;
-      minSpend: number;
     };
 
 /** What a tier actually costs at a given seat count. */
@@ -142,23 +136,6 @@ export function quote(
       };
     }
 
-    case "spend-floor": {
-      const rate = annual ? model.annualSeatRate : model.seatRate;
-      const seatCost = cents(seats * rate);
-      const belowFloor = seatCost < model.minSpend;
-      const monthly = belowFloor ? model.minSpend : seatCost;
-      return {
-        monthly,
-        billedSeats: seats,
-        perSeat: cents(monthly / seats),
-        breakdown: belowFloor
-          ? `${money(model.minSpend)} minimum spend`
-          : `${seats} seats x ${money(rate)}`,
-        floorNote: belowFloor
-          ? `${money(model.minSpend)}/mo minimum spend applies below ${Math.ceil(model.minSpend / rate)} seats`
-          : null,
-      };
-    }
   }
 }
 
@@ -167,9 +144,12 @@ export function quote(
  *
  * Only the platform-fee model does: its fixed component amortises. Showing an
  * "effective per seat" figure on the others would be misleading in two
- * different directions at once — flat for per-seat and spend-floor tiers, and
- * actually RISING for base-plus-seat, where the cheap included block is diluted
- * by every seat added past it. The UI shows that figure only where this is true.
+ * different directions at once — flat for the pure per-seat tier, and actually
+ * RISING for base-plus-seat, where the cheap included block is diluted by every
+ * seat added past it. The UI shows that figure only where this is true.
+ *
+ * Both Professional and Enterprise use this model, so both legitimately show
+ * the falling curve.
  */
 export function hasVolumeCurve(model: PricingModel): boolean {
   return model.kind === "platform-plus-seat";
@@ -182,7 +162,6 @@ export function marginalSeatRate(model: PricingModel, annual: boolean): number {
       return annual ? model.annualSeatRate : model.seatRate;
     case "per-seat":
     case "platform-plus-seat":
-    case "spend-floor":
       return annual ? model.annualSeatRate : model.seatRate;
   }
 }
