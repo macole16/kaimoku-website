@@ -6,6 +6,7 @@ import {
   quote,
   hasVolumeCurve,
   marginalSeatRate,
+  seatCap,
   formatMoney,
   type PricingModel,
 } from "@/lib/pricing";
@@ -36,15 +37,18 @@ const tiers: Tier[] = [
       includedSeats: 5,
       seatRate: 5,
       annualSeatRate: 4.15,
+      maxSeats: 10,
     },
-    anchors: [5, 10, 15],
+    anchors: [5, 8, 10],
     desc: "For individuals and families. Full email platform with AI.",
     storagePerAccount: "5 GB",
+    costNote:
+      "A household plan, capped at 10 mailboxes. Past that you are a business, and Small Business is the tier with the API, workspaces and admin delegation to match.",
     highlight: false,
     ctaHref: URLS.CHECKOUT_INDIVIDUAL,
     ctaLabel: "Available at launch",
     extras: [
-      "+$5/additional account (includes 5 GB)",
+      "+$5/additional account (includes 5 GB), up to 10 total",
       "+$1/GB/mo for extra storage",
       "Premium AI: +$5/account/mo",
     ],
@@ -175,7 +179,7 @@ const faqs = [
   },
   {
     q: "How does per-account pricing work?",
-    a: "Small Business, Professional, and Enterprise are billed per email account. You choose how many accounts you need and can add more at any time. Individual/Family includes 5 accounts in the base price with additional accounts at $5 each.",
+    a: "Small Business, Professional, and Enterprise are billed per email account. You choose how many accounts you need and can add more at any time. Individual/Family includes 5 accounts in the base price, with additional accounts at $5 each up to a maximum of 10. It is a household plan, so it is capped there: above 10 mailboxes you are on Small Business, which is also where the API, workspaces and admin delegation live.",
   },
   {
     q: "What's the Professional platform fee?",
@@ -183,7 +187,7 @@ const faqs = [
   },
   {
     q: "How does Enterprise pricing work?",
-    a: "Enterprise is $250/month plus $5/account/month, with a 25-account minimum, so the smallest Enterprise plan is $375/month. It is deliberately the same shape as Professional and the same $5/account rate, which makes the upgrade a flat $175/month at any size. We price it that way because SSO, audit logging and dedicated infrastructure cost us the same whether you have 30 mailboxes or 3,000. Charging for them per account would mean a 500-person organization paid roughly ten times a 50-person one for identical infrastructure. Add-ons such as managed backups and extended retention are still priced individually.",
+    a: "Enterprise is $250/month plus $5/account/month, with a 25-account minimum, so the smallest Enterprise plan is $375/month. It is deliberately the same shape as Professional and the same $5/account rate, which makes the upgrade a flat $175/month at any size from its 25-account minimum upward. We price it that way because SSO, audit logging and dedicated infrastructure cost us the same whether you have 30 mailboxes or 3,000. Charging for them per account would mean a 500-person organization paid roughly ten times a 50-person one for identical infrastructure. Add-ons such as managed backups and extended retention are still priced individually.",
   },
   {
     q: "What is Premium AI?",
@@ -343,6 +347,7 @@ function PricingPageInner() {
               const q = quote(tier.model, seats, annual);
               const showPerSeat = hasVolumeCurve(tier.model);
               const overflow = marginalSeatRate(tier.model, annual);
+              const cap = seatCap(tier.model);
 
               return (
                 <div
@@ -366,32 +371,49 @@ function PricingPageInner() {
                   </h3>
                   {/* True monthly total for the selected team size. This is
                       the headline on purpose: a per-seat rate understates the
-                      Professional bill 2.5x at its own minimum. */}
-                  <div className="mt-4 flex items-baseline gap-1">
-                    <span className="text-4xl font-bold text-slate-900">
-                      {formatMoney(q.monthly)}
-                    </span>
-                    <span className="text-slate-500">/month</span>
-                  </div>
+                      Professional bill 2.5x at its own minimum.
 
-                  {/* The sum, spelled out. Naming the platform fee here is the
-                      whole point of this layout. */}
-                  <p className="mt-1 text-sm font-medium text-kuju-dark">
-                    {q.breakdown}
-                  </p>
+                      A tier past its seat cap shows why instead of a price. It
+                      must not render a number here: a capped tier's price at an
+                      uncapped size is not a quote, it is a fiction. */}
+                  {q.available ? (
+                    <>
+                      <div className="mt-4 flex items-baseline gap-1">
+                        <span className="text-4xl font-bold text-slate-900">
+                          {formatMoney(q.monthly)}
+                        </span>
+                        <span className="text-slate-500">/month</span>
+                      </div>
 
-                  <p className="mt-1 text-xs text-slate-500">
-                    {q.billedSeats} {q.billedSeats === 1 ? "seat" : "seats"}
-                    {showPerSeat && (
-                      <> &middot; {formatMoney(q.perSeat)} per mailbox</>
-                    )}
-                    {annual && <> &middot; billed annually</>}
-                  </p>
+                      {/* The sum, spelled out. Naming the platform fee here is
+                          the whole point of this layout. */}
+                      <p className="mt-1 text-sm font-medium text-kuju-dark">
+                        {q.breakdown}
+                      </p>
 
-                  {q.floorNote && (
-                    <p className="mt-2 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600">
-                      {q.floorNote}
-                    </p>
+                      <p className="mt-1 text-xs text-slate-500">
+                        {q.billedSeats} {q.billedSeats === 1 ? "seat" : "seats"}
+                        {showPerSeat && (
+                          <> &middot; {formatMoney(q.perSeat)} per mailbox</>
+                        )}
+                        {annual && <> &middot; billed annually</>}
+                      </p>
+
+                      {q.floorNote && (
+                        <p className="mt-2 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600">
+                          {q.floorNote}
+                        </p>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <p className="mt-4 text-2xl font-light leading-tight text-slate-400">
+                        {q.reason}
+                      </p>
+                      <p className="mt-2 text-sm text-slate-600">
+                        For {seats} mailboxes, see Small Business.
+                      </p>
+                    </>
                   )}
 
                   <p className="mt-3 text-sm text-slate-600">{tier.desc}</p>
@@ -410,6 +432,7 @@ function PricingPageInner() {
                     <dl className="space-y-1">
                       {tier.anchors.map((n) => {
                         const a = quote(tier.model, n, annual);
+                        if (!a.available) return null;
                         return (
                           <div
                             key={n}
@@ -429,7 +452,9 @@ function PricingPageInner() {
                       })}
                     </dl>
                     <p className="mt-2 text-xs text-slate-500">
-                      +{formatMoney(overflow)} per additional seat
+                      {cap === null
+                        ? `+${formatMoney(overflow)} per additional seat`
+                        : `+${formatMoney(overflow)} per additional seat, up to ${cap}`}
                     </p>
                   </div>
 
