@@ -340,6 +340,12 @@ function PricingPageInner() {
             )}
           </div>
 
+          {/* The tier names are h3, so without this the page jumps h1 -> h3.
+              Visually hidden rather than rendered: the grid needs no visible
+              label, but screen-reader users need the level to be continuous
+              and the group to be named. */}
+          <h2 className="sr-only">Plans</h2>
+
           {/* Tier cards */}
           <div className="grid gap-6 lg:grid-cols-4">
             {tiers.map((tier) => {
