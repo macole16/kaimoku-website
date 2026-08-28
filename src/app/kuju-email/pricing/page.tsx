@@ -48,7 +48,7 @@ const tiers: Tier[] = [
         annualPremiumAIPerSeat: 4.15,
       },
     },
-    anchors: [5, 8, 10],
+    anchors: [5, 10],
     desc: "For individuals and families. Full email platform with AI.",
     storagePerAccount: "5 GB",
     costNote:
@@ -178,7 +178,7 @@ const tiers: Tier[] = [
     desc: "For organizations with identity, audit and residency requirements.",
     storagePerAccount: "10 GB default",
     costNote:
-      "From its 25-account minimum upward, Enterprise is exactly $175/month more than Professional at the same account count, and stays $175 more however large you grow. SSO and audit logging cost us the same whether you have 30 mailboxes or 3,000, so we do not charge for them per seat.",
+      "Exactly $175/month more than Professional at the same account count, at any size from its 25-account minimum up.",
     ctaHref: URLS.CHECKOUT_ENTERPRISE,
     ctaLabel: "Available at launch",
     extras: [
@@ -277,44 +277,31 @@ function PricingPageInner() {
 
   return (
     <>
-      <section className="bg-gradient-to-br from-surface-deep via-surface-mist to-surface-deep px-6 py-20 text-white">
+      <section className="bg-gradient-to-br from-surface-deep via-surface-mist to-surface-deep px-6 py-12 text-white">
         <div className="mx-auto max-w-7xl text-center">
           <h1 className="mb-4 text-4xl font-bold md:text-5xl">
-            Simple, Transparent Pricing
+            What Kuju Email will cost
           </h1>
           <p className="mx-auto max-w-2xl text-lg text-slate-300">
-            Kuju Email is not open yet. This is the pricing we intend to launch
-            with, published early because you deserve to know the shape of the
-            bill before you invest a migration in us. Set your team size below
-            and every plan shows its real monthly total, platform fees included.
+            Not open yet, so these are launch prices, published early because
+            you deserve the shape of the bill before you commit a migration to
+            us. A 14-day trial opens with the platform.
           </p>
+          <a
+            href={URLS.KUJU_NOTIFY}
+            className="mt-6 inline-block rounded-lg bg-white/10 px-5 py-3 text-sm font-semibold text-white ring-1 ring-white/25 transition-colors hover:bg-white/20"
+          >
+            Get notified at launch
+          </a>
         </div>
       </section>
 
-      <section className="px-6 py-20">
+      <section className="px-6 pb-20 pt-10">
         <div className="mx-auto max-w-7xl">
-          {/* Trial banner */}
-          <div className="mb-12 rounded-xl border border-kuju/20 bg-kuju/5 p-6 text-center">
-            <p className="mb-3 text-lg font-semibold text-primary">
-              A 14-day trial will open with the platform
-            </p>
-            <p className="mb-4 text-slate-600">
-              Full Professional-level access, all features, no credit card. We
-              are not taking signups yet — tell us you want one and you will
-              hear from us before the doors open.
-            </p>
-            <a
-              href={URLS.KUJU_NOTIFY}
-              className="inline-block rounded-lg bg-kuju px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-kuju-dark"
-            >
-              Get notified at launch
-            </a>
-          </div>
-
           {/* Seat control — the page's primary input. Every price below is
               recomputed from it, so the headline figure is the real bill for
               THIS team rather than an abstract per-seat rate. */}
-          <div className="mb-10 rounded-2xl border border-slate-200 bg-white px-6 py-6">
+          <div className="mb-8 rounded-2xl border border-slate-200 bg-white px-6 py-6">
             <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-3">
               <label
                 htmlFor="seat-count"
@@ -427,42 +414,46 @@ function PricingPageInner() {
               </div>
             </fieldset>
 
+            {/* Billing period is a pricing input like the other three, so it
+                belongs in the same panel; standing alone between the panel and
+                the cards it read as a second, unrelated control zone. */}
+            <div className="mt-6 border-t border-slate-100 pt-6">
+              <div className="flex items-center justify-center gap-3">
+                <span
+                  className={`text-sm font-medium ${!annual ? "text-primary" : "text-slate-400"}`}
+                >
+                  Monthly
+                </span>
+                <button
+                  onClick={() => setAnnual(!annual)}
+                  className={`relative h-7 w-12 rounded-full transition-colors ${
+                    annual ? "bg-kuju" : "bg-slate-300"
+                  }`}
+                  aria-label="Toggle annual billing"
+                >
+                  <span
+                    className={`absolute top-0.5 left-0.5 h-6 w-6 rounded-full bg-white shadow transition-transform ${
+                      annual ? "translate-x-5" : "translate-x-0"
+                    }`}
+                  />
+                </button>
+                <span
+                  className={`text-sm font-medium ${annual ? "text-primary" : "text-slate-400"}`}
+                >
+                  Annual
+                </span>
+                {annual && (
+                  <span className="rounded-full bg-kuju/10 px-2 py-0.5 text-xs font-semibold text-kuju-dark">
+                    Save 17% (2 months free)
+                  </span>
+                )}
+              </div>
+            </div>
+
             <p className="mt-4 text-center text-xs text-slate-500">
               Every price below is the real monthly total at this team size,
               including whatever you select here.
             </p>
-          </div>
-
-          {/* Billing toggle */}
-          <div className="mb-10 flex items-center justify-center gap-3">
-            <span
-              className={`text-sm font-medium ${!annual ? "text-primary" : "text-slate-400"}`}
-            >
-              Monthly
-            </span>
-            <button
-              onClick={() => setAnnual(!annual)}
-              className={`relative h-7 w-12 rounded-full transition-colors ${
-                annual ? "bg-kuju" : "bg-slate-300"
-              }`}
-              aria-label="Toggle annual billing"
-            >
-              <span
-                className={`absolute top-0.5 left-0.5 h-6 w-6 rounded-full bg-white shadow transition-transform ${
-                  annual ? "translate-x-5" : "translate-x-0"
-                }`}
-              />
-            </button>
-            <span
-              className={`text-sm font-medium ${annual ? "text-primary" : "text-slate-400"}`}
-            >
-              Annual
-            </span>
-            {annual && (
-              <span className="rounded-full bg-kuju/10 px-2 py-0.5 text-xs font-semibold text-kuju-dark">
-                Save 17% (2 months free)
-              </span>
-            )}
           </div>
 
           {/* The tier names are h3, so without this the page jumps h1 -> h3.
@@ -695,12 +686,22 @@ function PricingPageInner() {
           <h2 className="mb-12 text-center text-3xl font-bold text-primary">
             Frequently Asked Questions
           </h2>
-          <div className="space-y-8">
+          <div className="divide-y divide-slate-200 border-y border-slate-200">
             {faqs.map(({ q, a }) => (
-              <div key={q}>
-                <h3 className="mb-2 text-lg font-semibold text-primary">{q}</h3>
-                <p className="leading-relaxed text-slate-600">{a}</p>
-              </div>
+              <details key={q} className="group py-4">
+                <summary className="flex cursor-pointer items-center justify-between gap-4 text-lg font-semibold text-primary marker:content-['']">
+                  <h3 className="text-lg font-semibold">{q}</h3>
+                  <span
+                    aria-hidden
+                    className="shrink-0 text-slate-400 transition-transform group-open:rotate-45"
+                  >
+                    +
+                  </span>
+                </summary>
+                <p className="mt-3 max-w-prose leading-relaxed text-slate-600">
+                  {a}
+                </p>
+              </details>
             ))}
           </div>
         </div>
