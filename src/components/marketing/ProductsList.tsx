@@ -28,7 +28,9 @@ export function ProductsList({ products }: { products: Product[] }) {
               >
                 {p.name}
               </h3>
-              <span className="text-xs text-slate-500">
+              {/* slate-600, not slate-500: at 12px on paper (#f4f1ea) slate-500 measures
+                  4.22:1 against a 4.5:1 WCAG AA requirement. slate-600 is 6.72:1. */}
+              <span className="text-xs text-slate-600">
                 {p.status === "shipped"
                   ? `Shipped ${p.shippedIn}`
                   : p.status === "beta"

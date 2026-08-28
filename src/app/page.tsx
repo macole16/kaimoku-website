@@ -12,11 +12,21 @@ export default function Home() {
           the brand mark and CTA. Mark watermark bleeds off the right
           edge as ornament; type does the work. */}
       <section className="relative overflow-hidden bg-paper px-6 py-24 text-foreground md:py-32">
+        {/* Ornamental watermark. The size is load-bearing, not taste: the Mark
+            is a rectangle frame with two inner rules, and at 560 its height
+            (700px, since h = size * 1.25) exceeded this section's ~609px, so
+            overflow-hidden clipped the top AND bottom while right-[-7%] clipped
+            the right. With every closing edge gone it rendered as three
+            disconnected bars, one of them the brand orange at 15% opacity,
+            reading as a CSS bug rather than ornament. At 420 the frame is
+            525px tall and fits, so the top, bottom and left edges close and
+            only the right bleeds, which is the intended effect. Keep
+            size * 1.25 under the section height if either ever changes. */}
         <div
           aria-hidden
           className="pointer-events-none absolute right-[-7%] top-1/2 hidden -translate-y-1/2 opacity-[0.15] md:block"
         >
-          <Mark size={560} />
+          <Mark size={420} />
         </div>
         <div className="relative mx-auto max-w-7xl">
           <div className="max-w-3xl">
