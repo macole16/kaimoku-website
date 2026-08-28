@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { URLS, isComingSoon } from "@/lib/constants";
+import { URLS } from "@/lib/constants";
 import { loadModes } from "@/lib/modes";
 import { ModesShowcase } from "@/components/marketing/ModesShowcase";
 import { SecurityJourney } from "@/components/marketing/SecurityJourney";
@@ -14,23 +14,23 @@ export const metadata: Metadata = {
 const standoutFeatures = [
   {
     title: "Defense in depth, by default",
-    desc: "Two-tier spam and phishing detection, Google Safe Browsing URL checks on every link, message intelligence with SPF/DKIM/DMARC and relay-hop tracing, and virus attachments stripped automatically while the message body still arrives.",
+    desc: "rspamd scoring on every inbound message, Google Safe Browsing URL checks on every link, message intelligence with SPF/DKIM/DMARC and relay-hop tracing, and virus attachments stripped automatically while the message body still arrives.",
+  },
+  {
+    title: "Quarantine, not silent rejection",
+    desc: "Messages convicted of authentication laundering are held in a recoverable quarantine rather than bounced into the void. Per-domain junk, drop, and expiry thresholds decide what lands, what waits, and for how long.",
   },
   {
     title: "Multi-domain, multi-tenant",
     desc: "Per-domain admin delegation, branded webmail hostnames with automatic TLS, retention policies, partitioned storage, and per-domain spam thresholds. Tenants are fully isolated.",
   },
   {
-    title: "Connect existing accounts",
-    desc: "Bring Gmail, Outlook, or any IMAP mailbox into one inbox via Kuju Bridge. Send and receive without changing addresses. Use Kuju as the front-end for the email you already have.",
+    title: "Bring your existing mail",
+    desc: "Import from any IMAP mailbox — Gmail, Outlook, or an old server you are leaving behind. Folder structure, flags, and dates survive the move, and duplicate detection means a re-run picks up where it stopped instead of doubling your inbox.",
   },
   {
     title: "Native CalDAV and CardDAV",
     desc: 'RFC 4791 calendar and RFC 6352 contacts that sync with Apple Calendar, Thunderbird, and any standard client. One-click "add to calendar" from detected dates in messages.',
-  },
-  {
-    title: "Self-hosted option (coming soon)",
-    desc: "Run Kuju Email on your own infrastructure when compliance or data residency rules ask for it. The same managed platform, deployed where you choose.",
   },
   {
     title: "Modern authentication",
@@ -41,18 +41,18 @@ const standoutFeatures = [
 const onboardingSteps = [
   {
     step: "1",
-    title: "Start your trial",
-    desc: "Sign up for a 14-day free trial on demo.kuju.email. Full Professional-level access. All features, no restrictions.",
+    title: "Tell us you want in",
+    desc: "Kuju Email is in private development. Send a note and we will add you to the launch list, with a working demo ahead of general availability.",
   },
   {
     step: "2",
-    title: "Choose a plan and bring your domain",
-    desc: "Pick the tier that fits. Point your MX, SPF, and DKIM records to Kuju. We provide the exact values to copy into your DNS provider.",
+    title: "Bring your domain",
+    desc: "At launch you point your MX, SPF, and DKIM records at Kuju. We provide the exact values to copy into your DNS provider — no guesswork, no downtime window.",
   },
   {
     step: "3",
-    title: "You're live",
-    desc: "Email flows through Kuju immediately. Import your existing mail anytime. Invite your team and start using the full platform.",
+    title: "Import and go",
+    desc: "Pull your existing mail across from any IMAP server. Folders, flags, and dates come with it, and duplicate detection makes the import safe to re-run.",
   },
 ];
 
@@ -64,6 +64,9 @@ export default function KujuEmailPage() {
       <section className="bg-gradient-to-br from-surface-deep via-surface-mist to-surface-deep px-6 py-24 text-white md:py-32">
         <div className="mx-auto max-w-7xl">
           <div className="max-w-3xl">
+            <p className="mb-6 text-xs font-medium uppercase tracking-[0.2em] text-kuju-light">
+              Coming soon
+            </p>
             <h1
               className="mb-8 text-5xl font-light leading-[1.05] tracking-tight md:text-7xl"
               style={{ fontFamily: "var(--font-display)" }}
@@ -76,22 +79,14 @@ export default function KujuEmailPage() {
             <p className="mb-10 max-w-2xl text-lg leading-[1.7] text-slate-300 md:text-xl">
               Pick the one that fits the moment, or move between them as the
               work changes. Calendar, contacts, search, and security come along.
+              We are still building; here is what it will be.
             </p>
             <div className="flex flex-wrap items-center gap-6">
               <a
-                href={URLS.KUJU_TRIAL_SIGNUP}
-                className={`rounded-lg bg-kuju px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-kuju-dark ${
-                  isComingSoon(URLS.KUJU_TRIAL_SIGNUP)
-                    ? "pointer-events-none opacity-60"
-                    : ""
-                }`}
-                title={
-                  isComingSoon(URLS.KUJU_TRIAL_SIGNUP)
-                    ? "Coming soon"
-                    : undefined
-                }
+                href={URLS.KUJU_NOTIFY}
+                className="rounded-lg bg-kuju px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-kuju-dark"
               >
-                Start 14-Day Trial
+                Get notified at launch
               </a>
               <Link
                 href="/kuju-email/pricing"
@@ -114,8 +109,8 @@ export default function KujuEmailPage() {
             What sets Kuju Email apart
           </h2>
           <p className="mx-auto mb-12 max-w-2xl text-center text-lg text-slate-600">
-            Six things you get from day one. The full feature catalog lives in
-            the User Guide and API Docs.
+            Six things that will be there on day one. The full feature catalog
+            lives in the User Guide and API Docs.
           </p>
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {standoutFeatures.map((f) => (
@@ -161,10 +156,10 @@ export default function KujuEmailPage() {
         <div className="mx-auto max-w-7xl">
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="mb-4 text-3xl font-bold text-primary md:text-4xl">
-              Move your domain to Kuju
+              How moving will work
             </h2>
             <p className="mb-12 text-lg text-slate-600">
-              Switch to Kuju Email in three steps. No downtime, no data loss.
+              Three steps, once Kuju Email opens up. No downtime, no data loss.
             </p>
           </div>
           <div className="grid gap-8 md:grid-cols-3">
@@ -193,25 +188,19 @@ export default function KujuEmailPage() {
             className="mb-4 text-3xl font-light leading-tight tracking-tight text-foreground md:text-4xl"
             style={{ fontFamily: "var(--font-display)" }}
           >
-            Start where it makes sense.
+            Not open yet. Worth watching.
           </h2>
           <p className="mb-8 text-lg leading-[1.7] text-slate-600">
-            14 days, full Professional access, on demo.kuju.email. Bring your
-            domain when you choose a plan.
+            Kuju Email is in private development. Tell us what your team needs
+            from its email and we will come back to you before launch — the
+            roadmap is still soft enough for that to matter.
           </p>
           <div className="flex flex-wrap items-center gap-6">
             <a
-              href={URLS.KUJU_TRIAL_SIGNUP}
-              className={`rounded-lg bg-kuju px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-kuju-dark ${
-                isComingSoon(URLS.KUJU_TRIAL_SIGNUP)
-                  ? "pointer-events-none opacity-60"
-                  : ""
-              }`}
-              title={
-                isComingSoon(URLS.KUJU_TRIAL_SIGNUP) ? "Coming soon" : undefined
-              }
+              href={URLS.KUJU_NOTIFY}
+              className="rounded-lg bg-kuju px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-kuju-dark"
             >
-              Start 14-Day Trial
+              Get notified at launch
             </a>
             <Link
               href="/kuju-email/pricing"

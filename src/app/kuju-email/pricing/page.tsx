@@ -16,7 +16,7 @@ const tiers = [
     extraAccountPrice: "$5/account/mo",
     highlight: false,
     ctaHref: URLS.CHECKOUT_INDIVIDUAL,
-    ctaLabel: "Start 14-Day Trial",
+    ctaLabel: "Available at launch",
     extras: [
       "+$5/additional account (includes 5 GB)",
       "+$1/GB/mo for extra storage",
@@ -47,7 +47,7 @@ const tiers = [
     extraAccountPrice: null,
     highlight: true,
     ctaHref: URLS.CHECKOUT_SMALL_BUSINESS,
-    ctaLabel: "Start 14-Day Trial",
+    ctaLabel: "Available at launch",
     extras: ["+$1/GB/mo for extra storage", "Premium AI: +$5/account/mo"],
     features: [
       "Everything in Individual / Family, plus:",
@@ -76,7 +76,7 @@ const tiers = [
     extraAccountPrice: null,
     highlight: false,
     ctaHref: URLS.CHECKOUT_PROFESSIONAL,
-    ctaLabel: "Start 14-Day Trial",
+    ctaLabel: "Available at launch",
     extras: [
       "+$1/GB/mo for extra storage",
       "3-year archiving included",
@@ -109,7 +109,7 @@ const tiers = [
     extraAccountPrice: null,
     highlight: false,
     ctaHref: URLS.CHECKOUT_ENTERPRISE,
-    ctaLabel: "Start 14-Day Trial",
+    ctaLabel: "Available at launch",
     extras: [
       "+$1/GB/mo for extra storage",
       "Managed backups: +$7/account/mo",
@@ -129,8 +129,8 @@ const tiers = [
 
 const faqs = [
   {
-    q: "How does the 14-day trial work?",
-    a: "Every new signup gets a 14-day trial with full Professional-level access — all features, no restrictions. You'll get an email address on demo.kuju.email to explore the platform. After the trial, pick a plan and bring your own domain to go live.",
+    q: "How will the 14-day trial work?",
+    a: "When Kuju Email opens, every new signup will get a 14-day trial with full Professional-level access — all features, no restrictions. You'll get an email address on demo.kuju.email to explore the platform. After the trial, pick a plan and bring your own domain to go live.",
   },
   {
     q: "What happens when my trial expires?",
@@ -176,10 +176,6 @@ const faqs = [
     q: "Can I bring my own AI provider?",
     a: "Yes. The AI features support Anthropic Claude, OpenAI, Together AI, Groq, Fireworks, Mistral, and any OpenAI-compatible endpoint. API keys are isolated per-domain.",
   },
-  {
-    q: "Is there a self-hosted option?",
-    a: "Not yet, but it's on our roadmap. If you have strict compliance or data residency requirements, reach out — we'd love to hear about your needs.",
-  },
 ];
 
 function PricingPageInner() {
@@ -193,8 +189,9 @@ function PricingPageInner() {
             Simple, Transparent Pricing
           </h1>
           <p className="mx-auto max-w-2xl text-lg text-slate-300">
-            Start with a 14-day free trial. Pick the plan that fits when
-            you&rsquo;re ready. No hidden fees.
+            Kuju Email is not open yet. This is the pricing we intend to launch
+            with, published early because you deserve to know the shape of the
+            bill before you invest a migration in us. No hidden fees.
           </p>
         </div>
       </section>
@@ -204,25 +201,18 @@ function PricingPageInner() {
           {/* Trial banner */}
           <div className="mb-12 rounded-xl border border-kuju/20 bg-kuju/5 p-6 text-center">
             <p className="mb-3 text-lg font-semibold text-primary">
-              Try everything free for 14 days
+              A 14-day trial will open with the platform
             </p>
             <p className="mb-4 text-slate-600">
-              Full Professional-level access on demo.kuju.email. All features,
-              no restrictions, no credit card required. Bring your own domain
-              when you&rsquo;re ready to go live.
+              Full Professional-level access, all features, no credit card. We
+              are not taking signups yet — tell us you want one and you will
+              hear from us before the doors open.
             </p>
             <a
-              href={URLS.KUJU_TRIAL_SIGNUP}
-              className={`inline-block rounded-lg bg-kuju px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-kuju-dark ${
-                isComingSoon(URLS.KUJU_TRIAL_SIGNUP)
-                  ? "pointer-events-none opacity-60"
-                  : ""
-              }`}
-              title={
-                isComingSoon(URLS.KUJU_TRIAL_SIGNUP) ? "Coming soon" : undefined
-              }
+              href={URLS.KUJU_NOTIFY}
+              className="inline-block rounded-lg bg-kuju px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-kuju-dark"
             >
-              Start 14-Day Trial
+              Get notified at launch
             </a>
           </div>
 
