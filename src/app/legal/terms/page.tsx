@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 
+import { NotYetAvailableNote } from "@/components/NotYetAvailableNote";
+
 export const metadata: Metadata = {
   title: "Terms of Service",
   description:
@@ -11,7 +13,7 @@ export default function TermsPage() {
     <div className="mx-auto max-w-3xl px-6 py-16">
       <h1 className="mb-2 text-4xl font-bold text-primary">Terms of Service</h1>
       <p className="mb-12 text-sm text-slate-500">
-        Effective Date: March 18, 2026 &middot; Last Updated: April 10, 2026
+        Effective Date: March 18, 2026 &middot; Last Updated: August 27, 2026
       </p>
 
       <div className="space-y-10 text-slate-700 leading-relaxed [&_h2]:mb-4 [&_h2]:mt-0 [&_h2]:text-xl [&_h2]:font-bold [&_h2]:text-primary [&_p]:mb-4 [&_ul]:mb-4 [&_ul]:list-inside [&_ul]:list-disc [&_ul]:space-y-1 [&_ol]:mb-4 [&_ol]:list-inside [&_ol]:list-decimal [&_ol]:space-y-1">
@@ -58,6 +60,8 @@ export default function TermsPage() {
             features. The Service is provided on a subscription basis according
             to the plan you select.
           </p>
+          <NotYetAvailableNote feature="Kuju Bridge" />
+
           <p>
             <strong>Kuju Bridge.</strong> The Service includes an optional
             feature called Kuju Bridge that allows you to connect external email
@@ -71,6 +75,9 @@ export default function TermsPage() {
 
         <section>
           <h2>3. Connected Accounts (Kuju Bridge)</h2>
+
+          <NotYetAvailableNote feature="Kuju Bridge" />
+
           <p>When you use Kuju Bridge to connect an external email account:</p>
           <ul>
             <li>
