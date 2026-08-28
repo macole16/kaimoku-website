@@ -65,7 +65,23 @@ export const metadata: Metadata = {
     title: "Kaimoku Technologies",
     description: SITE_DESCRIPTION,
   },
-  robots: { index: true, follow: true },
+  // DELIBERATELY NOINDEX. Kaimoku is pre-launch and the site is meant to stay
+  // undiscoverable until it opens; kaimoku.tech returning 404 is part of the
+  // same intent, not a misconfiguration (github-bhri4). Vercel sends no
+  // X-Robots-Tag on production aliases, so without this the vercel.app host is
+  // fully open to search engines.
+  //
+  // This does NOT disable link sharing. The openGraph and twitter blocks above
+  // still render a card when someone is sent the URL directly; noindex governs
+  // crawling and search listings, which is the separate thing being withheld.
+  //
+  // AT LAUNCH: flip both flags to true, delete the noindex in src/app/robots.ts,
+  // and only then point metadataBase at the real domain.
+  robots: {
+    index: false,
+    follow: false,
+    googleBot: { index: false, follow: false },
+  },
 };
 
 export default function RootLayout({
