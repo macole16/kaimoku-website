@@ -9,10 +9,10 @@
   name: Kuju Email
   tagline: A complete email platform that fits the work.
   description: |
-    Email infrastructure that pays attention. Productivity and security
-    woven through the workflow, calendar and contacts that sync with any
-    standard client, UI modes for the way you work. Managed service or
-    self-host (coming soon).
+    Email infrastructure that pays attention. Security woven through the
+    workflow rather than bolted beside it, calendar and contacts that sync
+    with any standard client, and four UI modes for the way the work
+    actually changes shape.
   href: /kuju-email
-  status: beta
+  status: coming_soon
   shippedIn: "0.13"
