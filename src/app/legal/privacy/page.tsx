@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 
+import { NotYetAvailableNote } from "@/components/NotYetAvailableNote";
+
 export const metadata: Metadata = {
   title: "Privacy Policy",
   description:
@@ -11,7 +13,7 @@ export default function PrivacyPage() {
     <div className="mx-auto max-w-3xl px-6 py-16">
       <h1 className="mb-2 text-4xl font-bold text-primary">Privacy Policy</h1>
       <p className="mb-12 text-sm text-slate-500">
-        Effective Date: March 18, 2026 &middot; Last Updated: April 10, 2026
+        Effective Date: March 18, 2026 &middot; Last Updated: August 27, 2026
       </p>
 
       <div className="space-y-10 text-slate-700 leading-relaxed [&_h2]:mb-4 [&_h2]:mt-0 [&_h2]:text-xl [&_h2]:font-bold [&_h2]:text-primary [&_p]:mb-4 [&_ul]:mb-4 [&_ul]:list-inside [&_ul]:list-disc [&_ul]:space-y-1">
@@ -61,6 +63,8 @@ export default function PrivacyPage() {
             <li>Calendar events and contact records you create</li>
             <li>Folder structures and organizational preferences</li>
           </ul>
+
+          <NotYetAvailableNote feature="Kuju Bridge" />
 
           <p>
             <strong>Connected Account Data (Kuju Bridge).</strong> If you
@@ -134,6 +138,9 @@ export default function PrivacyPage() {
 
         <section>
           <h2>4. Connected Accounts (Kuju Bridge)</h2>
+
+          <NotYetAvailableNote feature="Kuju Bridge" />
+
           <p>
             Kuju Bridge allows you to connect external email accounts (Gmail,
             Microsoft Outlook, or IMAP providers) to view and manage your email
@@ -456,6 +463,9 @@ export default function PrivacyPage() {
 
         <section>
           <h2>15. Google API Services User Data Policy</h2>
+
+          <NotYetAvailableNote feature="Kuju Bridge" />
+
           <p>
             Kuju Bridge&rsquo;s use and transfer of information received from
             Google APIs adheres to the{" "}
