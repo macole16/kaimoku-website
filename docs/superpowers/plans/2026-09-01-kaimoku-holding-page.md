@@ -77,8 +77,12 @@ export const config = {
 - [ ] **Step 3: Start the dev server**
 
 ```bash
-npx next dev -p 3999
+npx next dev -p 3999 > /tmp/task1-probe-dev.log 2>&1 &
+DEV_PID=$!
+sleep 10
 ```
+
+Background it. Run in the foreground it blocks, and Step 4 never executes.
 
 - [ ] **Step 4: Run both arms and read the headers**
 
@@ -102,9 +106,12 @@ Expected: the first prints `x-probe-ran: 1` and `x-probe-host: kaimoku.tech`; th
 - [ ] **Step 6: Delete the probe**
 
 ```bash
+kill "$DEV_PID"
 rm src/middleware.ts
 git status --porcelain   # MUST be empty
 ```
+
+Both matter: the port must be free for Task 2, and the probe file must be gone or Task 4 cannot create `src/middleware.ts` cleanly.
 
 Nothing from this task is committed. It is a spike; its output is an answer.
 
