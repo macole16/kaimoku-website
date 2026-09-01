@@ -22,7 +22,10 @@ cleanup() {
 trap cleanup EXIT
 
 echo "starting dev server on ${PORT}..."
-npx next dev -p "$PORT" > /tmp/verify-holding-dev.log 2>&1 &
+# mise exec, not a bare npx: the shell's own node is 26.7.0, but .mise.toml
+# pins 22.11.0, and this script is the repo's only test -- it must run on
+# the pinned version, the same way the build already does.
+mise exec -- npx next dev -p "$PORT" > /tmp/verify-holding-dev.log 2>&1 &
 DEV_PID=$!
 
 ready=0
@@ -57,10 +60,12 @@ arm "3 www rewrites"        www.kaimoku.tech           /                     "$H
 arm "4 vercel.app UNTOUCHED" kaimoku-website.vercel.app /kuju-email/pricing  "$SITE_SENTINEL"    "$HOLDING_SENTINEL"
 arm "5 robots passthrough"  kaimoku.tech               /robots.txt           "Disallow: /"       "$HOLDING_SENTINEL"
 arm "6 _next is rewritten too" kaimoku.tech /_next/static/chunks/main.js "$HOLDING_SENTINEL"
+arm "7 trailing-dot apex rewrites" kaimoku.tech. / "$HOLDING_SENTINEL"
+arm "8 trailing-dot www rewrites" www.kaimoku.tech. / "$HOLDING_SENTINEL"
 
 echo
 if [[ "$FAILS" -gt 0 ]]; then
   echo "${FAILS} arm(s) FAILED"
   exit 1
 fi
-echo "all 6 arms passed"
+echo "all 8 arms passed"

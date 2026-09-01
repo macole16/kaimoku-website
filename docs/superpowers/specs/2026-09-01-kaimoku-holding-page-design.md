@@ -93,8 +93,13 @@ kaimoku-website.vercel.app/* -> middleware NEVER RUNS     -> full site, unchange
 ```
 
 A **rewrite**, not a redirect: the URL the visitor typed is preserved and the response is
-200. Nothing about the site's path structure is probeable, because every path returns the
-same page.
+200 for most paths — but this is not airtight. `next.config.ts`'s `redirects()`
+(`/privacy` -> `/legal/privacy`, `/terms` -> `/legal/terms`) are evaluated **before**
+middleware, so they still fire on the brand domain: `kaimoku.tech/privacy` returns a 308
+with `Location: /legal/privacy`, leaking that those two paths exist (not their content).
+A `POST` to any path likewise does not reach the holding page — it returns 405, since the
+rewrite target is a static file. So the honest claim is narrower: content is uniform across
+GET paths that aren't redirect sources, not that the path structure is unprobeable.
 
 ### The matcher must be host-scoped
 
@@ -112,10 +117,22 @@ export const config = {
 well, merely to call `next()` — and a runtime throw would then return 500 for the entire
 site. Host-scoping means it does not run at all for other hosts.
 
-The middleware **also checks the host in code** before rewriting. Correctness must not
-depend on `has`-matcher semantics being what the author believed; the matcher is the
-optimisation and the in-code check is the guarantee. Verify `has` behaves as documented on
-Next 16.1.7 during implementation rather than assuming it.
+The middleware **also checks the host in code** before rewriting, but the matcher and that
+check form an **AND**, not a backstop pair — both must pass for the rewrite to happen:
+
+| Matcher | In-code check | Result |
+| --- | --- | --- |
+| fires | passes | holding page |
+| fires | **fails** | **FULL SITE** |
+| does **not** fire | (never runs) | **FULL SITE** |
+
+So the in-code check is **not** the correctness guarantee for the stealth property — it
+only guards the opposite, safe direction: the matcher **over**-matching and leaking the
+holding page onto a host it should not (e.g. `vercel.app`). **The matcher is what is
+load-bearing** for "`kaimoku.tech` never serves the full site" — if it fails to fire, the
+in-code check never runs at all. Verify `has` behaves as documented on Next 16.1.7 during
+implementation rather than assuming it; that verification is what the matcher's
+correctness actually rests on.
 
 ### Two deliberate exclusions
 
@@ -189,6 +206,8 @@ both the rewritten and non-rewritten cases, so status cannot distinguish them:
 | 4 | **`Host: kaimoku-website.vercel.app` → `/kuju-email/pricing`** | **`SITE_SENTINEL`** | **`HOLDING_SENTINEL`** |
 | 5 | `Host: kaimoku.tech` → `/robots.txt` | `Disallow: /` | `HOLDING_SENTINEL` |
 | 6 | `Host: kaimoku.tech` → `/_next/static/chunks/main.js` | `HOLDING_SENTINEL` | — |
+| 7 | `Host: kaimoku.tech.` → `/` | `HOLDING_SENTINEL` | — |
+| 8 | `Host: www.kaimoku.tech.` → `/` | `HOLDING_SENTINEL` | — |
 
 **Arm 6 was added during implementation** (Task 4 review, fix round 1). Without it this
 document's central approach-C justification — that `/_next/*` on the brand domain returns the
@@ -196,6 +215,15 @@ holding page, so JS bundles are not fetchable there — was an *asserted* proper
 non-vacuous: the middleware carries no path exclusion for `/_next`, so a middleware that added
 one (the common copy-pasted Next matcher pattern) would fall through to the real static handler
 and fail this arm.
+
+**Arms 7 and 8 were added in the final fix wave.** A trailing-dot host
+(`kaimoku.tech.`) is a legal root-anchored FQDN form that browsers send verbatim, and it
+bypassed both the matcher (whose literal `value` carried no trailing dot) and the in-code
+`.split(":")[0].toLowerCase()` normalisation (which stripped a port but not a trailing
+dot) — so it fell straight through to the full site. Both the matcher (four literal
+entries, not two) and the in-code host normalisation (`.replace(/\.$/, "")`) were fixed;
+arms 7 and 8 exist to prove that fix is real, not merely asserted — see Section 4's
+falsifiability step below, which was re-run against this exact regression.
 
 Arm 4 is the one that catches the genuinely bad outcome — the full site leaking onto the
 brand domain. Arms 2 and 4 are deliberate mirror images: each asserts both the presence of
@@ -207,7 +235,9 @@ nobody has watched fail is not evidence, and an unwired script is indistinguisha
 passing one:
 
 1. Change the host constant in `src/middleware.ts` to a bogus value.
-2. Run `scripts/verify-holding.sh`. It **must exit non-zero**, failing arms 1-3.
+2. Run `scripts/verify-holding.sh`. It **must exit non-zero**, failing every rewrite arm
+   (1-3, 6-8; arms 4 and 5 are host-independent or assert the untouched site and still
+   pass).
 3. Revert.
 
 The observed non-zero exit is pasted into the issue on close. Demonstrated, not asserted.
@@ -265,10 +295,11 @@ silently contradicted.
 
 ## 7. Success criteria
 
-1. The branch adds exactly four files — `src/middleware.ts`, `public/holding.html`,
-   `scripts/verify-holding.sh` and this spec — and **modifies none**. Confirmed by
-   `git diff --name-status main...HEAD`: every line must begin `A`, none `M` or `D`.
-2. All **six** arms in Section 4 pass, and the **separate** falsifiability step has been
+1. The branch adds exactly five files — `src/middleware.ts`, `public/holding.html`,
+   `scripts/verify-holding.sh`, this spec, and the implementation plan — and **modifies
+   none**. Confirmed by `git diff --name-status main...HEAD`: every line must begin `A`,
+   none `M` or `D`.
+2. All **eight** arms in Section 4 pass, and the **separate** falsifiability step has been
    **observed failing** under mutation — not asserted to. (Falsifiability is deliberately
    not an arm of the script: a script cannot assert its own ability to fail.)
 3. `npm run build` and `npm run lint` both pass.

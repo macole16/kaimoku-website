@@ -14,7 +14,7 @@
 
 ## Global Constraints
 
-- **No existing tracked file may be modified.** The branch adds exactly four files (three below + the spec) and modifies none. `git diff --name-status main...HEAD` must show only `A` lines.
+- **No existing tracked file may be modified.** The branch adds exactly five files (three below + the spec + this plan) and modifies none. `git diff --name-status main...HEAD` must show only `A` lines.
 - **The page names no product.** No mention of Kuju Email, pricing, or what Kaimoku builds. Company only: mark, wordmark, one line, contact.
 - **Not indexed.** `robots.ts` and `layout.tsx` are NOT touched. The page carries its own `<meta name="robots" content="noindex,nofollow">`.
 - **Colours are exact:** ink `#0E0E0E`, orange `#B8421E`. From `src/components/Logo.tsx`, Round-07, spec-locked.
@@ -31,7 +31,7 @@
 | --- | --- |
 | `public/holding.html` | The entire page. Self-contained: inline CSS, inline SVG, no script, no `/_next/`. Sole external reference is the Google Fonts stylesheet. |
 | `src/middleware.ts` | Host check and rewrite. Pure, synchronous, no I/O. Holds the host list and the passthrough list. |
-| `scripts/verify-holding.sh` | Boots its own dev server, runs six arms, tears down, exits non-zero on any failure. |
+| `scripts/verify-holding.sh` | Boots its own dev server, runs eight arms, tears down, exits non-zero on any failure. |
 
 ---
 
@@ -486,17 +486,23 @@ Note `git checkout --` reverts from the index, so this is only safe because Task
 - [ ] **Step 4: Lint and build**
 
 ```bash
-npm run lint
-npm run build
+mise exec -- npm run lint
+mise exec -- npm run build
+jq '.middleware["/"].matchers | length' .next/server/middleware-manifest.json   # MUST be 4
 ```
 
-Both must pass. The build is the deploy gate on Vercel, so a failure here would block the deploy.
+Both `lint` and `build` must pass. The build is the deploy gate on Vercel, so a failure
+here would block the deploy. The `jq` assertion catches a rename, a removal, or a lost
+matcher entry — a middleware-manifest with fewer than four matchers means one of the four
+host forms (apex, apex-with-trailing-dot, `www`, `www`-with-trailing-dot) silently stopped
+being covered, which is exactly the shape of the trailing-dot bypass this branch's final
+fix round found.
 
 - [ ] **Step 5: Record the evidence on the issue**
 
 ```bash
 cd /Users/macole/github
-bd note github-wwkxc "VERIFICATION OBSERVED <date>: all 5 arms pass; mutation of the host constant produced exit=1 failing arms 1-3 (paste output); revert restored exit=0; npm run lint and npm run build both pass."
+bd note github-wwkxc "VERIFICATION OBSERVED <date>: all 8 arms pass; mutation of the host constant produced exit=1 failing arms 1-3 and 6-8 (paste output); revert restored exit=0; npm run lint and npm run build both pass; middleware-manifest matcher count is 4."
 ```
 
 Nothing is committed in this task.
@@ -566,7 +572,24 @@ These are the user's to perform, whenever they choose:
 
 1. Vercel dashboard (`kaimoku-llc` scope) -> `kaimoku-website` -> Domains -> add `kaimoku.tech` and `www.kaimoku.tech`.
 2. Cloudflare -> `kaimoku.tech` zone -> add the `A`/`CNAME` records Vercel specifies. **Do not touch `MX` or the SPF `TXT` record** — `info@kaimoku.tech` receives mail through them.
-3. Verify: `dig +short kaimoku.tech` returns records, then `curl -s https://kaimoku.tech/ | grep "Something is coming."` and `curl -sI https://kaimoku.tech/kuju-email/pricing` returns the holding page, not pricing.
+3. Verify with body-sentinel checks in **both** directions, never `curl -I` / headers-only —
+   `-I` fetches headers only, and both the holding page and the real pricing page return
+   200 text/html, so a headers-only check passes whether the middleware works or not. This
+   matters more than it looks here: production runs Next in `minimalMode`, where Vercel's
+   own edge router evaluates the matcher, so this go-live moment is the **only** time
+   production behaviour is ever actually observed.
+
+   ```bash
+   dig +short kaimoku.tech   # returns records
+
+   curl -s https://kaimoku.tech/kuju-email/pricing | grep -c "Something is coming."          # MUST be 1
+   curl -s https://kaimoku.tech/kuju-email/pricing | grep -c "For individuals and families"  # MUST be 0
+   curl -s "https://kaimoku.tech./" | grep -c "Something is coming."                          # MUST be 1 (trailing dot)
+   ```
+
+   **Only the apex and `www` are covered.** Any other subdomain (e.g. `a.kaimoku.tech`) or
+   a wildcard DNS record would serve the full site — the matcher does not cover it — so do
+   not create one.
 
 Revert at any time by deleting the DNS record. No deploy needed.
 
