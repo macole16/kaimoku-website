@@ -1,7 +1,9 @@
 # Agent-Friendly Docs Design
 
 **Date:** 2026-08-31
-**Status:** Approved
+**Revised:** 2026-09-01 — Sections 1, 3 and 6, for the closed-beta decision (`beta-1`)
+and the `launch-1.1` resolution. See the revision note at the end.
+**Status:** Design approved; spec awaiting review
 **Issue:** bd `launch-1.8` (child of `launch-1`, Kuju Mail public launch readiness)
 **Scope:** A static, instruct-only documentation corpus on `kaimoku-website` that a customer's AI agent can consume to walk them through Kuju Email signup, DNS delegation, migration, and delivery troubleshooting.
 
@@ -102,6 +104,13 @@ scripts/check-corpus.mjs     build gate (Section 4, Tier 1)
   build time. Anything hand-copied into `public/` is a second copy of the facts, which
   is what this design exists to prevent.
 - `generateStaticParams` enumerates runbook slugs so every `.md` route is prerendered.
+- **Absolute URLs come from one constant, and that constant is the `vercel.app` host.**
+  `llms.txt` links out by convention, so the corpus needs an absolute base.
+  `src/app/layout.tsx` already defines `SITE_URL = "https://kaimoku-website.vercel.app"`
+  and points `metadataBase` at it; the corpus reuses that constant rather than minting a
+  second one. `kaimoku.tech` is **not** the base — as of 2026-09-01 it does not resolve
+  at all (Section 6). Hardcoding the branded host would ship a corpus of dead links to
+  the one class of consumer least equipped to be sceptical about them.
 
 ---
 
@@ -211,6 +220,41 @@ Match the NS suffix against the table below.
    and the failure mode when it tries is not an error — it is the agent *claiming* it
    did. The marker makes handoff structural rather than a thing an author must remember.
 
+### Per-runbook content constraints
+
+Two runbooks are constrained by decisions taken after this spec's first draft — the
+closed-beta shape agreed 2026-09-01. Both are *content* requirements rather than format
+ones, and both are wrong-by-default if left unstated.
+
+**`signup-trial.md` documents invite redemption, not open self-serve signup.** The beta
+is invite-gated (`beta-1`): a Site Admin issues an invite carrying **one secret rendered
+two ways** — a clickable link and a human-typeable code such as `KUJU-7F3K-9QM2`
+(`beta-1.3`) — and redemption is followed by a flow choice between a mailbox on the demo
+domain and bring-your-own-domain (`beta-1.4`). A runbook describing an open signup page
+would instruct the agent to walk a customer to a door that is not there. It must also
+neither state nor infer a plan tier: the invite deliberately does not encode one
+(`beta-1.5`).
+
+**`migration.md` documents the estimator and the per-account cap together.** Neither is
+complete without the other:
+
+- The estimator (`beta-1.6`) is an IMAP `RFC822.SIZE` dry run — metadata only, no bodies
+  transferred — so the agent can answer "how big is my mailbox and how long will this
+  take" before anything starts. The runbook carries its two caveats: Gmail's virtual
+  folders double-count a heavily-labelled account 2-3x unless counting `[Gmail]/All Mail`
+  alone, and `RFC822.SIZE` is **wire** size, not disk size.
+- The cap (`beta-1.10`) is **2 GB per account**, and the single most important thing the
+  runbook can say about it is that **hitting the cap is a PAUSE — not a failure, and not
+  a restart.** The import checkpoints `last_folder`/`last_uid`, seeds `bytes_imported`
+  from the job on resume, and dedupes on persisted content keys, so converting to a
+  paying customer *resumes* the same job rather than re-importing. An agent that reads a
+  cap-stop as an error will tell the customer their migration failed — wrong, and exactly
+  the anxiety this corpus exists to reduce.
+- Because the worker imports newest-first, the capped slice is the customer's *recent*
+  mail. Describe the cap in time using the estimator ("your mailbox is 18 GB; the test
+  brings your most recent 2 GB, roughly your last 5 months") rather than as a bare byte
+  count.
+
 ### Read-only by construction
 
 Every command in the corpus is read-only: `dig`, `curl -sI`, `openssl s_client`.
@@ -305,11 +349,13 @@ timer itself dies — a dead timer and a passing timer are indistinguishable fro
 
 ## 6. Gates and dependencies
 
-| Gate | Effect |
-| --- | --- |
-| `launch-1.1` (kaimoku.tech DNS unpointed / cert resolved) | The corpus is not reliably fetchable at the branded host until resolved. Does not block authoring. |
-| `launch-1.5` (demo signup enabled) | `signup-trial.md` documents a flow that currently 303s to `/login`. Ships with `pending: true` on `signup_url`; the runbook is authored but must not claim a working signup until this closes. |
-| `launch-1.14` (crawl block flipped) | `robots.txt` disallows everything, so well-behaved `llms.txt` consumers are blocked. The corpus ships dark and lights up at launch. The download-and-hand-to-your-agent path works before then; agent *discovery* does not. |
+| Gate | State | Effect |
+| --- | --- | --- |
+| `launch-1.1` (kaimoku.tech publicly broken) | **CLOSED** — resolved by *unpointing* the DNS, not by repairing the Vercel mapping | `kaimoku.tech` and `www.kaimoku.tech` no longer resolve at all (measured 2026-09-01: both NXDOMAIN; `kaimoku-website.vercel.app` answers 200). The corpus's only host is the `vercel.app` one. Re-attaching the branded domain is `github-j3x`, **deferred**, so this is the steady state rather than a short wait — which is why Section 1 pins absolute URLs to `SITE_URL`. |
+| `launch-1.5` (demo signup enabled) | OPEN | `signup_url` 303s to `/login` today. Ships with `pending: true`; the runbook is authored but must not claim a working signup until this closes. |
+| `beta-1.3` / `beta-1.4` (invite issuance; post-redemption flow choice) | OPEN | Govern what `signup-trial.md` may say — redemption of an issued invite, never open signup. See Section 3. |
+| `beta-1.6` / `beta-1.10` (size estimator; 2 GB cap) | OPEN | Govern what `migration.md` may say. Authored against the agreed behaviour; its facts must be re-verified against the shipped implementation before any of them drop `pending`. |
+| `launch-1.14` (crawl block flipped) | OPEN | `robots.ts` disallows everything, so well-behaved `llms.txt` consumers are blocked. The corpus ships dark and lights up at launch. The download-and-hand-to-your-agent path works before then; agent *discovery* does not. |
 
 Stealth is in force. Nothing in this design authorizes a go-public action.
 
@@ -327,3 +373,24 @@ Stealth is in force. Nothing in this design authorizes a go-public action.
 7. `dns-delegation.md` end-to-end: given a real domain on a registrar in the map, an
    agent following it produces correct, registrar-specific instructions and correctly
    verifies delegation afterward.
+
+---
+
+## Revision note — 2026-09-01
+
+Four corrections, all made *before* the spec's first review so the review is spent on
+the design rather than on known-stale content. Each premise was re-verified rather than
+carried forward from the ticket text.
+
+| # | Change | Why | Verified by |
+| --- | --- | --- | --- |
+| 1 | Section 6: `launch-1.1` row rewritten | Closed by unpointing DNS, not by repairing the mapping — the opposite resolution to the one the row assumed | `dig +short kaimoku.tech` and `www` both empty; `curl` exits 6 (could not resolve); `kaimoku-website.vercel.app` returns 200 |
+| 2 | Section 1: absolute URLs pinned to `SITE_URL` | Follows from #1 — `llms.txt` uses absolute URLs and the branded host is gone | `src/app/layout.tsx:32` already defines the constant and `metadataBase` uses it |
+| 3 | Section 3: `signup-trial.md` documents invite redemption | The beta is invite-gated; an open-signup runbook would be wrong | `beta-1.3` (one secret, two renderings), `beta-1.4` (flow choice), `beta-1.5` (no tier in the invite) |
+| 4 | Section 3: `migration.md` carries estimator + 2 GB cap, cap framed as a pause | A cap-stop read as an error is a worse outcome than no runbook | `beta-1.6` (`RFC822.SIZE` dry run + Gmail/wire-size caveats), `beta-1.10` (resumability verified in `worker.go` / `dedupe.go` on 2026-09-01) |
+
+Unchanged: every design decision, the facts-layer schema, the runbook format rules, and
+all four verification tiers. The four verify-first facts this design rests on were
+re-measured on 2026-09-01 and all still hold — checkout URLs are still `#coming-soon`,
+`guide/page.tsx` is still 1,186 lines of hand-written JSX with no markdown source, the
+repo still has no CI at all, and `origin` is still GitHub directly.
