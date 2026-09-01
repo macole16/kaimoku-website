@@ -64,10 +64,9 @@ export const metadata: Metadata = {
     description: SITE_DESCRIPTION,
   },
   // DELIBERATELY NOINDEX. Kaimoku is pre-launch and the site is meant to stay
-  // undiscoverable until it opens; kaimoku.tech returning 404 is part of the
-  // same intent, not a misconfiguration (github-bhri4). Vercel sends no
-  // X-Robots-Tag on production aliases, so without this the vercel.app host is
-  // fully open to search engines.
+  // undiscoverable until it opens. Vercel sends no X-Robots-Tag on production
+  // aliases, so without this the vercel.app host would be fully open to search
+  // engines. See github-bhri4 for details.
   //
   // This does NOT disable link sharing. The openGraph and twitter blocks above
   // still render a card when someone is sent the URL directly; noindex governs
