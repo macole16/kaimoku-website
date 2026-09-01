@@ -255,8 +255,12 @@ silently contradicted.
 2. All six arms in Section 4 pass, and the falsifiability arm has been **observed failing**
    under mutation, not asserted to.
 3. `npm run build` and `npm run lint` both pass.
-4. `public/holding.html` references no external stylesheet, no script, and no `/_next/`
-   path — grep-checkable.
+4. `public/holding.html` contains **no `<script>` and no `/_next/` reference** — the
+   load-bearing property, since the `/_next/` independence is what permits a catch-all
+   matcher. The **only** permitted external reference is the Google Fonts stylesheet for
+   Cormorant Garamond (`fonts.googleapis.com` / `fonts.gstatic.com`), which does not touch
+   the rewritten host and so does not weaken that property. Grep-checkable in both
+   directions: zero matches for `<script` and `/_next/`; at most the two font hosts.
 5. After merge, `https://kaimoku-website.vercel.app/` is functionally unaffected — the full
    site serves, `robots.txt` still returns `Disallow: /`, and the homepage still carries
    `noindex`. ("Byte-for-byte" is not the criterion: build output is content-hashed and
