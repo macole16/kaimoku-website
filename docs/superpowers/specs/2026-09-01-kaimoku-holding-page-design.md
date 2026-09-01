@@ -107,7 +107,11 @@ GET paths that aren't redirect sources, not that the path structure is unprobeab
 export const config = {
   matcher: [
     { source: "/:path*", has: [{ type: "host", value: "kaimoku.tech" }] },
+    // Trailing-dot forms are a legal FQDN spelling ("kaimoku.tech.") that
+    // browsers send verbatim -- they are not optional entries.
+    { source: "/:path*", has: [{ type: "host", value: "kaimoku.tech." }] },
     { source: "/:path*", has: [{ type: "host", value: "www.kaimoku.tech" }] },
+    { source: "/:path*", has: [{ type: "host", value: "www.kaimoku.tech." }] },
   ],
 };
 ```

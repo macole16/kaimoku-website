@@ -239,7 +239,7 @@ site-wide robots.txt."
 
 **Interfaces:**
 - Consumes: `HOLDING_SENTINEL` from `public/holding.html` (Task 2); `SITE_SENTINEL` from the existing pricing page.
-- Produces: exit 0 when all six arms pass, non-zero otherwise. Used by Tasks 4 and 5. (Arm 6 was added in Task 4's fix round; Task 3 as originally written creates five.)
+- Produces: exit 0 when all eight arms pass, non-zero otherwise. Used by Tasks 4 and 5. (Arms 6-8 were added across later fix rounds; Task 3 as originally written creates five.)
 
 - [ ] **Step 1: Write the script**
 
@@ -354,6 +354,13 @@ does not exist yet."
 
 - [ ] **Step 1: Write the middleware**
 
+> **Corrected 2026-09-01.** This block previously showed a host normalisation without
+> the trailing-dot strip and a two-entry matcher, together with an inverted claim that
+> the in-code check was "the guarantee". A trailing-dot host (`kaimoku.tech.`) is a
+> legal FQDN that bypassed both and served the FULL site. The block below is the
+> as-shipped file. See the spec's Section 1 for the AND-relationship between the two
+> layers, which is what makes the matcher load-bearing.
+
 ```ts
 import { NextResponse, type NextRequest } from "next/server";
 
@@ -383,12 +390,25 @@ const HOLDING_FILE = "/holding.html";
 const PASSTHROUGH = new Set(["/robots.txt", "/favicon.ico", HOLDING_FILE]);
 
 export function middleware(request: NextRequest) {
-  // Strip any :port before comparing; a Host header may carry one.
-  const host = (request.headers.get("host") ?? "").split(":")[0].toLowerCase();
+  // Strip any :port, then any single trailing dot, before comparing. A Host
+  // header may carry a port, and a trailing dot is a legal root-anchored FQDN
+  // form ("kaimoku.tech.") that browsers send verbatim. Omitting this strip
+  // let that form fall through both the matcher (below) and this check, and
+  // the FULL SITE was served on it.
+  const host = (request.headers.get("host") ?? "")
+    .split(":")[0]
+    .toLowerCase()
+    .replace(/\.$/, "");
 
-  // The matcher below should already have excluded other hosts. This check is
-  // the guarantee; the matcher is the optimisation. Correctness must not depend
-  // on `has`-matcher semantics being what the author believed.
+  // The matcher and this check form an AND: both must pass to rewrite.
+  //   matcher fires + this check passes -> holding page
+  //   matcher fires + this check FAILS  -> FULL SITE
+  //   matcher does NOT fire             -> FULL SITE (middleware never runs)
+  // So this check is NOT the correctness guarantee for the stealth property --
+  // it only protects the opposite, safe direction: the matcher OVER-matching
+  // and leaking the holding page onto a host it shouldn't (e.g. vercel.app).
+  // The matcher is what is LOAD-BEARING for "kaimoku.tech never serves the
+  // full site" -- if it fails to fire, this code never runs at all.
   if (!HOLDING_HOSTS.has(host)) return NextResponse.next();
   if (PASSTHROUGH.has(request.nextUrl.pathname)) return NextResponse.next();
 
@@ -400,21 +420,39 @@ export function middleware(request: NextRequest) {
  * bare catch-all it would run on every vercel.app request merely to call next(),
  * and a runtime throw would then 500 the entire site.
  */
+/**
+ * NOTE: Next 16 deprecates `middleware.ts` in favour of `proxy.ts`. Both are
+ * first-class in 16.1.7 and share one loader, so this still works. Kept as
+ * `middleware.ts` deliberately: the spike that verified `has`-matcher host
+ * evaluation was run against this convention. Migration is tracked in
+ * bd github-tcg4g, which requires re-running scripts/verify-holding.sh —
+ * INCLUDING its mutation step — because the rename invalidates that evidence.
+ * If this file is ever renamed without re-verifying, kaimoku.tech can
+ * silently begin serving the FULL site instead of the holding page.
+ */
+// Four literal entries, not two regex-style patterns like "kaimoku\\.tech\\.?".
+// Next.js interpolates a matcher's `value` into a regex, so a trailing-dot
+// alternation there would work locally -- but production runs in minimalMode,
+// where Vercel's edge router (a DIFFERENT implementation) evaluates the
+// matcher, and its handling of regex metacharacters in this position is
+// unverified. Literal values are unambiguous under either implementation.
 export const config = {
   matcher: [
     { source: "/:path*", has: [{ type: "host", value: "kaimoku.tech" }] },
+    { source: "/:path*", has: [{ type: "host", value: "kaimoku.tech." }] },
     { source: "/:path*", has: [{ type: "host", value: "www.kaimoku.tech" }] },
+    { source: "/:path*", has: [{ type: "host", value: "www.kaimoku.tech." }] },
   ],
 };
 ```
 
-- [ ] **Step 2: Run the verification — all six arms MUST pass**
+- [ ] **Step 2: Run the verification — all eight arms MUST pass**
 
 ```bash
 ./scripts/verify-holding.sh; echo "exit=$?"
 ```
 
-Expected: `PASS` on all six, `all 6 arms passed`, `exit=0`.
+Expected: `PASS` on all eight, `all 8 arms passed`, `exit=0`.
 
 - [ ] **Step 3: Confirm no existing file was touched**
 
@@ -478,7 +516,7 @@ If it exits 0, **STOP**: the script is not testing what it claims and must be fi
 ```bash
 git checkout -- src/middleware.ts
 grep -c "mutant.invalid" src/middleware.ts   # MUST print 0
-./scripts/verify-holding.sh; echo "exit=$?"  # MUST be exit=0, all 5 pass
+./scripts/verify-holding.sh; echo "exit=$?"  # MUST be exit=0, all 8 pass
 ```
 
 Note `git checkout --` reverts from the index, so this is only safe because Task 4 Step 4 committed the file.
@@ -586,6 +624,25 @@ These are the user's to perform, whenever they choose:
    curl -s https://kaimoku.tech/kuju-email/pricing | grep -c "For individuals and families"  # MUST be 0
    curl -s "https://kaimoku.tech./" | grep -c "Something is coming."                          # MUST be 1 (trailing dot)
    ```
+
+   Step 1 above attaches **both** `kaimoku.tech` and `www.kaimoku.tech`, but the checks so
+   far never observe `www` — and this go-live moment is the only place production's real
+   matcher behaviour is ever exercised, so an unprobed `www` is a live gap, not a
+   theoretical one. Probe it too, plus one uppercase-`Host` spelling: browsers always
+   lowercase the `Host` header before sending it, so this is low severity, but `curl` and
+   automated scanners send whatever case they are given, and it costs nothing to check.
+
+   ```bash
+   curl -s https://www.kaimoku.tech/kuju-email/pricing | grep -c "Something is coming."          # MUST be 1
+   curl -s https://www.kaimoku.tech/kuju-email/pricing | grep -c "For individuals and families"  # MUST be 0
+   curl -s -H "Host: KAIMOKU.TECH" https://kaimoku.tech/ | grep -c "Something is coming."        # MUST be 1
+   ```
+
+   **`grep -c ... # MUST be 0` exits 1 on a correct result.** `grep -c` exits non-zero
+   whenever the count is zero, even though zero is the expected, correct outcome here.
+   Harmless when a human reads the printed number, but it will abort this block if it is
+   ever run under `set -e`. Read the numbers `grep` prints; do not infer pass/fail from the
+   exit code on these particular checks.
 
    **Only the apex and `www` are covered.** Any other subdomain (e.g. `a.kaimoku.tech`) or
    a wildcard DNS record would serve the full site — the matcher does not cover it — so do
