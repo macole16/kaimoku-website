@@ -188,6 +188,14 @@ both the rewritten and non-rewritten cases, so status cannot distinguish them:
 | 3 | `Host: www.kaimoku.tech` → `/` | `HOLDING_SENTINEL` | — |
 | 4 | **`Host: kaimoku-website.vercel.app` → `/kuju-email/pricing`** | **`SITE_SENTINEL`** | **`HOLDING_SENTINEL`** |
 | 5 | `Host: kaimoku.tech` → `/robots.txt` | `Disallow: /` | `HOLDING_SENTINEL` |
+| 6 | `Host: kaimoku.tech` → `/_next/static/chunks/main.js` | `HOLDING_SENTINEL` | — |
+
+**Arm 6 was added during implementation** (Task 4 review, fix round 1). Without it this
+document's central approach-C justification — that `/_next/*` on the brand domain returns the
+holding page, so JS bundles are not fetchable there — was an *asserted* property. It is
+non-vacuous: the middleware carries no path exclusion for `/_next`, so a middleware that added
+one (the common copy-pasted Next matcher pattern) would fall through to the real static handler
+and fail this arm.
 
 Arm 4 is the one that catches the genuinely bad outcome — the full site leaking onto the
 brand domain. Arms 2 and 4 are deliberate mirror images: each asserts both the presence of
@@ -260,7 +268,7 @@ silently contradicted.
 1. The branch adds exactly four files — `src/middleware.ts`, `public/holding.html`,
    `scripts/verify-holding.sh` and this spec — and **modifies none**. Confirmed by
    `git diff --name-status main...HEAD`: every line must begin `A`, none `M` or `D`.
-2. All **five** arms in Section 4 pass, and the **separate** falsifiability step has been
+2. All **six** arms in Section 4 pass, and the **separate** falsifiability step has been
    **observed failing** under mutation — not asserted to. (Falsifiability is deliberately
    not an arm of the script: a script cannot assert its own ability to fail.)
 3. `npm run build` and `npm run lint` both pass.

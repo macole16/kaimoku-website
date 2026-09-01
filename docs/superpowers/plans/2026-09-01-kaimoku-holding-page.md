@@ -31,7 +31,7 @@
 | --- | --- |
 | `public/holding.html` | The entire page. Self-contained: inline CSS, inline SVG, no script, no `/_next/`. Sole external reference is the Google Fonts stylesheet. |
 | `src/middleware.ts` | Host check and rewrite. Pure, synchronous, no I/O. Holds the host list and the passthrough list. |
-| `scripts/verify-holding.sh` | Boots its own dev server, runs five arms, tears down, exits non-zero on any failure. |
+| `scripts/verify-holding.sh` | Boots its own dev server, runs six arms, tears down, exits non-zero on any failure. |
 
 ---
 
@@ -239,7 +239,7 @@ site-wide robots.txt."
 
 **Interfaces:**
 - Consumes: `HOLDING_SENTINEL` from `public/holding.html` (Task 2); `SITE_SENTINEL` from the existing pricing page.
-- Produces: exit 0 when all five arms pass, non-zero otherwise. Used by Tasks 4 and 5.
+- Produces: exit 0 when all six arms pass, non-zero otherwise. Used by Tasks 4 and 5. (Arm 6 was added in Task 4's fix round; Task 3 as originally written creates five.)
 
 - [ ] **Step 1: Write the script**
 
@@ -408,13 +408,13 @@ export const config = {
 };
 ```
 
-- [ ] **Step 2: Run the verification — all five arms MUST pass**
+- [ ] **Step 2: Run the verification — all six arms MUST pass**
 
 ```bash
 ./scripts/verify-holding.sh; echo "exit=$?"
 ```
 
-Expected: `PASS` on all five, `all 5 arms passed`, `exit=0`.
+Expected: `PASS` on all six, `all 6 arms passed`, `exit=0`.
 
 - [ ] **Step 3: Confirm no existing file was touched**
 
@@ -469,7 +469,7 @@ grep -n "mutant.invalid" src/middleware.ts   # confirm the mutation landed
 ./scripts/verify-holding.sh; echo "exit=$?"
 ```
 
-Expected: arms 1, 2, 3 **FAIL**; `exit=1`. **Capture this output verbatim** — it is the evidence that the script can fail, and it goes into the issue on close.
+Expected: arms 1, 2, 3 **and 6 FAIL**; `exit=1`. Arm 6 is a rewrite arm like 1-3, so mutating the host constant must break it too — if arm 6 still passes while 1-3 fail, something is wrong and you should stop. Arms 4 and 5 still pass (arm 4 asserts the untouched site; arm 5's robots.txt is host-independent). **Capture this output verbatim** — it is the evidence that the script can fail, and it goes into the issue on close.
 
 If it exits 0, **STOP**: the script is not testing what it claims and must be fixed before anything merges.
 
