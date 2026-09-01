@@ -3,6 +3,7 @@ import { Spectral, Public_Sans, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { SITE_URL } from "@/lib/constants";
 
 const spectral = Spectral({
   variable: "--font-display",
@@ -29,7 +30,6 @@ const cormorantGaramond = Cormorant_Garamond({
   display: "swap",
 });
 
-const SITE_URL = "https://kaimoku-website.vercel.app";
 const SITE_DESCRIPTION =
   "Kaimoku Technologies builds software that pays attention to the things software has stopped paying attention to. Our first product is Kuju Email: secure, transparent business email.";
 
