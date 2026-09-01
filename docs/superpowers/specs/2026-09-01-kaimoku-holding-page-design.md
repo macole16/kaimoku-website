@@ -252,8 +252,9 @@ silently contradicted.
 1. The branch adds exactly four files — `src/middleware.ts`, `public/holding.html`,
    `scripts/verify-holding.sh` and this spec — and **modifies none**. Confirmed by
    `git diff --name-status main...HEAD`: every line must begin `A`, none `M` or `D`.
-2. All six arms in Section 4 pass, and the falsifiability arm has been **observed failing**
-   under mutation, not asserted to.
+2. All **five** arms in Section 4 pass, and the **separate** falsifiability step has been
+   **observed failing** under mutation — not asserted to. (Falsifiability is deliberately
+   not an arm of the script: a script cannot assert its own ability to fail.)
 3. `npm run build` and `npm run lint` both pass.
 4. `public/holding.html` contains **no `<script>` and no `/_next/` reference** — the
    load-bearing property, since the `/_next/` independence is what permits a catch-all
