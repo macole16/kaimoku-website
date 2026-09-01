@@ -70,7 +70,15 @@ pulled to learn what is being built.
 as React, and as inline SVG in `holding.html`. A build-time generator using
 `renderToStaticMarkup` was considered and rejected — it adds a `prebuild` step and a
 failure mode to protect against cosmetic drift in ~15 lines of geometry that has been
-spec-locked since 2026-05-11. Both files carry a comment pointing at the other.
+spec-locked since 2026-05-11.
+
+**The pointer comment is ONE-WAY, deliberately.** `holding.html` names `Logo.tsx`;
+`Logo.tsx` does **not** name `holding.html`, because adding it would modify an existing
+tracked file and break the additions-only property that success criterion 1 rests on. That
+property is worth more than a reciprocal comment: it makes "this change cannot have
+affected the live site" checkable by `git diff --name-status` alone. The residual risk is
+that someone editing `Logo.tsx` has no signal the mark is mirrored elsewhere — accepted,
+and recorded here rather than silently.
 
 ---
 
