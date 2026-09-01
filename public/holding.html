@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Kaimoku Technologies</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400&display=swap">
+<style>
+  /* Round-07 brand. The mark geometry below is duplicated from
+     src/components/Logo.tsx by deliberate choice -- see the spec,
+     "Accepted duplication". Keep the two in step if the mark ever changes. */
+  :root { --ink: #0E0E0E; --orange: #B8421E; --paper: #FAFAF8; }
+  @media (prefers-color-scheme: dark) {
+    :root { --ink: #F4F3EF; --paper: #0E0E0E; }
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    display: flex; align-items: center; justify-content: center;
+    padding: 2rem; text-align: center;
+  }
+  main { display: flex; flex-direction: column; align-items: center; gap: 1.75rem; }
+  .wordmark {
+    font-family: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+    font-weight: 400;
+    font-size: clamp(2.75rem, 12vw, 4.5rem);
+    line-height: .85; letter-spacing: -.03em;
+    margin: 0; display: inline-flex; align-items: flex-end;
+  }
+  .divider { width: 3px; height: .7em; background: var(--orange); margin: 0 .08em .18em; }
+  .line { margin: 0; font-size: clamp(.95rem, 2.5vw, 1.05rem); letter-spacing: .02em; opacity: .75; }
+  a { color: inherit; text-decoration: none; border-bottom: 1px solid var(--orange); padding-bottom: 2px; }
+  a:hover { color: var(--orange); }
+</style>
+</head>
+<body>
+<main>
+  <svg width="64" height="80" viewBox="0 0 64 80" fill="none" aria-hidden="true">
+    <rect x="2" y="2" width="60" height="76" stroke="currentColor" stroke-width="4"/>
+    <line x1="4" y1="26.667" x2="60" y2="26.667" stroke="#B8421E" stroke-width="4"/>
+    <line x1="4" y1="53.333" x2="60" y2="53.333" stroke="currentColor" stroke-width="4"/>
+  </svg>
+  <h1 class="wordmark" aria-label="Kaimoku"><span>kai</span><span class="divider" aria-hidden="true"></span><span>moku</span></h1>
+  <p class="line">Something is coming.</p>
+  <p class="line"><a href="mailto:info@kaimoku.tech">info@kaimoku.tech</a></p>
+</main>
+</body>
+</html>
