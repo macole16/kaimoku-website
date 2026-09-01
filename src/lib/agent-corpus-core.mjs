@@ -76,8 +76,16 @@ const DERIVED = {
 
 /**
  * Resolve `{{fact:path}}` to a string. A path is dot-separated; array indexes
- * are numeric segments (`nameservers.0`). Only scalar leaves and derived views
- * resolve; anything else is an authoring error and must fail the build.
+ * are numeric segments (`nameservers.0`). A fact object's `value:` wrapper
+ * (the sibling of `verify`/`pending` metadata) is transparent EVERYWHERE —
+ * mid-path (`nameservers.0` reaches into `nameservers.value[0]`) AND at the
+ * terminal position (`signup_url` bare is identical to `signup_url.value`;
+ * `test_migration_cap_gb` bare resolves the same way `.value` would) — but
+ * only ONE hop, and never past a non-scalar: `nameservers` bare still
+ * throws (its `value` is an array), `mx` bare still throws (it has no
+ * `value` key at all — it needs `.target`). Only scalar leaves and derived
+ * views resolve; anything else is an authoring error and must fail the
+ * build.
  * @param {Record<string, any>} facts
  * @param {string} factPath
  * @returns {string}
@@ -92,8 +100,8 @@ export function resolveFact(facts, factPath) {
     // If the next segment isn't a literal key of the current node but the
     // node has a `value` wrapper, descend through it transparently — this is
     // what lets `nameservers.0` reach the array without spelling out
-    // `nameservers.value.0`, matching the alternative this function's own
-    // non-scalar error message offers below.
+    // `nameservers.value.0`. See the terminal unwrap below for the
+    // end-of-path counterpart (a bare `signup_url` or `test_migration_cap_gb`).
     if (
       node !== null &&
       typeof node === "object" &&
@@ -107,6 +115,18 @@ export function resolveFact(facts, factPath) {
       throw new Error(`unknown fact: ${trimmed}`);
     }
     node = node[seg];
+  }
+  // The `value:` wrapper is transparent at the END of a path too, not just
+  // mid-path: `signup_url` bare must equal `signup_url.value`, and
+  // `test_migration_cap_gb` bare must resolve to "2". Unwrap AT MOST ONCE —
+  // if that single hop still lands on an object (nameservers.value is an
+  // array; mx has no `value` key to unwrap through at all), the non-scalar
+  // guard below still throws. That guard is what stops a fact from
+  // silently flattening into a plausible-looking string (e.g. an array
+  // comma-joining into "ns1.kuju.email,ns2.kuju.email") and must never be
+  // weakened to accommodate this.
+  if (node !== null && typeof node === "object" && !Array.isArray(node) && Object.hasOwn(node, "value")) {
+    node = node.value;
   }
   if (node === null || typeof node === "object") {
     throw new Error(

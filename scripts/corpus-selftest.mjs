@@ -39,6 +39,19 @@ check("unknown fact throws", () => {
 check("non-scalar fact throws", () => {
   assert.throws(() => core.resolveFact(facts, "nameservers"), /non-scalar/);
 });
+check("wrapped scalar resolves BARE (terminal position), not only via .value: test_migration_cap_gb", () => {
+  assert.equal(core.resolveFact(facts, "test_migration_cap_gb"), "2");
+});
+check("bare wrapped scalar is identical to its explicit .value form: signup_url", () => {
+  assert.equal(core.resolveFact(facts, "signup_url"), core.resolveFact(facts, "signup_url.value"));
+  assert.equal(core.resolveFact(facts, "signup_url"), "https://mail.kuju.email/signup");
+});
+check("negative control: nameservers bare STILL throws (its value is an ARRAY; unwrap must not comma-join it)", () => {
+  assert.throws(() => core.resolveFact(facts, "nameservers"), /non-scalar/);
+});
+check("negative control: mx bare STILL throws (no value wrapper to unwrap through; needs .target)", () => {
+  assert.throws(() => core.resolveFact(facts, "mx"), /non-scalar/);
+});
 check("registrars.table has 11 data rows, the infix keys, and no single braces", () => {
   const t = core.resolveFact(facts, "registrars.table");
   const rows = t.split("\n").filter((l) => l.startsWith("| `"));
