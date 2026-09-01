@@ -49,3 +49,6 @@ next-env.d.ts
 .claude/scheduled_tasks.lock
 .agents/
 skills-lock.json
+
+# SDD scratch workspace (superpowers:subagent-driven-development). Not part of the site.
+.superpowers/
