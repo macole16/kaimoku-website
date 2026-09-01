@@ -155,19 +155,27 @@ signup_url:
   pending: true    # returns 303 -> /login until launch-1.5 enables the demo
   verify: {type: http, expect_status: 200}
 
-registrars:        # ported from kuju-mail internal/api/registrar.go
+registrars:        # ported from kuju-mail internal/api/registrar.go — ALL 11 keys
   registrar-servers.com: {name: Namecheap, dns_url: "..."}
   domaincontrol.com:     {name: GoDaddy,   dns_url: "..."}
-  verify: {type: http, expect_status: [200, 302]}
+  name-services.com:     {name: Enom / Tucows}          # no panel URL — reported SKIP
+  verify: {type: http, reject_status: [404, 410]}
 ```
 
 Every value above was measured live on 2026-08-31, not assumed.
 
 ### Accepted duplication
 
-The registrar map duplicates `kuju-mail/internal/api/registrar.go`. Building cross-repo
-sharing for seven URLs is not worth it; the scheduled check in Section 4 catches rot.
-This is recorded as a deliberate choice, not an oversight.
+The registrar map duplicates `kuju-mail/internal/api/registrar.go` — **11 keys, 10 of which
+carry a panel URL** (`name-services.com` / Enom-Tucows has none). Building cross-repo sharing
+for eleven entries is not worth it; the scheduled check in Section 4 catches rot. This is
+recorded as a deliberate choice, not an oversight.
+
+**Matching is a SUBSTRING test, not a suffix match.** `registrar.go:42` is
+`strings.Contains(host, suffix)`, applied to `nss[0].Host` only (the first nameserver),
+lowercased with the trailing dot stripped. `awsdns` and `azure-dns` are *infixes* — a real
+Route 53 nameserver is `ns-1234.awsdns-56.org` — so a suffix match silently misses AWS and
+Azure and returns generic advice instead of an error.
 
 ---
 
@@ -196,7 +204,9 @@ facts_used: [nameservers, mx, customer_domain_records, registrars]
 
 ## Step 2 - Identify the registrar
 
-Match the NS suffix against the table below.
+Lowercase the FIRST nameserver host, strip its trailing dot, and check whether it
+CONTAINS any key in the table below as a substring. Do not suffix-match: in
+`ns-1234.awsdns-56.org` the key `awsdns` sits in the middle and the suffix is `.org`.
 
 > **HUMAN ACTION** - you cannot do this step. Give the customer the exact URL
 > and the exact two values, then wait for them to confirm.
@@ -394,3 +404,35 @@ all four verification tiers. The four verify-first facts this design rests on we
 re-measured on 2026-09-01 and all still hold — checkout URLs are still `#coming-soon`,
 `guide/page.tsx` is still 1,186 lines of hand-written JSX with no markdown source, the
 repo still has no CI at all, and `origin` is still GitHub directly.
+
+---
+
+## Revision note 2 — 2026-09-01 (post-approval)
+
+The design was approved and the spec reviewed; these are **factual corrections found while
+re-measuring the spec's own live facts before writing the implementation plan**, not design
+changes. Every design decision, the four verification tiers, and the corpus shape are
+unchanged. Re-measuring was itself the point: a design whose stated purpose is fighting
+documentation drift must not ship a stale facts file on day one.
+
+| # | Spec said | Measured 2026-09-01 | Correction |
+| --- | --- | --- | --- |
+| 5 | Registrar map is "seven URLs" (§2) | `registrar.go:15-27` holds **11 keys**, 10 with a panel URL; `name-services.com` has none | §2 corrected. The URL-less entry must be reported as a named `SKIP`, never silently dropped — an entry that vanishes from the checked set is how a checker quietly stops checking |
+| 6 | "Match the NS **suffix** against the table" (§3) | `registrar.go:42` is `strings.Contains` on `nss[0].Host` only | §2 and §3 corrected. `awsdns`/`azure-dns` are infixes; a suffix match misses AWS and Azure — a confident wrong answer, which is the exact failure class this corpus exists to prevent |
+| 7 | Registrar `verify: {expect_status: [200, 302]}` (§2) | Cloudflare **403**, Azure **403**, GoDaddy deep link unreachable; **3 of 9 fail on day one**. These are login-gated dashboards, so 403 is correct behaviour, not rot | §2 inverted to `reject_status: [404, 410]`. A check that ships red for a known-benign reason trains people to ignore red — the same pathology §4 invokes to justify `pending:` |
+| 8 | Two placeholder syntaxes are enough (§3) | Registrar URLs and the DMARC template embed `{domain}` in **single** braces — a prefix of `{{fact:...}}`, the confusable case that rule exists to prevent | `{domain}` stays verbatim in `mail-facts.yaml` only, is rewritten to `<domain>` on emission, and Tier 1 rejects any single-brace token surviving into a rendered runbook |
+
+**Facts re-confirmed exactly** (safe to encode): `MX kuju.email` = `10 mail.kuju.email.`;
+`TXT demo.kuju.email` = `"v=spf1 mx ~all"`; `TXT _dmarc.demo.kuju.email` =
+`"v=DMARC1; p=quarantine; rua=mailto:postmaster@demo.kuju.email"`; `signup_url` 303s to
+`/login` exactly as predicted, so `pending: true` is correct and Tier 3's second mutant has a
+real target; `ns1.kuju.email` = `96.126.108.161`, `ns2.kuju.email` = `172.235.42.202`;
+`https://kaimoku-website.vercel.app/` = 200.
+
+**A trap recorded so it is not "fixed" into the broken form.** `dig NS kuju.email` returns
+`irma.ns.cloudflare.com.` / `james.ns.cloudflare.com.` — `kuju.email`'s own zone is hosted at
+Cloudflare, while `ns1/ns2.kuju.email` are the delegation targets *offered to customers*.
+These are different things, so the obvious check "assert `NS kuju.email` contains
+`ns1.kuju.email`" is a permanent **false failure**. §2's chosen check (A record of each
+nameserver, expect nonempty) is correct precisely because it sidesteps this, and that
+reasoning belongs in the checker source or a future maintainer will "improve" it.
