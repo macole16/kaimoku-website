@@ -56,10 +56,11 @@ arm "2 deep path rewrites"  kaimoku.tech               /kuju-email/pricing   "$H
 arm "3 www rewrites"        www.kaimoku.tech           /                     "$HOLDING_SENTINEL"
 arm "4 vercel.app UNTOUCHED" kaimoku-website.vercel.app /kuju-email/pricing  "$SITE_SENTINEL"    "$HOLDING_SENTINEL"
 arm "5 robots passthrough"  kaimoku.tech               /robots.txt           "Disallow: /"       "$HOLDING_SENTINEL"
+arm "6 _next is rewritten too" kaimoku.tech /_next/static/chunks/main.js "$HOLDING_SENTINEL"
 
 echo
 if [[ "$FAILS" -gt 0 ]]; then
   echo "${FAILS} arm(s) FAILED"
   exit 1
 fi
-echo "all 5 arms passed"
+echo "all 6 arms passed"
