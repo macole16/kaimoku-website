@@ -167,25 +167,38 @@ export const REQUIRED_META = ["slug", "title", "order", "preconditions", "outcom
  * must-allow case in scripts/corpus-selftest.mjs; add both when you add a row.
  */
 export const DENYLIST = [
-  // Fix round 1 (reviewer-confirmed bypasses): the boundary style
-  // `(^|[\s;&|(])name(\s|$)` demands the preceding character be whitespace or
-  // a shell metacharacter, so a `/`-prefixed invocation (`/bin/rm`,
-  // `/usr/bin/ssh`) slipped past entirely. `\bcurl\b` and `\bnsupdate\b`
-  // already used real word boundaries and were NOT bypassable this way — this
-  // rewrite makes the other four rules match that already-correct style.
-  { name: "rm", re: /\brm\b/ },
+  // Fix round 2 (reviewer-confirmed over-tightening from round 1): round 1
+  // widened the boundary to a bare `\b` to close the `/bin/rm` path-prefix
+  // bypass, but that threw away COMMAND POSITION along with the bug — `\bdd\b`
+  // then matched inside "yyyy-mm-dd", and `\bshutdown\b` matched inside
+  // "graceful-shutdown", because a hyphen is a non-word character and so
+  // satisfies a bare `\b` on either side. The original `(^|[\s;&|(])name(\s|$)`
+  // was not a sloppy word boundary — the LEADING class encodes "this token is
+  // in command position" (line start, or after `;`/`&`/`|`/`(`/whitespace),
+  // and a hyphen was correctly never in that class. The one real bug was that
+  // the leading class had no allowance for a path prefix. Fix: keep the
+  // command-position leading class AND the original `(\s|$)` trailing check
+  // (so a token embedded in a hyphenated compound word or date format still
+  // requires a real space/end after the name, not just any non-word char),
+  // and insert an optional path segment between them — the same shape already
+  // used below for `pipe to shell`, whose target list has no hyphenated-idiom
+  // collision so its trailing `\b` was never a problem there.
+  { name: "rm", re: /(^|[\s;&|(])(?:\S*\/)?rm(\s|$)/ },
   { name: "curl write verb", re: /\bcurl\b.*\s-X\s*(POST|PUT|PATCH|DELETE)\b/i },
   { name: "curl upload flag", re: /\bcurl\b.*\s(-d|--data(-\w+)?|-F|--form|-T|--upload-file)(\s|$)/ },
-  // `-u\S` catches curl's getopt-style attached form (`-uadmin:pw`); the
-  // separate `-u(\s|=)` keeps catching the space-separated form (`-u me:pw`).
-  { name: "credential flag", re: /\s(-u\S|-u(\s|=)|--user(\s|=)|--password(\s|=)|--token(\s|=)|--api-key(\s|=))/ },
+  // `-u\S` catches curl's getopt-style attached form (`-uadmin:pw`). The
+  // second alternative catches a SINGLE-DASH cluster containing `u`
+  // (`-su`, `-sun`) without also matching the GNU long option `--url`: the
+  // `(?!-)` after the first `-` rejects a second leading dash outright, so
+  // `--url`'s two dashes never enter the cluster branch at all.
+  { name: "credential flag", re: /\s(-u\S|-(?!-)[a-zA-Z]*u[a-zA-Z]*(?=\s|=|$)|--user(\s|=)|--password(\s|=)|--token(\s|=)|--api-key(\s|=))/ },
   // /i: an "authorization:"/"bearer" header is credential-bearing regardless
   // of case; the header name and scheme are conventionally capitalised but
   // HTTP header matching is case-insensitive and so is this rule now.
   { name: "auth header", re: /Authorization:|\bBearer\s+\S+/i },
   { name: "nsupdate", re: /\bnsupdate\b/ },
-  { name: "privileged or destructive tool", re: /\b(sudo|doas|dd|mkfs\S*|chmod|chown|kill|killall|pkill|shutdown|reboot|systemctl|launchctl)\b/ },
-  { name: "remote shell or package tool", re: /\b(ssh|scp|sftp|rsync|kubectl|docker|helm|npm|npx|pip3?|brew|apt(-get)?|yum|dnf)\b/ },
+  { name: "privileged or destructive tool", re: /(^|[\s;&|(])(?:\S*\/)?(sudo|doas|dd|mkfs\S*|chmod|chown|kill|killall|pkill|shutdown|reboot|systemctl|launchctl)(\s|$)/ },
+  { name: "remote shell or package tool", re: /(^|[\s;&|(])(?:\S*\/)?(ssh|scp|sftp|rsync|kubectl|docker|helm|npm|npx|pip3?|brew|apt(-get)?|yum|dnf)(\s|$)/ },
   { name: "file write redirect", re: /(^|\s)[12&]?>>?\s*(?!&[12](\s|$))(?!\/dev\/null(\s|$))\S/ },
   // Path-prefixed shell targets after a pipe (`| /bin/sh`) need the same
   // treatment: allow an optional path segment before the word-bounded name.
