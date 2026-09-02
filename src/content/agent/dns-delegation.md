@@ -194,7 +194,7 @@ Then:
 | non-empty but does not contain `v=DKIM1` | MISMATCH - confirm the selector spelling with the person and re-run once; if it still does not match, report it as MISMATCH rather than PASS or MISSING |
 
 If any record is still missing after two re-checks, stop here and use the
-delivery troubleshooting runbook.
+[delivery troubleshooting runbook](/kuju-email/agent/troubleshooting-delivery.md).
 
 ## Step 6 - Report
 
