@@ -1,0 +1,24 @@
+[Unit]
+Description=Check kaimoku-website's documented mail facts (mail-facts.yaml) against live DNS/HTTPS; report via ntfy
+Documentation=https://github.com/macole16/kaimoku-website/blob/main/docs/superpowers/specs/2026-08-31-agent-friendly-docs-design.md
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=macole
+WorkingDirectory=/opt/kaimoku-website
+# The clone is public; no credentials are needed. --ff-only: a diverged clone is
+# a setup error, and silently resetting it would hide that.
+ExecStartPre=/usr/bin/git pull --ff-only --quiet
+# The checker needs only the `yaml` package but that lives in package.json with
+# next/react; --omit=dev --ignore-scripts keeps it to runtime deps and prevents
+# any lifecycle script (including prebuild) from running here.
+ExecStartPre=/usr/bin/npm install --omit=dev --ignore-scripts --no-audit --no-fund --silent
+# --self-test: the five Tier 3 mutants run FIRST; exit 2 aborts before the real
+# check, and no heartbeat is sent, so a broken checker goes dark rather than green.
+# Exit 1 = findings (the unit shows as failed in `systemctl --failed`, which is a
+# report, not a page).
+ExecStart=/usr/bin/node scripts/check-facts-live.mjs --self-test --ntfy
+TimeoutStartSec=600
+Nice=10

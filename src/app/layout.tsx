@@ -3,6 +3,7 @@ import { Spectral, Public_Sans, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { SITE_URL } from "@/lib/constants";
 
 const spectral = Spectral({
   variable: "--font-display",
@@ -29,17 +30,14 @@ const cormorantGaramond = Cormorant_Garamond({
   display: "swap",
 });
 
-const SITE_URL = "https://kaimoku-website.vercel.app";
 const SITE_DESCRIPTION =
   "Kaimoku Technologies builds software that pays attention to the things software has stopped paying attention to. Our first product is Kuju Email: secure, transparent business email.";
 
 export const metadata: Metadata = {
-  // Resolves relative URLs in openGraph, twitter and alternates below. Points
-  // at the vercel.app host deliberately: kaimoku.tech resolves to Vercel and
-  // www has a Vercel CNAME, but the apex returned HTTP 404 when this was
-  // written, so canonical tags aimed there would point search engines and
-  // social scrapers at a dead page. Switch this the day the domain is attached
-  // to the project and answers 200.
+  // Resolves relative URLs in openGraph, twitter and alternates below.
+  // The host and the reasoning for it live with the constant — see SITE_URL
+  // in src/lib/constants.ts. Do not restate the rationale here: two copies
+  // are how this comment came to contradict that one.
   metadataBase: new URL(SITE_URL),
   title: {
     default: "Kaimoku Technologies",
@@ -66,10 +64,9 @@ export const metadata: Metadata = {
     description: SITE_DESCRIPTION,
   },
   // DELIBERATELY NOINDEX. Kaimoku is pre-launch and the site is meant to stay
-  // undiscoverable until it opens; kaimoku.tech returning 404 is part of the
-  // same intent, not a misconfiguration (github-bhri4). Vercel sends no
-  // X-Robots-Tag on production aliases, so without this the vercel.app host is
-  // fully open to search engines.
+  // undiscoverable until it opens. Vercel sends no X-Robots-Tag on production
+  // aliases, so without this the vercel.app host would be fully open to search
+  // engines. See github-bhri4 for details.
   //
   // This does NOT disable link sharing. The openGraph and twitter blocks above
   // still render a card when someone is sent the URL directly; noindex governs

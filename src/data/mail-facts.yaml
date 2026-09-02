@@ -1,0 +1,72 @@
+# Single source for every volatile value the agent corpus and the TSX pages
+# share. Spec: docs/superpowers/specs/2026-08-31-agent-friendly-docs-design.md
+# section 2. Every value was measured live on 2026-09-01.
+#
+# Three placeholder forms, deliberately different:
+#   {{fact:path.to.leaf}}  BUILD time — resolved by src/lib/agent-corpus-core.mjs;
+#                          an unknown path fails the build.
+#   <domain>               RUN time — the customer's agent fills it in.
+#   {domain}               UPSTREAM ONLY — mirrors registrar.go verbatim. It is
+#                          rewritten to <domain> whenever a value is emitted into
+#                          the corpus, and the Tier 1 check rejects any single-brace
+#                          token that survives into a rendered runbook.
+#
+# `verify:` blocks are read by scripts/check-facts-live.mjs (Tier 2). A fact
+# without one is unverifiable by this site (spec section 2, "our product config")
+# and is reported as SKIP, never silently omitted.
+# `pending: true` = known-divergent on purpose; the checker fails if it PASSES.
+
+nameservers:
+  value: [ns1.kuju.email, ns2.kuju.email]
+  verify: {type: dns, record: A, expect: nonempty}
+  # NOT `NS kuju.email contains ns1.kuju.email`. kuju.email's own zone is hosted
+  # at Cloudflare (irma.ns.cloudflare.com / james.ns.cloudflare.com); ns1/ns2 are
+  # the delegation targets OFFERED TO CUSTOMERS, not the nameservers of
+  # kuju.email. That check would be a permanent false failure — the exact thing
+  # that trains people to ignore red. Measured 2026-09-01: ns1 -> 96.126.108.161,
+  # ns2 -> 172.235.42.202.
+
+mx:
+  target: mail.kuju.email
+  priority: 10
+  verify: {type: dns, name: kuju.email, record: MX, expect_contains: "10 mail.kuju.email."}
+
+customer_domain_records:
+  spf: "v=spf1 mx ~all"
+  dmarc: "v=DMARC1; p=quarantine; rua=mailto:postmaster@{domain}"
+  # The checker resolves TXT <name> for spf and TXT _dmarc.<name> for dmarc, with
+  # {domain} substituted by <name>. Measured 2026-09-01 on demo.kuju.email: both exact.
+  verify: {type: dns, name: demo.kuju.email, record: TXT}
+
+signup_url:
+  value: "https://mail.kuju.email/signup"
+  pending: true    # 303 -> https://mail.kuju.email/login until launch-1.5 enables the demo
+  verify: {type: http, expect_status: [200]}
+
+test_migration_cap_gb:
+  value: 2         # beta-1.10: per-account cap on a TEST migration; a PAUSE, not a failure
+  # No verify block: this is product config the website cannot observe.
+
+registrars:
+  # Ported verbatim from kuju-mail/internal/api/registrar.go (11 keys, 10 with a
+  # panel URL). Accepted duplication (spec section 2). Matching is
+  # strings.Contains on the FIRST nameserver host, lowercased, trailing dot
+  # stripped — `awsdns` and `azure-dns` are INFIXES, not suffixes.
+  #
+  # verify: third-party panels are bot-hostile (measured 2026-09-01 with a browser
+  # UA: Cloudflare 403, Azure 403, GoDaddy deep link 504 at the Akamai edge,
+  # Namecheap 405 on HEAD). So the check is "the URL is still routed": any HTTP
+  # response EXCEPT 404/410 passes; a transport failure after one retry fails.
+  # An entry with no dns_url is reported as SKIP by name, never dropped.
+  verify: {type: http, reject_status: [404, 410], domain_placeholder: example.com}
+  registrar-servers.com: {name: Namecheap, dns_url: "https://ap.www.namecheap.com/domains/domaincontrolpanel/{domain}/advancedns"}
+  domaincontrol.com:     {name: GoDaddy, dns_url: "https://dcc.godaddy.com/dns/{domain}"}
+  cloudflare.com:        {name: Cloudflare, dns_url: "https://dash.cloudflare.com"}
+  google.com:            {name: "Google / Squarespace", dns_url: "https://domains.squarespace.com"}
+  googledomains.com:     {name: "Google / Squarespace", dns_url: "https://domains.squarespace.com"}
+  awsdns:                {name: "AWS Route 53", dns_url: "https://console.aws.amazon.com/route53"}
+  azure-dns:             {name: "Microsoft Azure", dns_url: "https://portal.azure.com/#browse/Microsoft.Network%2FdnsZones"}
+  digitalocean.com:      {name: DigitalOcean, dns_url: "https://cloud.digitalocean.com/networking/domains/{domain}"}
+  linode.com:            {name: "Linode / Akamai", dns_url: "https://cloud.linode.com/domains"}
+  hover.com:             {name: Hover, dns_url: "https://www.hover.com/control_panel/domain/{domain}"}
+  name-services.com:     {name: "Enom / Tucows"}   # no dns_url upstream either

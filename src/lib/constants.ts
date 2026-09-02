@@ -26,6 +26,17 @@ export const URLS = {
   CONTACT_EMAIL: "mailto:info@kaimoku.tech",
 } as const;
 
+/**
+ * Absolute base for every URL the site emits about itself: metadataBase in
+ * layout.tsx, and the agent corpus (llms.txt links out by convention).
+ *
+ * Deliberately the vercel.app host. kaimoku.tech does NOT resolve at all as of
+ * 2026-09-01 (launch-1.1 was closed by UNPOINTING the DNS; re-attaching the
+ * branded domain is github-j3x, deferred). Switch this the day the domain is
+ * attached and answers 200 — and nowhere else: this is the only definition.
+ */
+export const SITE_URL = "https://kaimoku-website.vercel.app";
+
 export function isComingSoon(url: string): boolean {
   return url === "#coming-soon";
 }

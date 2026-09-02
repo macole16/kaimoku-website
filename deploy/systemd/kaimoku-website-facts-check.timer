@@ -1,0 +1,13 @@
+[Unit]
+Description=Daily kaimoku-website facts check (docs vs live DNS/HTTPS)
+
+[Timer]
+OnCalendar=daily
+# Catch up if the build host was off at the scheduled time.
+Persistent=true
+# Spread third-party HTTP checks; the registrar panels are bot-hostile.
+RandomizedDelaySec=1800
+Unit=kaimoku-website-facts-check.service
+
+[Install]
+WantedBy=timers.target
