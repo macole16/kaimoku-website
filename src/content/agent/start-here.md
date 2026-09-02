@@ -46,7 +46,7 @@ Check which tools you have:
 | --- | --- |
 | all three print a version | continue |
 | `dig` is missing | use `nslookup -type=<record> <name>` wherever a runbook shows `dig <record> <name>`; the observations are the same |
-| `curl` or `openssl` is missing | tell the person; the steps that need them are marked and can be done by the person instead |
+| `curl` or `openssl` is missing | tell the person which command is missing; read them the step's command and ask them to run it and report back what it printed |
 
 ## Which runbook
 
@@ -63,7 +63,7 @@ needs it and you should not call the API.
 
 ## Where these files come from
 
-Every runbook is generated from a single source of facts at build time, and a
-scheduled check compares those facts with live DNS every day. If a value in a
-runbook disagrees with what you observe, trust your observation, tell the
-person, and continue with the runbook's "if not" branch.
+Every runbook is generated from a single source of facts at build time, so
+the values you see reflect the latest deploy. If a value in a runbook
+disagrees with what you observe, trust your observation, tell the person,
+and continue with the runbook's "if not" branch.
