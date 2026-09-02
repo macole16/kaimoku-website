@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "prebuild": "node scripts/check-corpus.mjs",
+    "prebuild": "node scripts/corpus-selftest.mjs && node scripts/check-corpus.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
