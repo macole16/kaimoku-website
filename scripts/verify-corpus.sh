@@ -71,25 +71,25 @@ d="$(fresh_copy)"; sed -i '' 's/{{fact:nameservers.0}}/{{fact:nameserver.0}}/' "
 arm "M1 misspelled fact fails" fail "unknown fact: nameserver.0" -- check_on "$d"
 
 d="$(fresh_copy)"; printf '\n    curl -X POST https://mail.kuju.email/api/login\n' >> "$d/agent/dns-delegation.md"
-arm "M2 write verb fails" fail "denylisted command" -- check_on "$d"
+arm "M2 write verb fails" fail "denylisted command (curl write verb)" -- check_on "$d"
 
 d="$(fresh_copy)"; printf '\nOpen the panel at https://dcc.godaddy.com/dns/{domain} now.\n' >> "$d/agent/dns-delegation.md"
 arm "M3 single-brace token fails" fail "single-brace token" -- check_on "$d"
 
 d="$(fresh_copy)"; sed -i '' 's/^facts_used: \[nameservers, /facts_used: [/' "$d/agent/dns-delegation.md"
-arm "M4 facts_used drift fails" fail "facts_used" -- check_on "$d"
+arm "M4 facts_used drift fails" fail 'facts_used is missing "nameservers"' -- check_on "$d"
 
 d="$(fresh_copy)"; printf '\nSee [nothing](/kuju-email/agent/nope.md).\n' >> "$d/agent/dns-delegation.md"
 arm "M5 broken internal link fails" fail "broken link" -- check_on "$d"
 
 d="$(fresh_copy)"; printf '# stray\n' > "$d/agent/stray.md"
-arm "M6 stray file without front-matter fails" fail "front-matter" -- check_on "$d"
+arm "M6 stray file without front-matter fails" fail "missing front-matter (expected a leading --- block)" -- check_on "$d"
 
 d="$(fresh_copy)"; cp "$d/agent/dns-delegation.md" "$d/agent/dup.md"; sed -i '' 's/^slug: dns-delegation$/slug: dup/' "$d/agent/dup.md"
 arm "M7 duplicate order fails" fail "order 3 is already used" -- check_on "$d"
 
 d="$(fresh_copy)"; sed -i '' 's/^slug: dns-delegation$/slug: dns-delegate/' "$d/agent/dns-delegation.md"
-arm "M8 slug/filename mismatch fails" fail "slug" -- check_on "$d"
+arm "M8 slug/filename mismatch fails" fail "must equal the filename stem" -- check_on "$d"
 rm -rf "$SCRATCH"
 
 # ---------------------------------------------------------------------------
