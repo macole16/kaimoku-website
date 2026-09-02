@@ -168,8 +168,13 @@ if [[ "${SKIP_SERVER:-0}" != "1" ]]; then
   #
   # Measured 2026-09-01, and worth knowing before you edit route.ts: deleting
   # `export const dynamic = "force-static"` does NOT trip this arm, because
-  # generateStaticParams + dynamicParams=false already make the route fully
-  # static -- force-static is redundant in this configuration, not load-bearing.
+  # generateStaticParams alone (with no dynamic-API use in the handler) already
+  # makes the route fully static under the default dynamic:"auto" -- so
+  # force-static is redundant in this configuration, not load-bearing.
+  # dynamicParams=false is NOT part of that: it governs only what happens to a
+  # slug that is NOT in generateStaticParams' list (404 vs render on demand),
+  # and removing it leaves this arm green, which is exactly what the matrix
+  # below shows. Do not read it as contributing to the caching behaviour.
   # What DOES trip it is a route that is genuinely dynamic (verified with
   # dynamic = "force-dynamic", which fails both this arm and S6b). So do not
   # read a green S9 as proof that force-static is present; read it as proof the
