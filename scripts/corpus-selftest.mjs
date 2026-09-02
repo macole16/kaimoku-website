@@ -315,7 +315,7 @@ check("signup-trial.md documents invite redemption, no tier, no open signup", ()
   assert.ok(rb, "signup-trial.md not found");
   const md = core.renderRunbook(rb, facts, "https://site.test").markdown;
   assert.ok(md.includes("KUJU-7F3K-9QM2"), "typeable code example missing");
-  assert.ok(/one secret/i.test(md), "one-secret-two-renderings rule missing");
+  assert.ok(/one secret/i.test(md) && /rendered two ways/i.test(md), "one-secret-two-renderings rule missing");
   assert.ok(md.includes("demo domain") && /bring.your.own.domain/i.test(md), "flow choice missing");
   assert.ok(!/\b(Individual|Small Business|Professional|Enterprise) (plan|tier)\b/.test(md), "must not name a plan tier");
   assert.ok(!/\bfree trial\b/i.test(md) && !/14.day/i.test(md), "must not promise trial terms for the beta");
