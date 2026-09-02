@@ -1,9 +1,18 @@
 // Tier 2: compare src/data/mail-facts.yaml with live DNS and HTTPS. REPORTS,
-// never blocks. Tier 3: with --self-test, two mutants run FIRST as separate
-// processes; if either exits 0 the checker can no longer fail and the real
-// result would be meaningless, so the run aborts with exit 2.
+// never blocks. Tier 3: with --self-test, five mutants run FIRST as separate
+// processes, each scoped to the ONE fact it mutates via --only (so the mutant
+// sweep does not multiply the registrar/DNS network footprint); if any exits 0
+// the checker can no longer fail and the real result would be meaningless, so
+// the run aborts with exit 2. The mutant count is pinned (EXPECTED_MUTANT_COUNT)
+// so a shrunk mutant list -- including an empty one -- fails loudly rather than
+// printing a vacuous "SELF-TEST OK: 0/0".
 //
-//   node scripts/check-facts-live.mjs [--facts F] [--self-test] [--ntfy] [--quiet]
+//   node scripts/check-facts-live.mjs [--facts F] [--only FACT] [--self-test] [--ntfy] [--quiet]
+//
+// --only restricts runChecks to the single top-level fact (or, for a registrar
+// row, "registrars.<key>") named -- used internally by the Tier 3 mutant
+// runner; an operator may also pass it to probe one fact without hitting the
+// rest.
 //
 // Spec: docs/superpowers/specs/2026-08-31-agent-friendly-docs-design.md section 4.
 // Runs on `build` from deploy/systemd/kaimoku-website-facts-check.service with
@@ -23,6 +32,8 @@ const argv = process.argv.slice(2);
 const flag = (f) => argv.includes(f);
 const factsArg = argv.indexOf("--facts");
 const FACTS_PATH = factsArg !== -1 ? path.resolve(argv[factsArg + 1]) : path.join(ROOT, "src/data/mail-facts.yaml");
+const onlyArg = argv.indexOf("--only");
+const ONLY = onlyArg !== -1 ? argv[onlyArg + 1] : undefined;
 const QUIET = flag("--quiet");
 
 const NTFY_BASE = process.env.NTFY_BASE ?? "https://ntfy.tail3558e0.ts.net";
@@ -99,7 +110,7 @@ async function checkHttp(url, verify) {
 // fact that is not checked shows up as SKIP rather than vanishing.
 // ---------------------------------------------------------------------------
 
-async function runChecks(facts) {
+async function runChecks(facts, only) {
   const rows = [];
   const push = (fact, r, pending) => {
     let status = r.status;
@@ -110,13 +121,20 @@ async function runChecks(facts) {
   for (const [key, fact] of Object.entries(facts)) {
     const verify = fact?.verify;
     const pending = fact?.pending === true;
+    // --only scopes the walk to one fact (or one "registrars.<key>" row) so a
+    // Tier 3 mutant proves its own check function can fail without re-running
+    // the other fourteen rows -- see runMutant below.
+    const isRegistrarTarget = key === "registrars" && typeof only === "string" && only.startsWith("registrars.");
+    if (only && key !== only && !isRegistrarTarget) continue;
 
     if (key === "registrars") {
       // Reserved key `verify` is metadata; entries are the registrars.
       for (const e of registrarEntries(facts)) {
-        if (!e.dns_url) { rows.push({ fact: `registrars.${e.key}`, status: "SKIP", detail: `${e.name}: no dns_url upstream — not checkable, by design` }); continue; }
+        const rowName = `registrars.${e.key}`;
+        if (only && rowName !== only) continue;
+        if (!e.dns_url) { rows.push({ fact: rowName, status: "SKIP", detail: `${e.name}: no dns_url upstream — not checkable, by design` }); continue; }
         const url = e.dns_url.replaceAll("{domain}", verify?.domain_placeholder ?? "example.com");
-        push(`registrars.${e.key}`, await checkHttp(url, verify ?? {}), false);
+        push(rowName, await checkHttp(url, verify ?? {}), false);
       }
       continue;
     }
@@ -158,25 +176,81 @@ function render(rows) {
 // code AND on the specific row that must fail (a crash is not a pass).
 // ---------------------------------------------------------------------------
 
-function runMutant(name, mutate, mustContain) {
+// `only`, when given, is passed through as --only so the child process scopes
+// its network calls to the single fact this mutant touches instead of
+// re-running the full ~18-row check (5 mutants x a full run would multiply
+// the ~30 registrar GETs and DNS lookups a bare full run already makes; see
+// selfTest() below for the measured before/after). `mustContain` is one
+// string or an array of strings that must ALL appear (ANDed) -- splitting a
+// mutant's assertion across the row's fixed prefix and the injected token
+// lets each half do a different job: the prefix pins status+fact (rules out
+// an unrelated failure elsewhere), the injected token proves mutate()
+// actually landed (a no-op mutate() would leave the real value in place and
+// the token would never appear) -- see selfTest()'s mx/spf mutants.
+function runMutant(name, mutate, mustContain, only) {
   const facts = loadFacts(FACTS_PATH);
   mutate(facts);
   const file = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "facts-mutant-")), `${name}.yaml`);
   fs.writeFileSync(file, yaml.stringify(facts));
+  const musts = Array.isArray(mustContain) ? mustContain : [mustContain];
+  const args = [SELF, "--facts", file, "--quiet"];
+  if (only) args.push("--only", only);
   let out = ""; let code = 0;
   try {
-    out = execFileSync(process.execPath, [SELF, "--facts", file, "--quiet"], { encoding: "utf-8", stdio: ["ignore", "pipe", "pipe"] });
+    out = execFileSync(process.execPath, args, { encoding: "utf-8", stdio: ["ignore", "pipe", "pipe"] });
   } catch (err) { code = err.status ?? 1; out = `${err.stdout ?? ""}${err.stderr ?? ""}`; }
-  const ok = code !== 0 && out.includes(mustContain);
-  console.log(`${ok ? "mutant-failed-as-required" : "MUTANT-PASSED"}  ${name}  exit=${code}  wanted "${mustContain}"`);
+  const ok = code !== 0 && musts.every((m) => out.includes(m));
+  console.log(`${ok ? "mutant-failed-as-required" : "MUTANT-PASSED"}  ${name}  exit=${code}  wanted ${JSON.stringify(musts)}`);
   return ok;
 }
 
+// Pinned deliberately (matching this plan's precedent for hardcoded expected
+// counts, e.g. registrars.table's 11 rows): a mutant list that has shrunk --
+// down to and including an empty list -- must fail the self-test loudly
+// rather than silently reporting "SELF-TEST OK: 0/0 mutants failed as
+// required" and letting a checker that has stopped checking pass forever.
+// Bump this ONLY as a deliberate edit alongside adding/removing a mutant.
+const EXPECTED_MUTANT_COUNT = 5;
+
 function selfTest() {
   const results = [
-    runMutant("ns-does-not-exist", (f) => { f.nameservers.value[0] = "ns-does-not-exist.kuju.email"; }, "FAIL  nameservers.ns-does-not-exist.kuju.email"),
-    runMutant("pending-now-passes", (f) => { f.signup_url.value = "https://kaimoku-website.vercel.app/"; }, "PENDING_NOW_PASSES  signup_url"),
+    // Exercises checkDnsNonEmpty's catch branch.
+    runMutant("ns-does-not-exist", (f) => { f.nameservers.value[0] = "ns-does-not-exist.kuju.email"; }, "FAIL  nameservers.ns-does-not-exist.kuju.email", "nameservers"),
+    // Exercises checkHttp's expect_status branch.
+    runMutant("pending-now-passes", (f) => { f.signup_url.value = "https://kaimoku-website.vercel.app/"; }, "PENDING_NOW_PASSES  signup_url", "signup_url"),
+    // Exercises checkMx (:53's comparison) -- previously the only way to
+    // defeat it (e.g. `const ok = true;`) was to be invisible to self-test.
+    runMutant(
+      "mx-expect-mismatch",
+      (f) => { f.mx.verify.expect_contains = "MUTANT-MX-TOKEN-not-a-real-target."; },
+      ["FAIL  mx  MX kuju.email -> ", '(want "MUTANT-MX-TOKEN-not-a-real-target.")'],
+      "mx",
+    ),
+    // Exercises checkTxtEquals (:63's comparison) -- backs both spf and
+    // dmarc; corrupting spf alone is enough to reach the function.
+    runMutant(
+      "spf-mismatch",
+      (f) => { f.customer_domain_records.spf = "v=spf1 MUTANT-SPF-TOKEN ~all"; },
+      ["FAIL  customer_domain_records.spf  TXT demo.kuju.email -> ", '(want "v=spf1 MUTANT-SPF-TOKEN ~all")'],
+      "customer_domain_records",
+    ),
+    // Exercises checkHttp's reject_status branch (:91's comparison) --
+    // previously undefeatable-and-uncaught (`const bad = false;` would have
+    // silenced all ten registrar rows at once). Same host as the real
+    // registrars.google.com row (domains.squarespace.com) so DNS/TLS stay
+    // representative; only the path is swapped for one verified live to 404
+    // (measured 2026-09-02) so the response lands in reject_status.
+    runMutant(
+      "registrar-404",
+      (f) => { f.registrars["google.com"].dns_url = "https://domains.squarespace.com/definitely-not-a-real-path-mutant-test-xyz"; },
+      "FAIL  registrars.google.com  https://domains.squarespace.com/definitely-not-a-real-path-mutant-test-xyz -> HTTP 404 (reject 404/410)",
+      "registrars.google.com",
+    ),
   ];
+  if (results.length !== EXPECTED_MUTANT_COUNT) {
+    console.error(`SELF-TEST FAILED: expected ${EXPECTED_MUTANT_COUNT} mutants, found ${results.length} — the mutant list changed size; update EXPECTED_MUTANT_COUNT deliberately if this is intended`);
+    return false;
+  }
   const failed = results.filter((r) => r).length;
   if (failed !== results.length) { console.error(`SELF-TEST FAILED: only ${failed}/${results.length} mutants failed — the checker can no longer fail; real results would be meaningless`); return false; }
   console.log(`SELF-TEST OK: ${failed}/${results.length} mutants failed as required`);
@@ -203,7 +277,7 @@ async function main() {
     process.exit(2);   // no heartbeat: a run that cannot fail produced no information
   }
 
-  const rows = await runChecks(loadFacts(FACTS_PATH));
+  const rows = await runChecks(loadFacts(FACTS_PATH), ONLY);
   const { bad, line } = summarise(rows);
   const report = `${render(rows)}\n\nsummary: ${line}`;
   if (!QUIET || bad.length) console.log(report);

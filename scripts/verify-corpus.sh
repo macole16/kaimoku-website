@@ -97,7 +97,7 @@ rm -rf "$SCRATCH"
 # gated behind LIVE=1 -- the default offline harness run stays deterministic.
 # ---------------------------------------------------------------------------
 if [[ "${LIVE:-0}" == "1" ]]; then
-  arm "L1 live checker self-test proves both mutants fail" pass "SELF-TEST OK: 2/2 mutants failed as required" -- "${NODE[@]}" "$ROOT/scripts/check-facts-live.mjs" --self-test
+  arm "L1 live checker self-test proves all five mutants fail" pass "SELF-TEST OK: 5/5 mutants failed as required" -- "${NODE[@]}" "$ROOT/scripts/check-facts-live.mjs" --self-test
   arm "L2 live checker reports signup_url as PENDING (still 303)" pass "PENDING  signup_url" -- "${NODE[@]}" "$ROOT/scripts/check-facts-live.mjs"
   arm "L3 live checker names the URL-less registrar as SKIP" pass "SKIP  registrars.name-services.com" -- "${NODE[@]}" "$ROOT/scripts/check-facts-live.mjs"
 fi
