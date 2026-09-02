@@ -142,6 +142,25 @@ if [[ "${SKIP_SERVER:-0}" != "1" ]]; then
     if [[ -n "$mustnot" && "$body" == *"$mustnot"* ]]; then echo "FAIL  ${name}: body must NOT contain: ${mustnot}"; FAILS=$((FAILS + 1)); return; fi
     echo "PASS  ${name}"
   }
+  # count_arm <name> <path> <ERE-pattern> <expected-count>
+  # A body_arm substring check can only tell "present" from "absent" -- it
+  # cannot tell 1 rendered entry from 14, so a renderer that silently
+  # truncates (e.g. an accidental .slice(0,1)) still passes every body_arm
+  # sentinel. This counts how many lines in the SERVED body match an ERE
+  # pattern and fails unless it equals the expected count exactly. The
+  # expected counts are hardcoded, not derived, matching the precedent at
+  # scripts/corpus-selftest.mjs:57-64 (registrars.table's 11 rows) -- a
+  # hardcoded count fails loudly when an entry is legitimately added, which
+  # is correct behaviour for a drift-detection corpus.
+  count_arm() {
+    local name="$1" p="$2" pattern="$3" expected="$4" body n
+    body="$(curl -s "${BASE}${p}")"
+    n="$(printf '%s' "$body" | grep -cE -- "$pattern")"
+    if [[ "$n" -ne "$expected" ]]; then
+      echo "FAIL  ${name}: expected ${expected}, got ${n}"; FAILS=$((FAILS + 1)); return
+    fi
+    echo "PASS  ${name}"
+  }
 
   for slug in $(cd "$ROOT/src/content/agent" && ls -- *.md | sed 's/\.md$//'); do
     header_arm "S1 ${slug}.md is text/markdown" "/kuju-email/agent/${slug}.md" "content-type: text/markdown"
@@ -182,14 +201,41 @@ if [[ "${SKIP_SERVER:-0}" != "1" ]]; then
   header_arm "S9 dns-delegation.md is served from the prerendered cache (not rendered on demand)" "/kuju-email/agent/dns-delegation.md" "x-nextjs-cache: hit"
 
   # S10-S14: the generated glossary.md/docs.md twins (Task 6). Numbered from
-  # S10, not S9 — S9 above is already taken by the prerendered-cache arm and
-  # is called out by name in this file's header comment, so reusing "S9"
-  # here would collide with that label rather than extend it.
+  # S10, not S9 — S9 above is already taken by the prerendered-cache arm,
+  # which is named and explained in the inline comment block immediately
+  # above it (the "S1-S8 all pass even when..." paragraph through "do not
+  # read a green S9 as proof force-static is present", currently just above
+  # this line in this file), so reusing "S9" here would collide with that
+  # label rather than extend it. (This file's own header comment, :1-8,
+  # names neither arm — a prior draft of this comment claimed otherwise;
+  # that claim was wrong and has been corrected. See the Task 6 report's
+  # correction note.)
   header_arm "S10 glossary.md is text/markdown" "/kuju-email/glossary.md" "content-type: text/markdown"
   body_arm   "S11 glossary.md carries SPF and why-it-matters" "/kuju-email/glossary.md" "**Why it matters:**"
   header_arm "S12 docs.md is text/markdown" "/kuju-email/docs.md" "content-type: text/markdown"
   body_arm   "S13 docs.md lists endpoints" "/kuju-email/docs.md" "| GET | "
   body_arm   "S14 llms-full.txt embeds the glossary" "/llms-full.txt" "Sender Policy Framework"
+
+  # S15-S18: count arms (Task 6 review finding 1). S11/S13 above are
+  # substring sentinels and cannot distinguish "the renderer emitted 1
+  # entry/endpoint" from "it emitted all of them" -- e.g. an accidental
+  # .slice(0,1) in renderGlossaryMarkdown() still emits one
+  # "**Why it matters:**" line and S11 still passes. corpus-selftest.mjs
+  # cannot carry this assertion instead: it is plain ESM importing only
+  # agent-corpus-core.mjs (node:assert against .mjs), while the renderers
+  # live in src/lib/agent-corpus.ts and pull in src/lib/glossary.ts and
+  # src/lib/api-docs.ts, which are TypeScript -- confirmed node 22.11.0
+  # cannot import a .ts file directly ("Unknown file extension \".ts\"").
+  # So this harness, against the SERVED routes, is these counts' only home.
+  # Expected counts measured directly against the built site, not carried
+  # over from any prior report: `grep -c '^    id: "' src/lib/glossary.ts`
+  # gives 14 GLOSSARY entries; loadApiDocs() renders 7 `## ` sections, 39
+  # `### ` subsections and 147 endpoint table rows (counted via curl against
+  # a `next start`, since api-docs.ts is equally unreachable from plain node).
+  count_arm "S15 glossary.md has one heading per GLOSSARY entry (14)" "/kuju-email/glossary.md" '^## ' 14
+  count_arm "S16 docs.md has one heading per API doc section (7)" "/kuju-email/docs.md" '^## ' 7
+  count_arm "S17 docs.md has one heading per API doc subsection (39)" "/kuju-email/docs.md" '^### ' 39
+  count_arm "S18 docs.md has one table row per endpoint (147)" "/kuju-email/docs.md" '^\| (GET|POST|PUT|PATCH|DELETE) \| ' 147
 fi
 
 echo
