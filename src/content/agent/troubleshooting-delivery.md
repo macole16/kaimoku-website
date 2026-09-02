@@ -11,7 +11,17 @@ facts_used: [mx, customer_domain_records]
 
 # Troubleshoot mail delivery for a Kuju domain
 
-Replace `<domain>` with the customer's domain. Every command is read-only.
+You are an agent helping a person troubleshoot mail delivery for `<domain>`, a
+domain that already uses Kuju Email. Replace `<domain>` with the customer's
+domain everywhere below (for example `example.com`). Never invent a value you
+did not observe. Every command here is read-only.
+
+Steps marked **HUMAN ACTION** are things you cannot do: clicking through DNS
+or registrar control panels, reading a bounce message from the person's own
+inbox, reading a value from the Kuju admin screen, or sending and inspecting a
+test message from their own mailbox. Give the person exact instructions, then
+wait for them to confirm.
+
 Pick the section that matches the symptom the person reports. Collect every
 observation you make; the last section tells you how to report them.
 
@@ -26,7 +36,7 @@ observation you make; the last section tells you how to report them.
 | exactly `{{fact:mx.priority}} {{fact:mx.target}}.` | Kuju receives mail for the domain | A2 |
 | empty | no MX; senders will try the domain's A record, which is not a mail server | the domain is not provisioned - run [dns-delegation](/kuju-email/agent/dns-delegation.md) from Step 1 |
 | a different host | the OLD provider still receives the mail | the person's old mailbox has it; delegation is incomplete - dns-delegation Step 4 |
-| Kuju's host plus other hosts | split delivery; some senders reach the old provider | the extra MX records must be removed where the DNS lives (HUMAN ACTION) |
+| Kuju's host plus other hosts | split delivery; some senders reach the old provider | **HUMAN ACTION** - the extra MX records must be removed where the DNS lives |
 
 ### A2 - Is the delegation consistent?
 
@@ -57,7 +67,7 @@ observation you make; the last section tells you how to report them.
 >
 > | Bounce text contains | Meaning |
 > | --- | --- |
-> | `550` and `does not exist` or `unknown user` | the address is not set up in Kuju; the person needs to create the mailbox or alias (HUMAN ACTION in the Kuju admin) |
+> | `550` and `does not exist` or `unknown user` | the address is not set up in Kuju; **HUMAN ACTION** - the person needs to create the mailbox or alias in the Kuju admin |
 > | `550` and `spam` or `blocked` or `rejected` | Kuju's filters rejected it; the sender's own domain probably fails SPF/DKIM; the sender should check their setup |
 > | `quarantine` or `held` | the message is in the person's Kuju quarantine folder, not lost |
 > | `450` or `try again later` | a temporary deferral; the sender's server will retry for days - wait |
@@ -74,7 +84,7 @@ observation you make; the last section tells you how to report them.
 | --- | --- | --- |
 | SPF | a TXT equal to `{{fact:customer_domain_records.spf}}` | missing SPF is the most common cause of spam placement; the domain is not fully provisioned - dns-delegation Step 5 |
 | DMARC | a TXT starting `v=DMARC1` | same |
-| more than one SPF record | INVALID - receivers ignore both | the extra record must be deleted where the DNS lives (HUMAN ACTION) |
+| more than one SPF record | INVALID - receivers ignore both | **HUMAN ACTION** - the extra record must be deleted where the DNS lives |
 
 DKIM's selector rotates, so ask for it:
 
