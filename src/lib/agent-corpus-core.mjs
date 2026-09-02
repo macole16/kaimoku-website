@@ -167,16 +167,29 @@ export const REQUIRED_META = ["slug", "title", "order", "preconditions", "outcom
  * must-allow case in scripts/corpus-selftest.mjs; add both when you add a row.
  */
 export const DENYLIST = [
-  { name: "rm", re: /(^|[\s;&|(])rm(\s|$)/ },
+  // Fix round 1 (reviewer-confirmed bypasses): the boundary style
+  // `(^|[\s;&|(])name(\s|$)` demands the preceding character be whitespace or
+  // a shell metacharacter, so a `/`-prefixed invocation (`/bin/rm`,
+  // `/usr/bin/ssh`) slipped past entirely. `\bcurl\b` and `\bnsupdate\b`
+  // already used real word boundaries and were NOT bypassable this way — this
+  // rewrite makes the other four rules match that already-correct style.
+  { name: "rm", re: /\brm\b/ },
   { name: "curl write verb", re: /\bcurl\b.*\s-X\s*(POST|PUT|PATCH|DELETE)\b/i },
   { name: "curl upload flag", re: /\bcurl\b.*\s(-d|--data(-\w+)?|-F|--form|-T|--upload-file)(\s|$)/ },
-  { name: "credential flag", re: /\s(-u|--user|--password|--token|--api-key)(\s|=)/ },
-  { name: "auth header", re: /Authorization:|\bBearer\s+\S+/ },
+  // `-u\S` catches curl's getopt-style attached form (`-uadmin:pw`); the
+  // separate `-u(\s|=)` keeps catching the space-separated form (`-u me:pw`).
+  { name: "credential flag", re: /\s(-u\S|-u(\s|=)|--user(\s|=)|--password(\s|=)|--token(\s|=)|--api-key(\s|=))/ },
+  // /i: an "authorization:"/"bearer" header is credential-bearing regardless
+  // of case; the header name and scheme are conventionally capitalised but
+  // HTTP header matching is case-insensitive and so is this rule now.
+  { name: "auth header", re: /Authorization:|\bBearer\s+\S+/i },
   { name: "nsupdate", re: /\bnsupdate\b/ },
-  { name: "privileged or destructive tool", re: /(^|[\s;&|(])(sudo|doas|dd|mkfs\S*|chmod|chown|kill|killall|pkill|shutdown|reboot|systemctl|launchctl)(\s|$)/ },
-  { name: "remote shell or package tool", re: /(^|[\s;&|(])(ssh|scp|sftp|rsync|kubectl|docker|helm|npm|npx|pip3?|brew|apt(-get)?|yum|dnf)(\s|$)/ },
+  { name: "privileged or destructive tool", re: /\b(sudo|doas|dd|mkfs\S*|chmod|chown|kill|killall|pkill|shutdown|reboot|systemctl|launchctl)\b/ },
+  { name: "remote shell or package tool", re: /\b(ssh|scp|sftp|rsync|kubectl|docker|helm|npm|npx|pip3?|brew|apt(-get)?|yum|dnf)\b/ },
   { name: "file write redirect", re: /(^|\s)[12&]?>>?\s*(?!&[12](\s|$))(?!\/dev\/null(\s|$))\S/ },
-  { name: "pipe to shell", re: /\|\s*(sh|bash|zsh|dash|python3?|perl|node)(\s|$)/ },
+  // Path-prefixed shell targets after a pipe (`| /bin/sh`) need the same
+  // treatment: allow an optional path segment before the word-bounded name.
+  { name: "pipe to shell", re: /\|\s*(?:\S*\/)?\b(sh|bash|zsh|dash|python3?|perl|node)\b/ },
 ];
 
 /**
