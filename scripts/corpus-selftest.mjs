@@ -284,8 +284,26 @@ check("migration.md frames the cap as a pause and carries both estimator caveats
   const rb = core.loadRunbooks(path.join(ROOT, "src/content/agent")).find((r) => r.slug === "migration");
   assert.ok(rb, "migration.md not found");
   const md = core.renderRunbook(rb, facts, "https://site.test").markdown;
-  assert.ok(md.includes("PAUSE"), "cap must be framed as a pause");
-  assert.ok(!/cap[^.\n]*\b(fail|failure|error)\b/i.test(md.split("## Step 4")[1].split("## Step 5")[0]), "cap section must not describe the cap as a failure");
+  // Scoped to the Step 4/5 window (not the whole doc) so a match elsewhere in
+  // the corpus can't satisfy these — same reasoning as the pre-existing
+  // fail|failure|error negative-regex assertion below.
+  const step4 = md.split("## Step 4")[1].split("## Step 5")[0];
+  const step4Flat = step4.replace(/\s+/g, " ");
+  assert.ok(step4.includes("PAUSE"), "cap must be framed as a pause");
+  assert.ok(!/cap[^.\n]*\b(fail|failure|error)\b/i.test(step4), "cap section must not describe the cap as a failure");
+  // Half of "PAUSE, not a failure, not a restart" was previously unpinned:
+  // deleting "and it is not a restart" (while keeping "not an error") passed
+  // every prior assertion here. Pin the phrase directly.
+  assert.ok(/\bnot a restart\b/i.test(step4), "cap section must state the pause is not a restart");
+  // The resume guarantee is the consequential half: not just the word
+  // "resumes" appearing, but the whole claim — the SAME job resumes from its
+  // checkpoint, and nothing is re-imported or duplicated. Pin the literal
+  // guarantee sentence (whitespace-normalized so hard line wraps don't
+  // matter) rather than a word that could appear on its own.
+  assert.ok(
+    /the same job resumes from that point; nothing is re-imported and nothing is duplicated/i.test(step4Flat),
+    "resume/dedupe guarantee (same job resumes from its checkpoint; nothing re-imported or duplicated) missing",
+  );
   assert.ok(md.includes("[Gmail]/All Mail"), "Gmail caveat missing");
   assert.ok(/wire size/i.test(md), "wire-size caveat missing");
   assert.ok(md.includes("most recent 2 GB"), "cap must be described in time using the estimator");
