@@ -334,6 +334,20 @@ if [[ "${SKIP_SERVER:-0}" != "1" ]]; then
   # page.tsx:84-85) -- confirmed by building+serving and grepping the
   # rendered body for the sentinel outside this one region.
   body_arm   "S21 landing page's Runbooks section renders the dns-delegation runbook URL" "/kuju-email/agent" "https://kaimoku-website.vercel.app/kuju-email/agent/dns-delegation.md"
+
+  # S22: start-here.md (Task 12) is order 1 and must sort FIRST in llms.txt,
+  # ahead of signup-trial (order 2, the runbook that used to render first).
+  # renderLlmsTxt() (src/lib/agent-corpus-core.mjs:339-346) emits the section
+  # header, a blank line, then one "- [title](url): outcome" line per runbook
+  # in index.runbooks order -- and loadRunbooks() sorts that array by the
+  # order: front-matter field, not by filename (see the "orders by the
+  # order: field" selftest check). So the sentinel below -- the section
+  # header immediately followed (across exactly one blank line) by
+  # "- [Start here" -- is true only when start-here really is the first
+  # runbook rendered, not merely present somewhere in the list.
+  body_arm   "S22 llms.txt lists start-here FIRST" "/llms.txt" "## Runbooks (read start-here first)
+
+- [Start here"
 fi
 
 echo
