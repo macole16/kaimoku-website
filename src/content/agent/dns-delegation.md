@@ -5,7 +5,7 @@ order: 3
 preconditions:
   - the customer owns a domain and can log in to wherever it is registered
   - the customer has an active Kuju account (see signup-trial)
-  - you can run dig (or nslookup) and curl
+  - you can run dig (or nslookup)
 outcome: "NS points at Kuju; MX, SPF, DKIM and DMARC verify"
 facts_used: [nameservers, mx, customer_domain_records, registrars]
 ---
@@ -33,6 +33,7 @@ Read the `status:` in the header and the `ANSWER SECTION`.
 | `status: NOERROR` and the ANSWER SECTION is empty | Step 1b - a subdomain hosted inside its parent zone |
 | every NS answer ends in `.kuju.email.` | Step 5 - already delegated; verify only |
 | NS answers present, any other host | Step 2 |
+| `status: SERVFAIL`, `status: REFUSED`, or no response (timeout) | retry the lookup once; if it still fails, stop and tell the person the lookup itself is failing — do not guess a registrar from absent data |
 
 If `dig` is not installed, `nslookup -type=NS <domain>` gives the same answer:
 "can't find" is NXDOMAIN, an empty result is 1b, otherwise read the `nameserver =`
@@ -47,10 +48,40 @@ lines.
 ### Step 1b - A subdomain hosted inside its parent zone
 
 `<domain>` is a subdomain (such as `mail.example.com`) whose records live in the
-parent domain's DNS. Delegation happens at the parent: repeat Step 1 with the
-parent domain (`example.com`), identify its registrar in Step 2, and in Step 3
-the person creates NS records FOR the subdomain instead of changing the domain's
-own nameservers. Everything else is identical.
+parent domain's DNS (`example.com` in that example). **Do not follow Step 3's
+script on this path.** "Set custom nameservers" is a registrar-level control
+that replaces the PARENT domain's own top-level NS records — applying it here
+would delegate all of `example.com`, not just the subdomain, and would very
+likely take the parent domain's entire DNS offline. That is worse than the
+delegation never happening, so treat this branch as its own procedure:
+
+1. Repeat Step 1 with the parent domain to see who hosts ITS DNS.
+2. Identify that host with Step 2's substring table, exactly as for a normal
+   domain.
+3. Then, instead of Step 3's nameserver-replacement script, use this one:
+
+> **HUMAN ACTION** - you cannot do this step. Give the person:
+>
+> 1. The DNS panel link from Step 2 (the registrar name if there is none, or
+>    the nameserver hostnames you observed if no key matched).
+> 2. The instruction to open the parent zone's DNS RECORDS section — not the
+>    "nameservers" / "custom nameservers" setting, which controls the parent
+>    domain's own top-level NS and must be left exactly as it is — and add two
+>    NS records scoped to the subdomain label only:
+>
+>    Add NS records for `<domain>` pointing at:
+>      {{fact:nameservers.0}}
+>      {{fact:nameservers.1}}
+>
+> 3. An explicit statement, in your own words: this delegates only `<domain>`;
+>    the parent domain's own nameserver setting must not change.
+>
+> Ask them to tell you when they have saved the change.
+
+Continue at Step 4 to verify, running the same `dig NS <domain>` checks against
+the subdomain. Step 3's paragraph about capturing existing records and its
+"external DNS" alternative do not apply here — the subdomain's own records (if
+any) are unaffected by adding a delegation NS set beside them.
 
 ## Step 2 - Identify the registrar or DNS host
 
@@ -84,14 +115,23 @@ Kuju's side. Collect what exists now so the person can recreate it:
     dig MX <domain> +short
     dig TXT <domain> +short
 
-Keep the non-empty answers. Then:
+Keep the non-empty answers — including the MX and TXT ones, which you need for
+the Step 6 report and for rollback, but must NOT hand to the person as records
+to recreate (see item 2 below). Then:
 
 > **HUMAN ACTION** - you cannot do this step. Give the person:
 >
-> 1. The DNS panel link from Step 2 (or the registrar name if there is none).
-> 2. The list of existing records you captured, with the instruction to add
->    them in Kuju's domain DNS page after delegation (Kuju creates the mail
->    records itself; the website records are the ones that need copying).
+> 1. The DNS panel link from Step 2 (the registrar name if there is none, or —
+>    if no key matched at all — the nameserver hostnames you observed in
+>    Step 1, since that is the only identifying information you have).
+> 2. ONLY the captured A, AAAA and CNAME lines, with the instruction to add
+>    them in Kuju's domain DNS page after delegation. Do NOT forward the
+>    captured MX or TXT lines: Kuju publishes its own mail records (MX, SPF,
+>    DKIM, DMARC) once delegated, and re-adding the old provider's values
+>    alongside them creates a duplicate MX (mail can keep flowing to the old
+>    host) and two competing SPF TXT records (SPF fails outright per RFC 7208
+>    — a PermError, not a pass). Hold onto the MX/TXT values only for your
+>    Step 6 report and in case the person needs to roll back.
 > 3. The exact two nameservers to set, replacing whatever is there now:
 >
 >    Set custom nameservers to:
@@ -131,11 +171,11 @@ Check each one:
     dig TXT <domain> +short
     dig TXT _dmarc.<domain> +short
 
-| Record | Expected | If missing |
-| --- | --- | --- |
-| MX | exactly `{{fact:mx.priority}} {{fact:mx.target}}.` | wait 15 minutes and re-check; Kuju creates it when the domain is provisioned |
-| SPF (TXT at the domain) | a record equal to `{{fact:customer_domain_records.spf}}` | same |
-| DMARC (TXT at `_dmarc.<domain>`) | a record starting with `v=DMARC1` (Kuju's default is `{{fact:customer_domain_records.dmarc}}`) | same |
+| Record | Expected | If missing | If present but does not match |
+| --- | --- | --- | --- |
+| MX | exactly `{{fact:mx.priority}} {{fact:mx.target}}.` | wait 15 minutes and re-check; Kuju creates it when the domain is provisioned | MISMATCH - report the value seen; a second MX from the old provider means Step 3's item 2 was not followed and mail may still be routing to the old host |
+| SPF (TXT at the domain) | a record equal to `{{fact:customer_domain_records.spf}}` | same | MISMATCH - report the value(s) seen; more than one SPF TXT record (old provider's plus Kuju's) makes SPF fail outright, not just look wrong |
+| DMARC (TXT at `_dmarc.<domain>`) | a record starting with `v=DMARC1` (Kuju's default is `{{fact:customer_domain_records.dmarc}}`) | same | MISMATCH - report the value seen |
 
 DKIM uses a selector that Kuju rotates, so its name is not fixed:
 
@@ -151,6 +191,7 @@ Then:
 | --- | --- |
 | a record containing `v=DKIM1` | DKIM is published |
 | empty | wait 15 minutes; if still empty, **HUMAN ACTION** - ask the person to press "re-check DNS" on the same admin page, then re-run |
+| non-empty but does not contain `v=DKIM1` | MISMATCH - confirm the selector spelling with the person and re-run once; if it still does not match, report it as MISMATCH rather than PASS or MISSING |
 
 If any record is still missing after two re-checks, stop here and use the
 delivery troubleshooting runbook.
@@ -159,5 +200,6 @@ delivery troubleshooting runbook.
 
 Tell the person, in this order: which registrar you identified, what they
 changed, the three `dig NS` answers from Step 4, and the four verification
-results from Step 5 (each one PASS or MISSING with the value observed). Do not
-summarise a MISSING as "done".
+results from Step 5 (each one PASS, MISSING, or MISMATCH, with the value
+observed). Do not summarise a MISSING or a MISMATCH as "done" — MISMATCH means
+a record exists but is wrong, which is not the same as working.
