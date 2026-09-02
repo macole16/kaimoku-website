@@ -236,6 +236,10 @@ if [[ "${SKIP_SERVER:-0}" != "1" ]]; then
   count_arm "S16 docs.md has one heading per API doc section (7)" "/kuju-email/docs.md" '^## ' 7
   count_arm "S17 docs.md has one heading per API doc subsection (39)" "/kuju-email/docs.md" '^### ' 39
   count_arm "S18 docs.md has one table row per endpoint (147)" "/kuju-email/docs.md" '^\| (GET|POST|PUT|PATCH|DELETE) \| ' 147
+
+  # S19-S20: the human-facing landing page (Task 7).
+  body_arm   "S19 landing page renders" "/kuju-email/agent" "Hand this to your agent"
+  body_arm   "S20 landing page links llms.txt absolutely" "/kuju-email/agent" "https://kaimoku-website.vercel.app/llms.txt"
 fi
 
 echo
