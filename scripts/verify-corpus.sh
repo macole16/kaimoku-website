@@ -38,6 +38,61 @@ NODE=(mise exec -- node)
 arm "1 core selftest" pass "corpus-selftest:" -- "${NODE[@]}" "$ROOT/scripts/corpus-selftest.mjs"
 
 # ---------------------------------------------------------------------------
+# Tier 1 mutation arms (M0-M8) for scripts/check-corpus.mjs. Each M1-M8 arm
+# copies the corpus to a scratch dir, mutates the copy in exactly ONE way,
+# and asserts the checker fails WITH THE SENTINEL SPECIFIC TO THAT MUTATION
+# -- never just a non-zero exit, since a checker that crashed for an
+# unrelated reason (a typo in the checker itself, a missing module) would
+# also exit non-zero and could satisfy a naive "expects failure" arm.
+#
+# M0 is a deliberate addition beyond M1-M8: an UNMUTATED-BASELINE arm that
+# runs the checker against a pristine copy of the real corpus and asserts
+# exit 0 plus the success sentinel "corpus OK". Without it, every M1-M8
+# "PASS" could be passing for the wrong reason -- e.g. a checker that always
+# exits 1 regardless of input would pass all eight failure arms and never be
+# caught, because none of them alone proves the checker can ALSO recognize
+# a clean corpus. M0 is the negative control that gives M1-M8 meaning.
+# ---------------------------------------------------------------------------
+CHECK="$ROOT/scripts/check-corpus.mjs"
+SCRATCH="$(mktemp -d "${TMPDIR:-/tmp}/verify-corpus.XXXXXX")"
+trap 'rm -rf "$SCRATCH"' EXIT
+fresh_copy() {  # fresh_copy -> prints a new scratch corpus dir
+  local d; d="$(mktemp -d "$SCRATCH/case.XXXXXX")"
+  cp -R "$ROOT/src/content/agent" "$d/agent"; cp "$ROOT/src/data/mail-facts.yaml" "$d/facts.yaml"
+  echo "$d"
+}
+check_on() {  # check_on <dir> -> runs the checker against a scratch copy
+  "${NODE[@]}" "$CHECK" --content-dir "$1/agent" --facts "$1/facts.yaml" --app-dir "$ROOT/src/app"
+}
+
+arm "M0 real corpus passes" pass "corpus OK" -- "${NODE[@]}" "$CHECK"
+
+d="$(fresh_copy)"; sed -i '' 's/{{fact:nameservers.0}}/{{fact:nameserver.0}}/' "$d/agent/dns-delegation.md"
+arm "M1 misspelled fact fails" fail "unknown fact: nameserver.0" -- check_on "$d"
+
+d="$(fresh_copy)"; printf '\n    curl -X POST https://mail.kuju.email/api/login\n' >> "$d/agent/dns-delegation.md"
+arm "M2 write verb fails" fail "denylisted command" -- check_on "$d"
+
+d="$(fresh_copy)"; printf '\nOpen the panel at https://dcc.godaddy.com/dns/{domain} now.\n' >> "$d/agent/dns-delegation.md"
+arm "M3 single-brace token fails" fail "single-brace token" -- check_on "$d"
+
+d="$(fresh_copy)"; sed -i '' 's/^facts_used: \[nameservers, /facts_used: [/' "$d/agent/dns-delegation.md"
+arm "M4 facts_used drift fails" fail "facts_used" -- check_on "$d"
+
+d="$(fresh_copy)"; printf '\nSee [nothing](/kuju-email/agent/nope.md).\n' >> "$d/agent/dns-delegation.md"
+arm "M5 broken internal link fails" fail "broken link" -- check_on "$d"
+
+d="$(fresh_copy)"; printf '# stray\n' > "$d/agent/stray.md"
+arm "M6 stray file without front-matter fails" fail "front-matter" -- check_on "$d"
+
+d="$(fresh_copy)"; cp "$d/agent/dns-delegation.md" "$d/agent/dup.md"; sed -i '' 's/^slug: dns-delegation$/slug: dup/' "$d/agent/dup.md"
+arm "M7 duplicate order fails" fail "order 3 is already used" -- check_on "$d"
+
+d="$(fresh_copy)"; sed -i '' 's/^slug: dns-delegation$/slug: dns-delegate/' "$d/agent/dns-delegation.md"
+arm "M8 slug/filename mismatch fails" fail "slug" -- check_on "$d"
+rm -rf "$SCRATCH"
+
+# ---------------------------------------------------------------------------
 # Server arms: build, start, curl. `next start` (not `next dev`) because the
 # question is what the PRERENDERED output carries — force-static route handlers
 # store their headers in .next/server/app/*.meta and Vercel serves those.
@@ -238,7 +293,21 @@ if [[ "${SKIP_SERVER:-0}" != "1" ]]; then
   count_arm "S18 docs.md has one table row per endpoint (147)" "/kuju-email/docs.md" '^\| (GET|POST|PUT|PATCH|DELETE) \| ' 147
 
   # S19-S21: the human-facing landing page (Task 7).
-  body_arm   "S19 landing page renders" "/kuju-email/agent" "Hand this to your agent"
+  #
+  # S19 was originally sentinel "Hand this to your agent" (no trailing
+  # period). That string is NOT unique to the body: page.tsx:9 also emits it
+  # verbatim inside metadata.title ("Hand this to your agent · Kuju Email"),
+  # which Next renders into <head><title>...</title></head>. So the old S19
+  # passed even if the page BODY never rendered at all -- it was really
+  # testing <title>. (The trailing-period form at page.tsx:27, "Hand this to
+  # your agent.", is technically unique, but a one-character distinction from
+  # the title is fragile.) Fixed by pointing at a phrase that exists only in
+  # the body copy (page.tsx:30-31, the intro <p> under the hero <h1>) and
+  # nowhere in <head> -- confirmed via
+  # `grep -n "Hand this to your agent" src/app/kuju-email/agent/page.tsx`,
+  # which returns exactly the two lines above (:9 title, :27 <em>), neither
+  # of which contains this arm's new sentinel.
+  body_arm   "S19 landing page's intro paragraph renders (BODY, not just <title>)" "/kuju-email/agent" "written for an AI agent rather than a person"
   #
   # S20 was originally "S20 landing page links llms.txt absolutely", sentinel
   # "https://kaimoku-website.vercel.app/llms.txt" (review finding, Task 7
