@@ -237,9 +237,34 @@ if [[ "${SKIP_SERVER:-0}" != "1" ]]; then
   count_arm "S17 docs.md has one heading per API doc subsection (39)" "/kuju-email/docs.md" '^### ' 39
   count_arm "S18 docs.md has one table row per endpoint (147)" "/kuju-email/docs.md" '^\| (GET|POST|PUT|PATCH|DELETE) \| ' 147
 
-  # S19-S20: the human-facing landing page (Task 7).
+  # S19-S21: the human-facing landing page (Task 7).
   body_arm   "S19 landing page renders" "/kuju-email/agent" "Hand this to your agent"
-  body_arm   "S20 landing page links llms.txt absolutely" "/kuju-email/agent" "https://kaimoku-website.vercel.app/llms.txt"
+  #
+  # S20 was originally "S20 landing page links llms.txt absolutely", sentinel
+  # "https://kaimoku-website.vercel.app/llms.txt" (review finding, Task 7
+  # follow-up). That sentinel is NOT unique to the Index-files section it was
+  # meant to test: page.tsx:14 defines PROMPT, which contains the literal
+  # text "Read ${SITE_URL}/llms.txt" and renders in "The prompt" section well
+  # before the Index-files list at page.tsx:76-80. So the old arm passed even
+  # if the Index-files section never rendered -- it was really testing the
+  # prompt. Fixed by re-pointing at "llms-full.txt", which page.tsx uses only
+  # once, at line 80, inside the Index-files list (PROMPT never mentions
+  # llms-full.txt) -- confirmed via `grep -n llms-full src/app/kuju-email/agent/page.tsx`
+  # returning exactly that one line.
+  body_arm   "S20 landing page's Index-files list links llms-full.txt absolutely" "/kuju-email/agent" "https://kaimoku-website.vercel.app/llms-full.txt"
+  # S21: the Runbooks section (page.tsx:56-69, index.runbooks.map) had NO
+  # coverage at all -- the runbook URLs a person actually copies for their
+  # agent, i.e. the page's functional payload. Neither S19 (checks the hero
+  # sentinel) nor the old S20 (checks PROMPT, see above) touches it, so a
+  # wrong prop, an empty array, or a .map typo would ship green. This arm
+  # asserts a known runbook's absolute URL, as rendered by
+  # index.runbooks.map at page.tsx:60/64/66, actually appears in the served
+  # body. That URL string appears nowhere else on the page (PROMPT never
+  # mentions runbook paths; the Index-files section links only llms.txt,
+  # llms-full.txt and the glossary/docs reference docs via d.url at
+  # page.tsx:84-85) -- confirmed by building+serving and grepping the
+  # rendered body for the sentinel outside this one region.
+  body_arm   "S21 landing page's Runbooks section renders the dns-delegation runbook URL" "/kuju-email/agent" "https://kaimoku-website.vercel.app/kuju-email/agent/dns-delegation.md"
 fi
 
 echo
