@@ -264,4 +264,20 @@ check("loadRunbooks throws on a duplicate order", () => {
   });
 });
 
+check("dns-delegation renders with facts resolved and run-time placeholders intact", () => {
+  const runbooks = core.loadRunbooks(path.join(ROOT, "src/content/agent"));
+  const rb = runbooks.find((r) => r.slug === "dns-delegation");
+  assert.ok(rb, "dns-delegation.md not found");
+  const out = core.renderRunbook(rb, facts, "https://site.test");
+  assert.ok(out.markdown.includes("ns1.kuju.email") && out.markdown.includes("ns2.kuju.email"));
+  assert.ok(out.markdown.includes("10 mail.kuju.email."));
+  assert.ok(out.markdown.includes("<domain>"));
+  assert.ok(!out.markdown.includes("{{"), "unresolved placeholder");
+  assert.equal(out.markdown.match(core.SINGLE_BRACE_RE), null, "single-brace token leaked");
+  assert.ok(out.markdown.includes("ns-1234.awsdns-56.org"), "worked AWS example missing");
+  assert.deepEqual(out.used, ["customer_domain_records", "mx", "nameservers", "registrars"]);
+  assert.deepEqual([...rb.facts_used].sort(), out.used);
+  assert.equal(core.scanDenylist(rb.body).length, 0, JSON.stringify(core.scanDenylist(rb.body)));
+});
+
 console.log(`\ncorpus-selftest: ${passed} checks passed`);
