@@ -93,6 +93,16 @@ arm "M8 slug/filename mismatch fails" fail "must equal the filename stem" -- che
 rm -rf "$SCRATCH"
 
 # ---------------------------------------------------------------------------
+# Tier 2/3 live arms (scripts/check-facts-live.mjs). Network-dependent, so
+# gated behind LIVE=1 -- the default offline harness run stays deterministic.
+# ---------------------------------------------------------------------------
+if [[ "${LIVE:-0}" == "1" ]]; then
+  arm "L1 live checker self-test proves both mutants fail" pass "SELF-TEST OK: 2/2 mutants failed as required" -- "${NODE[@]}" "$ROOT/scripts/check-facts-live.mjs" --self-test
+  arm "L2 live checker reports signup_url as PENDING (still 303)" pass "PENDING  signup_url" -- "${NODE[@]}" "$ROOT/scripts/check-facts-live.mjs"
+  arm "L3 live checker names the URL-less registrar as SKIP" pass "SKIP  registrars.name-services.com" -- "${NODE[@]}" "$ROOT/scripts/check-facts-live.mjs"
+fi
+
+# ---------------------------------------------------------------------------
 # Server arms: build, start, curl. `next start` (not `next dev`) because the
 # question is what the PRERENDERED output carries — force-static route handlers
 # store their headers in .next/server/app/*.meta and Vercel serves those.

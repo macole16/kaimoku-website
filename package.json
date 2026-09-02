@@ -9,7 +9,8 @@
     "start": "next start",
     "lint": "eslint",
     "brand:generate": "node scripts/brand/generate.mjs",
-    "verify:corpus": "bash scripts/verify-corpus.sh"
+    "verify:corpus": "bash scripts/verify-corpus.sh",
+    "check:facts-live": "node scripts/check-facts-live.mjs --self-test"
   },
   "dependencies": {
     "next": "16.1.7",
