@@ -9,10 +9,10 @@
 //
 //   node scripts/check-facts-live.mjs [--facts F] [--only FACT] [--self-test] [--ntfy] [--quiet]
 //
-// --only restricts runChecks to the single top-level fact (or, for a registrar
-// row, "registrars.<key>") named -- used internally by the Tier 3 mutant
-// runner; an operator may also pass it to probe one fact without hitting the
-// rest.
+// --only restricts runChecks to the single top-level fact named -- used
+// internally by the Tier 3 mutant runner; an operator may also pass it to
+// probe one fact without hitting the rest. A bare "--only registrars" checks
+// every registrar row; "--only registrars.<key>" narrows to one row.
 //
 // Spec: docs/superpowers/specs/2026-08-31-agent-friendly-docs-design.md section 4.
 // Runs on `build` from deploy/systemd/kaimoku-website-facts-check.service with
@@ -131,7 +131,16 @@ async function runChecks(facts, only) {
       // Reserved key `verify` is metadata; entries are the registrars.
       for (const e of registrarEntries(facts)) {
         const rowName = `registrars.${e.key}`;
-        if (only && rowName !== only) continue;
+        // A bare `--only registrars` (no ".<key>" suffix) checks every
+        // registrar row -- the same "whole top-level fact" behaviour --only
+        // gives every other fact above. Without this carve-out every row
+        // fails the `rowName !== only` test (rowName is always
+        // "registrars.<key>", never bare "registrars"), so the section
+        // would silently print zero rows and no error -- exactly the
+        // "checking nothing without saying so" failure this script exists
+        // to prevent. A qualified `--only registrars.<key>` still narrows
+        // to that one row, unchanged.
+        if (only && only !== "registrars" && rowName !== only) continue;
         if (!e.dns_url) { rows.push({ fact: rowName, status: "SKIP", detail: `${e.name}: no dns_url upstream — not checkable, by design` }); continue; }
         const url = e.dns_url.replaceAll("{domain}", verify?.domain_placeholder ?? "example.com");
         push(rowName, await checkHttp(url, verify ?? {}), false);
@@ -218,7 +227,8 @@ function selfTest() {
     runMutant("ns-does-not-exist", (f) => { f.nameservers.value[0] = "ns-does-not-exist.kuju.email"; }, "FAIL  nameservers.ns-does-not-exist.kuju.email", "nameservers"),
     // Exercises checkHttp's expect_status branch.
     runMutant("pending-now-passes", (f) => { f.signup_url.value = "https://kaimoku-website.vercel.app/"; }, "PENDING_NOW_PASSES  signup_url", "signup_url"),
-    // Exercises checkMx (:53's comparison) -- previously the only way to
+    // Exercises checkMx's `ok` comparison (the `rendered.some((r) =>
+    // r.includes(expectContains))` line) -- previously the only way to
     // defeat it (e.g. `const ok = true;`) was to be invisible to self-test.
     runMutant(
       "mx-expect-mismatch",
@@ -226,24 +236,32 @@ function selfTest() {
       ["FAIL  mx  MX kuju.email -> ", '(want "MUTANT-MX-TOKEN-not-a-real-target.")'],
       "mx",
     ),
-    // Exercises checkTxtEquals (:63's comparison) -- backs both spf and
-    // dmarc; corrupting spf alone is enough to reach the function.
+    // Exercises checkTxtEquals's `ok = txt.includes(expected)` comparison --
+    // backs both spf and dmarc; corrupting spf alone is enough to reach the
+    // function.
     runMutant(
       "spf-mismatch",
       (f) => { f.customer_domain_records.spf = "v=spf1 MUTANT-SPF-TOKEN ~all"; },
       ["FAIL  customer_domain_records.spf  TXT demo.kuju.email -> ", '(want "v=spf1 MUTANT-SPF-TOKEN ~all")'],
       "customer_domain_records",
     ),
-    // Exercises checkHttp's reject_status branch (:91's comparison) --
-    // previously undefeatable-and-uncaught (`const bad = false;` would have
-    // silenced all ten registrar rows at once). Same host as the real
-    // registrars.google.com row (domains.squarespace.com) so DNS/TLS stay
-    // representative; only the path is swapped for one verified live to 404
-    // (measured 2026-09-02) so the response lands in reject_status.
+    // Exercises checkHttp's `bad = verify.reject_status.includes(r.status)`
+    // comparison -- previously undefeatable-and-uncaught (`const bad =
+    // false;` would have silenced all ten registrar rows at once). Points at
+    // a path on OUR OWN site (kaimoku-website.vercel.app -- the same host
+    // SITE_URL already targets), verified live to 404, rather than at a
+    // third-party registrar's site: this mutant exists to catch OUR
+    // reject_status comparison going blind, not to probe Squarespace's
+    // routing, so a future soft-404 or catch-all-200 on the registrar's real
+    // site can never flip this mutant to MUTANT-PASSED and falsely announce
+    // that OUR checker has stopped checking (that false alarm is the one
+    // Tier 3 exists to prevent). The injected path is also the proof the
+    // mutation landed -- a no-op mutate() would leave the real dns_url in
+    // place and this literal path would never appear in the row's detail.
     runMutant(
-      "registrar-404",
-      (f) => { f.registrars["google.com"].dns_url = "https://domains.squarespace.com/definitely-not-a-real-path-mutant-test-xyz"; },
-      "FAIL  registrars.google.com  https://domains.squarespace.com/definitely-not-a-real-path-mutant-test-xyz -> HTTP 404 (reject 404/410)",
+      "reject-status-self-404",
+      (f) => { f.registrars["google.com"].dns_url = "https://kaimoku-website.vercel.app/zz-mutant-probe-does-not-exist"; },
+      "FAIL  registrars.google.com  https://kaimoku-website.vercel.app/zz-mutant-probe-does-not-exist -> HTTP 404 (reject 404/410)",
       "registrars.google.com",
     ),
   ];
