@@ -167,23 +167,25 @@ export const REQUIRED_META = ["slug", "title", "order", "preconditions", "outcom
  * must-allow case in scripts/corpus-selftest.mjs; add both when you add a row.
  */
 export const DENYLIST = [
-  // Fix round 2 (reviewer-confirmed over-tightening from round 1): round 1
-  // widened the boundary to a bare `\b` to close the `/bin/rm` path-prefix
-  // bypass, but that threw away COMMAND POSITION along with the bug — `\bdd\b`
-  // then matched inside "yyyy-mm-dd", and `\bshutdown\b` matched inside
-  // "graceful-shutdown", because a hyphen is a non-word character and so
-  // satisfies a bare `\b` on either side. The original `(^|[\s;&|(])name(\s|$)`
-  // was not a sloppy word boundary — the LEADING class encodes "this token is
-  // in command position" (line start, or after `;`/`&`/`|`/`(`/whitespace),
-  // and a hyphen was correctly never in that class. The one real bug was that
-  // the leading class had no allowance for a path prefix. Fix: keep the
-  // command-position leading class AND the original `(\s|$)` trailing check
-  // (so a token embedded in a hyphenated compound word or date format still
-  // requires a real space/end after the name, not just any non-word char),
-  // and insert an optional path segment between them — the same shape already
-  // used below for `pipe to shell`, whose target list has no hyphenated-idiom
-  // collision so its trailing `\b` was never a problem there.
-  { name: "rm", re: /(^|[\s;&|(])(?:\S*\/)?rm(\s|$)/ },
+  // Fix round 3 (reviewer-confirmed: rounds 1 and 2 were the SAME boundary
+  // treated as one knob, oscillating). Leading and trailing are different
+  // problems with different character classes:
+  //   - LEADING = command position: `(^|[\s;&|(])` — start of line, or after
+  //     `;`/`&`/`|`/`(`/whitespace. A hyphen is correctly NEVER in this class,
+  //     which is what keeps "yyyy-mm-dd" and "graceful-shutdown" allowed
+  //     (round 1's mistake was widening this to a bare `\b`, which treats a
+  //     hyphen as a boundary too).
+  //   - TRAILING = command terminator: `(\s|[;&|)]|$)` — whitespace, or one of
+  //     `;`/`&`/`|`/`)` (a shell one-liner needs no space before these), or
+  //     end of string. A hyphen is correctly never in this class either
+  //     (round 2's mistake was narrowing this back to `(\s|$)`, which missed
+  //     that `reboot;true`, `shutdown)`, and `(rm)` are complete, executable
+  //     one-liners with no argument and no trailing space).
+  // Optional path segment `(?:\S*\/)?` sits between them, unchanged since
+  // round 1/2. Accepted trade-off (ruled on explicitly): a bare `(dd)` is now
+  // denied, since in a real shell `(dd)` is a subshell invocation — the only
+  // cost is a contrived `(yyyy)-(mm)-(dd)` date format, which fails CLOSED.
+  { name: "rm", re: /(^|[\s;&|(])(?:\S*\/)?rm(\s|[;&|)]|$)/ },
   { name: "curl write verb", re: /\bcurl\b.*\s-X\s*(POST|PUT|PATCH|DELETE)\b/i },
   { name: "curl upload flag", re: /\bcurl\b.*\s(-d|--data(-\w+)?|-F|--form|-T|--upload-file)(\s|$)/ },
   // `-u\S` catches curl's getopt-style attached form (`-uadmin:pw`). The
@@ -197,12 +199,14 @@ export const DENYLIST = [
   // HTTP header matching is case-insensitive and so is this rule now.
   { name: "auth header", re: /Authorization:|\bBearer\s+\S+/i },
   { name: "nsupdate", re: /\bnsupdate\b/ },
-  { name: "privileged or destructive tool", re: /(^|[\s;&|(])(?:\S*\/)?(sudo|doas|dd|mkfs\S*|chmod|chown|kill|killall|pkill|shutdown|reboot|systemctl|launchctl)(\s|$)/ },
-  { name: "remote shell or package tool", re: /(^|[\s;&|(])(?:\S*\/)?(ssh|scp|sftp|rsync|kubectl|docker|helm|npm|npx|pip3?|brew|apt(-get)?|yum|dnf)(\s|$)/ },
+  { name: "privileged or destructive tool", re: /(^|[\s;&|(])(?:\S*\/)?(sudo|doas|dd|mkfs\S*|chmod|chown|kill|killall|pkill|shutdown|reboot|systemctl|launchctl)(\s|[;&|)]|$)/ },
+  { name: "remote shell or package tool", re: /(^|[\s;&|(])(?:\S*\/)?(ssh|scp|sftp|rsync|kubectl|docker|helm|npm|npx|pip3?|brew|apt(-get)?|yum|dnf)(\s|[;&|)]|$)/ },
   { name: "file write redirect", re: /(^|\s)[12&]?>>?\s*(?!&[12](\s|$))(?!\/dev\/null(\s|$))\S/ },
-  // Path-prefixed shell targets after a pipe (`| /bin/sh`) need the same
-  // treatment: allow an optional path segment before the word-bounded name.
-  { name: "pipe to shell", re: /\|\s*(?:\S*\/)?\b(sh|bash|zsh|dash|python3?|perl|node)\b/ },
+  // Same terminator-class fix applies here: round 1's trailing `\b` treated a
+  // hyphen as a boundary, over-denying `bash-completion`/`node-red`/
+  // `perl-critic`; round 2 never touched this rule (it wasn't in Finding 1's
+  // list), so it kept over-denying until this round.
+  { name: "pipe to shell", re: /\|\s*(?:\S*\/)?(sh|bash|zsh|dash|python3?|perl|node)(\s|[;&|)]|$)/ },
 ];
 
 /**
