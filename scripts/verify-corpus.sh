@@ -45,8 +45,70 @@ arm "1 core selftest" pass "corpus-selftest:" -- "${NODE[@]}" "$ROOT/scripts/cor
 if [[ "${SKIP_SERVER:-0}" != "1" ]]; then
   PORT="${PORT:-3998}"
   BASE="http://127.0.0.1:${PORT}"
+
+  # PIDs of anything currently bound to $PORT, in any state lsof reports.
+  port_pids() { lsof -ti "tcp:${PORT}" 2>/dev/null || true; }
+
+  # Polls (1s granularity, matching the readiness loop below) until the port
+  # is free or <timeout> seconds pass. Returns 1 on timeout. We poll the
+  # socket itself rather than trusting that a `kill` call returning means the
+  # listener is gone — a signalled process can hold the socket open briefly
+  # while it unwinds.
+  wait_port_free() {
+    local timeout="$1" waited=0
+    while [[ -n "$(port_pids)" ]]; do
+      if [[ "$waited" -ge "$timeout" ]]; then return 1; fi
+      sleep 1
+      waited=$((waited + 1))
+    done
+    return 0
+  }
+
+  # A stale listener from a PRIOR run would serve the OLD build, and every
+  # arm below would then pass against content nobody just built — a silent,
+  # green false positive, which is worse than refusing to start. Fail loudly
+  # and name the port instead of proceeding.
+  if [[ -n "$(port_pids)" ]]; then
+    echo "FATAL: port ${PORT} is already in use before this run started (PID(s): $(port_pids | tr '\n' ' '))."
+    echo "       Proceeding would risk testing a STALE server left by a previous run."
+    echo "       Free it first, e.g.: kill $(port_pids | tr '\n' ' ')"
+    exit 2
+  fi
+
+  # Recursively signals a PID and every descendant, deepest first, so a
+  # child cannot be re-parented to init and orphaned mid-teardown.
+  # `mise exec -- npx next start` is at least THREE processes deep (the
+  # backgrounded subshell, npm/npx's own process, and the actual next-server
+  # node process that binds the port) — measured live: killing only the
+  # top-level PID left the bottom two running, holding the port, which is
+  # exactly the EADDRINUSE this fix exists for.
+  kill_tree() {
+    local pid="$1" sig="$2" child
+    for child in $(pgrep -P "$pid" 2>/dev/null || true); do
+      kill_tree "$child" "$sig"
+    done
+    kill -"$sig" "$pid" 2>/dev/null || true
+  }
+
   SRV_PID=""
-  cleanup() { if [[ -n "$SRV_PID" ]]; then kill "$SRV_PID" 2>/dev/null || true; fi; }
+  CLEANED_UP=0
+  cleanup() {
+    # Idempotent: harmless if the EXIT trap were ever invoked more than once.
+    [[ "$CLEANED_UP" -eq 1 ]] && return
+    CLEANED_UP=1
+    [[ -n "$SRV_PID" ]] && kill_tree "$SRV_PID" TERM
+    # Defense in depth alongside kill_tree, in case something detached from
+    # $SRV_PID's tree still holds the port.
+    local p
+    for p in $(port_pids); do kill -TERM "$p" 2>/dev/null || true; done
+    if ! wait_port_free 10; then
+      [[ -n "$SRV_PID" ]] && kill_tree "$SRV_PID" KILL
+      for p in $(port_pids); do kill -KILL "$p" 2>/dev/null || true; done
+      if ! wait_port_free 10; then
+        echo "WARN: port ${PORT} still occupied after SIGKILL teardown (PID(s): $(port_pids | tr '\n' ' '))" >&2
+      fi
+    fi
+  }
   trap cleanup EXIT
 
   echo "building..."
