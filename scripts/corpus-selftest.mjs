@@ -280,4 +280,16 @@ check("dns-delegation renders with facts resolved and run-time placeholders inta
   assert.equal(core.scanDenylist(rb.body).length, 0, JSON.stringify(core.scanDenylist(rb.body)));
 });
 
+check("migration.md frames the cap as a pause and carries both estimator caveats", () => {
+  const rb = core.loadRunbooks(path.join(ROOT, "src/content/agent")).find((r) => r.slug === "migration");
+  assert.ok(rb, "migration.md not found");
+  const md = core.renderRunbook(rb, facts, "https://site.test").markdown;
+  assert.ok(md.includes("PAUSE"), "cap must be framed as a pause");
+  assert.ok(!/cap[^.\n]*\b(fail|failure|error)\b/i.test(md.split("## Step 4")[1].split("## Step 5")[0]), "cap section must not describe the cap as a failure");
+  assert.ok(md.includes("[Gmail]/All Mail"), "Gmail caveat missing");
+  assert.ok(/wire size/i.test(md), "wire-size caveat missing");
+  assert.ok(md.includes("most recent 2 GB"), "cap must be described in time using the estimator");
+  assert.ok(!/\b(daily_send_limit|quota_bytes)\b/.test(md), "knobs must not be documented");
+});
+
 console.log(`\ncorpus-selftest: ${passed} checks passed`);
