@@ -150,9 +150,31 @@ if [[ "${SKIP_SERVER:-0}" != "1" ]]; then
     body_arm   "S4 llms-full.txt embeds ${slug}" "/llms-full.txt" "<!-- https://kaimoku-website.vercel.app/kuju-email/agent/${slug}.md -->"
   done
   header_arm "S5 llms.txt is text/plain" "/llms.txt" "content-type: text/plain"
-  header_arm "S6 unknown runbook is 404" "/kuju-email/agent/nope.md" "HTTP/1.1 404"
+  header_arm "S6a unknown runbook is 404" "/kuju-email/agent/nope.md" "HTTP/1.1 404"
+  # S6a alone is vacuous against dropping dynamicParams=false: the route
+  # handler's OWN "if (!runbook)" guard also returns 404 for an unenumerated
+  # slug, so S6a would still pass even if Next fell through to on-demand
+  # rendering instead of refusing the param outright. x-nextjs-prerender is
+  # attached only when Next serves its own prerendered not-found shell (the
+  # dynamicParams=false path); the handler's manual `new Response(...)` never
+  # carries it. That is the header this arm needs to distinguish the two.
+  header_arm "S6b unknown runbook hits Next's static not-found shell, not the handler's own 404 (dynamicParams=false)" "/kuju-email/agent/nope.md" "x-nextjs-prerender: 1"
   body_arm   "S7 dns-delegation carries the nameservers" "/kuju-email/agent/dns-delegation.md" "ns1.kuju.email"
   body_arm   "S8 llms.txt links are absolute" "/llms.txt" "https://kaimoku-website.vercel.app/kuju-email/agent/dns-delegation.md"
+  # S1-S8 all pass even when the route is rendered ON DEMAND instead of from
+  # the prerendered artifact: the handler computes and returns the same bytes
+  # either way. x-nextjs-cache is present only on a request served FROM that
+  # artifact, so this arm is the one signal that prerendering actually happened.
+  #
+  # Measured 2026-09-01, and worth knowing before you edit route.ts: deleting
+  # `export const dynamic = "force-static"` does NOT trip this arm, because
+  # generateStaticParams + dynamicParams=false already make the route fully
+  # static -- force-static is redundant in this configuration, not load-bearing.
+  # What DOES trip it is a route that is genuinely dynamic (verified with
+  # dynamic = "force-dynamic", which fails both this arm and S6b). So do not
+  # read a green S9 as proof that force-static is present; read it as proof the
+  # route is being served prerendered.
+  header_arm "S9 dns-delegation.md is served from the prerendered cache (not rendered on demand)" "/kuju-email/agent/dns-delegation.md" "x-nextjs-cache: hit"
 fi
 
 echo
