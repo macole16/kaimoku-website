@@ -180,6 +180,16 @@ if [[ "${SKIP_SERVER:-0}" != "1" ]]; then
   # read a green S9 as proof that force-static is present; read it as proof the
   # route is being served prerendered.
   header_arm "S9 dns-delegation.md is served from the prerendered cache (not rendered on demand)" "/kuju-email/agent/dns-delegation.md" "x-nextjs-cache: hit"
+
+  # S10-S14: the generated glossary.md/docs.md twins (Task 6). Numbered from
+  # S10, not S9 — S9 above is already taken by the prerendered-cache arm and
+  # is called out by name in this file's header comment, so reusing "S9"
+  # here would collide with that label rather than extend it.
+  header_arm "S10 glossary.md is text/markdown" "/kuju-email/glossary.md" "content-type: text/markdown"
+  body_arm   "S11 glossary.md carries SPF and why-it-matters" "/kuju-email/glossary.md" "**Why it matters:**"
+  header_arm "S12 docs.md is text/markdown" "/kuju-email/docs.md" "content-type: text/markdown"
+  body_arm   "S13 docs.md lists endpoints" "/kuju-email/docs.md" "| GET | "
+  body_arm   "S14 llms-full.txt embeds the glossary" "/llms-full.txt" "Sender Policy Framework"
 fi
 
 echo

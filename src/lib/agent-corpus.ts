@@ -1,5 +1,7 @@
 import path from "path";
 import { SITE_URL } from "@/lib/constants";
+import { loadApiDocs } from "@/lib/api-docs";
+import { GLOSSARY } from "@/lib/glossary";
 import {
   buildIndex,
   loadFacts,
@@ -93,12 +95,65 @@ export function renderLlmsFullTxt(): string {
   });
 }
 
-/** Filled in by Task 6. */
+/**
+ * Markdown twin of /kuju-email/glossary, from the same GLOSSARY array the page
+ * renders. Sorted by term like the page. Examples become fenced blocks.
+ */
 export function renderGlossaryMarkdown(): string {
-  return "# Kuju Email glossary\n";
+  const entries = [...GLOSSARY].sort((a, b) => a.term.localeCompare(b.term));
+  const lines: string[] = [
+    "# Kuju Email glossary",
+    "",
+    `Plain definitions for the security terms used across Kuju Email. HTML version: ${SITE_URL}/kuju-email/glossary`,
+    "",
+  ];
+  for (const e of entries) {
+    lines.push(`## ${e.term}${e.expansion ? ` — ${e.expansion}` : ""}`, "", e.definition, "");
+    for (const ex of e.examples ?? []) {
+      lines.push(`*${ex.label}:*`, "", "```", ex.body, "```", "");
+    }
+    lines.push(`**Why it matters:** ${e.whyItMatters}`, "");
+  }
+  return lines.join("\n");
 }
 
-/** Filled in by Task 6. */
+/**
+ * Markdown twin of /kuju-email/docs from openapi.yaml + api-overlay.yaml via
+ * loadApiDocs(). The HTML page's hand-written prose subsections (base URL,
+ * authentication) are JSX and are NOT duplicated here; the twin links to them.
+ * Informational for an agent: the runbooks never call the API.
+ */
 export function renderApiDocsMarkdown(): string {
-  return "# Kuju Email API reference\n";
+  const { sections } = loadApiDocs();
+  const lines: string[] = [
+    "# Kuju Email API reference",
+    "",
+    `Generated from the OpenAPI spec. Base URL, authentication and examples are on the HTML page: ${SITE_URL}/kuju-email/docs`,
+    "",
+  ];
+  for (const s of sections) {
+    lines.push(`## ${s.name}`, "");
+    for (const sub of s.children) {
+      lines.push(`### ${sub.name}`, "");
+      if (sub.endpoints.length === 0) {
+        lines.push(`See ${SITE_URL}/kuju-email/docs#${sub.id}`, "");
+        continue;
+      }
+      lines.push("| Method | Path | Auth | Description |", "| --- | --- | --- | --- |");
+      for (const ep of sub.endpoints) {
+        const desc = (ep.desc ?? "").replace(/\|/g, "\\|");
+        lines.push(`| ${ep.method.toUpperCase()} | \`${ep.path}\` | ${ep.auth ?? "public"} | ${desc} |`);
+      }
+      lines.push("");
+      for (const ep of sub.endpoints) {
+        if (!ep.parameters?.length) continue;
+        lines.push(`Parameters for \`${ep.method.toUpperCase()} ${ep.path}\`:`, "");
+        for (const p of ep.parameters) {
+          lines.push(`- \`${p.name}\` (${p.in}${p.required ? ", required" : ""})${p.description ? `: ${p.description}` : ""}`);
+        }
+        lines.push("");
+      }
+    }
+  }
+  return lines.join("\n");
 }
