@@ -35,7 +35,7 @@ observation you make; the last section tells you how to report them.
 | --- | --- | --- |
 | exactly `{{fact:mx.priority}} {{fact:mx.target}}.` | Kuju receives mail for the domain | A2 |
 | empty | no MX; senders will try the domain's A record, which is not a mail server | the domain is not provisioned - run [dns-delegation](/kuju-email/agent/dns-delegation.md) from Step 1 |
-| a different host | the OLD provider still receives the mail | the person's old mailbox has it; delegation is incomplete - dns-delegation Step 4 |
+| a different host | the OLD provider still receives the mail | the person's old mailbox has it; the change never landed - run A2 first to see which DNS model they use, then [dns-delegation](/kuju-email/agent/dns-delegation.md) Step 4 if delegated, or its Step 3b if they kept their own host |
 | Kuju's host plus other hosts | split delivery; some senders reach the old provider | **HUMAN ACTION** - the extra MX records must be removed where the DNS lives |
 
 ### A2 - Is the delegation consistent?
@@ -47,7 +47,7 @@ observation you make; the last section tells you how to report them.
 | --- | --- |
 | both answers end in `.kuju.email.` | A3 |
 | they differ | propagation is still in progress; wait 15 minutes and re-run A1 |
-| neither is Kuju | the person chose "external DNS"; A1's result is what matters - if A1 passed, A3 |
+| neither is Kuju | the person chose "Keep your current DNS", so the nameservers are not meant to be Kuju's; A1's result is what matters - if A1 passed, A3 |
 
 ### A3 - Does Kuju's mail server accept connections?
 
@@ -82,21 +82,22 @@ observation you make; the last section tells you how to report them.
 
 | Record | Expected | If not |
 | --- | --- | --- |
-| SPF | a TXT equal to `{{fact:customer_domain_records.spf}}` | missing SPF is the most common cause of spam placement; the domain is not fully provisioned - dns-delegation Step 5 |
+| SPF | a TXT equal to `{{fact:customer_domain_records.spf}}` | missing SPF is the most common cause of spam placement; the domain is not fully provisioned - [dns-delegation](/kuju-email/agent/dns-delegation.md) Step 5 |
 | DMARC | a TXT starting `v=DMARC1` | same |
-| more than one SPF record | INVALID - receivers ignore both | **HUMAN ACTION** - the extra record must be deleted where the DNS lives |
+| more than one SPF record | INVALID - SPF fails outright for every message (a PermError per RFC 7208), so neither record is used | **HUMAN ACTION** - the extra record must be deleted where the DNS lives |
 
 DKIM's selector rotates, so ask for it:
 
 > **HUMAN ACTION** - ask the person to read the DKIM selector from the domain's
-> DNS section in the Kuju admin (it looks like `mail-20260901`).
+> DNS section in the Kuju admin. A newly provisioned domain uses `default`;
+> after a rotation it looks like `mail-20260901`.
 
     dig TXT <selector>._domainkey.<domain> +short
 
 | Observation | Next |
 | --- | --- |
 | a record containing `v=DKIM1` | B2 |
-| empty | dns-delegation Step 5 (Kuju publishes it; a re-check in the admin usually fixes it) |
+| empty | [dns-delegation](/kuju-email/agent/dns-delegation.md) Step 5 - on a delegated domain a re-check in the admin usually fixes it; on the "Keep your current DNS" path the person must add the record themselves |
 
 ### B2 - What does a receiver actually see?
 

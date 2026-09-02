@@ -45,7 +45,7 @@ Check which tools you have:
 | Observation | Next |
 | --- | --- |
 | all three print a version | continue |
-| `dig` is missing | use `nslookup -type=<record> <name>` wherever a runbook shows `dig <record> <name>`; the observations are the same |
+| `dig` is missing | use `nslookup -type=<record> <name>` wherever a runbook shows `dig <record> <name>`; the observations are the same. A `dig` command that names a server with `@` is the exception — `nslookup` cannot express it, and the runbook that uses one says what to do instead |
 | `curl` or `openssl` is missing | tell the person which command is missing; read them the step's command and ask them to run it and report back what it printed |
 
 ## Which runbook
@@ -53,7 +53,7 @@ Check which tools you have:
 | The person wants to | Open |
 | --- | --- |
 | redeem an invite they received (Kuju is invite-only during the beta) | [Redeem a Kuju Email invite](/kuju-email/agent/signup-trial.md) |
-| point their own domain at Kuju | [Delegate your domain's DNS to Kuju](/kuju-email/agent/dns-delegation.md) |
+| point their own domain at Kuju | [Set up your domain's DNS for Kuju](/kuju-email/agent/dns-delegation.md) |
 | bring their existing mail across from another provider | [Move an existing mailbox into Kuju](/kuju-email/agent/migration.md) |
 | find out why mail is not arriving, bounces, or lands in spam | [Troubleshoot mail delivery for a Kuju domain](/kuju-email/agent/troubleshooting-delivery.md) |
 
