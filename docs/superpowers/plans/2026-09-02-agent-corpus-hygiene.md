@@ -761,6 +761,28 @@ text. If implementation shows a decision is wrong, report it — do not silently
    Task 17's selftest sentinel becomes `": done — Assumes: a; b.\n"`, and task 20's S25
    sentinel becomes `"— Assumes: the customer owns a domain and can log in to wherever it is registered;"`.
 
+   > **SUPERSEDED IN PART — the snippet above is NOT what shipped (recorded 2026-09-03).**
+   > The em dash and the `— Assumes:` format ARE what shipped and remain binding. The GATING
+   > EXPRESSION is not. As written, `r.preconditions?.length` never calls `renderPreconditions`,
+   > so `llms.txt` is uncoupled from it — and task 17's falsifiability protocol (spec §7.3)
+   > REQUIRES that blanking `renderPreconditions` turn the `llms.txt` assertion red. Those two
+   > demands cannot both be satisfied. The contradiction is the dispatcher's, not an
+   > implementer's: both artifacts were written here.
+   >
+   > This was not argued, it was measured. The D7 reviewer implemented the literal form above and
+   > re-ran the mutation: the `llms.txt` check stayed GREEN, proving the two are inconsistent.
+   >
+   > **What shipped, and stays:** the clause is gated on
+   > `renderPreconditions(r.preconditions) !== ""`, so one predicate decides whether the body
+   > block and the `Assumes:` clause appear, and neither can appear without the other.
+   > Behaviourally identical to the literal form for every real input.
+   >
+   > **Do NOT "simplify" this by extracting a shared `hasPreconditions(p)` predicate.** It looks
+   > like a free cleanup and it silently removes the coupling: with a shared predicate
+   > `renderLlmsTxt` stops calling `renderPreconditions`, so blanking that function leaves the
+   > `llms.txt` check green again — recreating the exact inconsistency this note exists to record.
+   > The cost being avoided is one discarded string per runbook at build time, for five runbooks.
+
 3. **A leftover `expect_contains` on `mx.verify` → delete it AND guard against its return.**
    Both halves. Delete the key from `mail-facts.yaml`, and in the MX branch of
    `check-facts-live.mjs` emit a FAIL row when a `verify.expect_contains` is still present:
