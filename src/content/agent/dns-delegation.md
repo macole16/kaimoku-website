@@ -402,7 +402,11 @@ admin and press "{{fact:wizard_labels.recheck_button}}", then re-run. If the
 record is still absent, that button only re-reads what is published — ask them
 to find the **{{fact:wizard_labels.auto_configure_heading}}** section on the
 same page and press its **{{fact:wizard_labels.auto_configure_button}}** button,
-which republishes the records themselves.
+which republishes the records themselves. Tell them BEFORE they press it that a
+dialog will ask "{{fact:wizard_labels.auto_configure_confirm}}" and that they
+must accept it — replacing those four records is what the button is for. If the
+person hand-added any mail records to this domain, stop and check with them
+first.
 
 **Where the person publishes them (Step 3b):** rule out a cached answer first. A
 lookup made before the record existed can be remembered by the resolver for an

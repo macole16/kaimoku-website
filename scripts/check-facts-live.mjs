@@ -24,7 +24,7 @@ import path from "node:path";
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import yaml from "yaml";
-import { loadFacts, registrarEntries, mxExpectation, formatMx } from "../src/lib/agent-corpus-core.mjs";
+import { loadFacts, registrarEntries, mxExpectation, formatMx, RESERVED_KEYS } from "../src/lib/agent-corpus-core.mjs";
 
 const SELF = fileURLToPath(import.meta.url);
 const ROOT = path.resolve(path.dirname(SELF), "..");
@@ -163,7 +163,18 @@ async function runChecks(facts, only) {
       continue;
     }
     if (!verify) {
-      if (fact?.unverifiable === true) { rows.push({ fact: key, status: "SKIP", detail: "unverifiable: true — product config the site cannot observe" }); continue; }
+      if (fact?.unverifiable === true) {
+        // Report the SIZE of what is unchecked, not merely THAT something is
+        // (launch-1.31). `unverifiable: true` is a one-line, self-service
+        // opt-out of Tier 2, and this row was byte-identical whether the fact
+        // held 3 leaves or 7 -- so wizard_labels doubling went unremarked. The
+        // count makes growth visible in the daily ntfy report; verify-corpus's
+        // F5 arm pins it so growth is also DELIBERATE.
+        const leaves = Object.keys(fact).filter((k) => !RESERVED_KEYS.has(k)).length;
+        const noun = leaves === 1 ? "leaf" : "leaves";
+        rows.push({ fact: key, status: "SKIP", detail: `unverifiable: true — product config the site cannot observe (${leaves} ${noun} unchecked)` });
+        continue;
+      }
       rows.push({ fact: key, status: "FAIL", detail: "no verify block and no unverifiable: true — a mistyped verify: key would otherwise silently downgrade this fact to SKIP" });
       continue;
     }

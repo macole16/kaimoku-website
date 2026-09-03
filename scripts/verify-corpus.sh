@@ -161,6 +161,15 @@ arm "F3 fact with BOTH verify and unverifiable: true FAILS (contradiction, not a
 d="$(fresh_copy)"; sed -i '' 's/verify: {type: dns, name: kuju.email, record: MX}/verify: {type: dns, name: kuju.email, record: MX, expect_contains: "10 mail.kuju.email."}/' "$d/facts.yaml"
 arm "F4 stray expect_contains on mx.verify FAILS (derived value, not a leftover key)" fail "FAIL  mx  expect_contains is derived from target/priority now — remove it from mail-facts.yaml" -- "${NODE[@]}" "$FACTS_LIVE" --facts "$d/facts.yaml" --only mx
 
+# F5 (launch-1.31): an unverifiable fact is a one-line, self-service opt-out of
+# Tier 2, and the SKIP row said nothing about its SIZE -- wizard_labels grew
+# 3 leaves -> 7 across launch-1.27/-1.29 while the report stayed BYTE-IDENTICAL,
+# so the widening was invisible. The count is pinned here on purpose, the same
+# argument EXPECTED_MUTANT_COUNT makes one level down: adding a leaf must be a
+# deliberate edit that updates this arm, not a silent widening of what is
+# unchecked. If you added a leaf, update the number -- do not delete the arm.
+arm "F5 unverifiable SKIP names the leaf count (silent growth is visible)" pass "SKIP  wizard_labels  unverifiable: true — product config the site cannot observe (7 leaves unchecked)" -- "${NODE[@]}" "$FACTS_LIVE" --only wizard_labels
+
 rm -rf "$SCRATCH"
 
 # ---------------------------------------------------------------------------

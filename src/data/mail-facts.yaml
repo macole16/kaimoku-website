@@ -51,25 +51,28 @@ test_migration_cap_gb:
   unverifiable: true   # product config the website cannot observe; declared, not defaulted
 
 wizard_labels:
-  # Verbatim UI copy from kuju-mail: domain_admin/_wizard.html (49,56) and
-  # domain_admin/_dns.html (banner 74, auto-configure heading 118 and its
-  # button 127, re-check button 243). Directory-qualified deliberately --
-  # site_admin/_dns.html also exists AND also has a "Refresh" at line 5, so a
-  # bare basename sends a re-verifier to the wrong file with a false match.
+  # Verbatim UI copy from kuju-mail. Every leaf carries its own `source:` --
+  # repo, path and line -- so provenance is DATA a checker can consume rather
+  # than prose that rots, and the basename ambiguity is closed by construction:
+  # domain_admin/_dns.html and site_admin/_dns.html BOTH exist and BOTH have a
+  # "Refresh" at line 5, so a bare basename sends a re-verifier to the wrong
+  # file with a false match on their first check.
   #
-  # Adding a leaf: copy the value from the template, never from memory; name it
-  # for the CONTROL it labels, suffixing only when two would collide (the three
-  # older leaves predate this and are named by value); and quote a label in a
-  # runbook only where the reader is told to press it -- prose describing the
-  # action ("a re-check in the admin") stays prose. No verify block, product
-  # config the site cannot observe, so Tier 2 SKIPs the whole fact and nothing
-  # mechanically enforces any of the above (launch-1.25 / -1.26 / -1.27).
-  use_kuju_dns: "Use Kuju DNS"
-  keep_current_dns: "Keep your current DNS"
-  nameservers_not_pointed: "Nameservers Not Pointed at Kuju"
-  recheck_button: "Re-check"
-  auto_configure_button: "Auto-Configure"
-  auto_configure_heading: "Auto-Configure Mail Records"
+  # Adding a leaf: copy the value from the template, never from memory; give it
+  # a `source:`; name it for the CONTROL it labels, suffixing only when two
+  # would collide; and quote a label in a runbook only where the reader is told
+  # to press it -- prose describing the action ("a re-check in the admin")
+  # stays prose. No verify block (product config the site cannot observe), so
+  # Tier 2 SKIPs the whole fact -- but that SKIP row now names the leaf COUNT,
+  # so silent growth is at least visible in the daily report.
+  # launch-1.25 / -1.26 / -1.27 / -1.29 / -1.30 / -1.31.
+  use_kuju_dns:            {value: "Use Kuju DNS", source: "kuju-mail:internal/web/templates/domain_admin/_wizard.html:49"}
+  keep_current_dns:        {value: "Keep your current DNS", source: "kuju-mail:internal/web/templates/domain_admin/_wizard.html:56"}
+  nameservers_not_pointed: {value: "Nameservers Not Pointed at Kuju", source: "kuju-mail:internal/web/templates/domain_admin/_dns.html:74"}
+  recheck_button:          {value: "Re-check", source: "kuju-mail:internal/web/templates/domain_admin/_dns.html:243"}
+  auto_configure_button:   {value: "Auto-Configure", source: "kuju-mail:internal/web/templates/domain_admin/_dns.html:127"}
+  auto_configure_heading:  {value: "Auto-Configure Mail Records", source: "kuju-mail:internal/web/templates/domain_admin/_dns.html:118"}
+  auto_configure_confirm:  {value: "This will replace existing MX, SPF, DKIM, and DMARC records. Continue?", source: "kuju-mail:internal/web/templates/domain_admin/_dns.html:126"}
   unverifiable: true
 
 registrars:
