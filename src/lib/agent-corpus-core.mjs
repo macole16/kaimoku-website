@@ -18,7 +18,7 @@ export const FACT_RE = /\{\{fact:([^{}]*)\}\}/g;
 export const SINGLE_BRACE_RE = /(?<!\{)\{[^{}\s]+\}(?!\})/g;
 
 /** Keys inside a fact object that are metadata, not data. */
-const RESERVED_KEYS = new Set(["verify", "pending"]);
+const RESERVED_KEYS = new Set(["verify", "pending", "unverifiable"]);
 
 /**
  * @param {string} factsPath absolute path to mail-facts.yaml
@@ -73,6 +73,9 @@ export function renderRegistrarTable(facts) {
   }
   return lines.join("\n");
 }
+
+/** Live MX expectation, derived from the SAME leaves the runbooks render. */
+export function mxExpectation(mx) { return `${mx.priority} ${mx.target}.`; }
 
 /** Derived views: paths that are not YAML leaves but are rendered from them. */
 const DERIVED = {

@@ -30,6 +30,10 @@ check("nameservers.1 resolves", () => {
 check("mx.priority is stringified", () => {
   assert.equal(core.resolveFact(facts, "mx.priority"), "10");
 });
+check("mxExpectation derives the live expectation from the leaves the corpus renders", () => {
+  assert.equal(core.mxExpectation(facts.mx), "10 mail.kuju.email.");
+  assert.equal(core.mxExpectation({ target: "x.test", priority: 20 }), "20 x.test.");
+});
 check("dmarc template is emitted with the RUN-time placeholder", () => {
   const v = core.resolveFact(facts, "customer_domain_records.dmarc");
   assert.ok(v.includes("<domain>"), v);
@@ -281,6 +285,7 @@ check("dns-delegation renders with facts resolved and run-time placeholders inta
   const out = core.renderRunbook(rb, facts, "https://site.test");
   assert.ok(out.markdown.includes("ns1.kuju.email") && out.markdown.includes("ns2.kuju.email"));
   assert.ok(out.markdown.includes("10 mail.kuju.email."));
+  assert.ok(out.markdown.includes(core.mxExpectation(facts.mx)), "rendered MX and live expectation must be the same string");
   assert.ok(out.markdown.includes("<domain>"));
   assert.ok(!out.markdown.includes("{{"), "unresolved placeholder");
   assert.equal(out.markdown.match(core.SINGLE_BRACE_RE), null, "single-brace token leaked");

@@ -108,6 +108,33 @@ arm "M10 malformed front-matter YAML names its file" fail "dns-delegation.md: fr
 d="$(fresh_copy)"; printf 'zz: a: b\n' >> "$d/facts.yaml"
 arm "M11 malformed facts YAML names its file" fail "facts.yaml is not valid YAML" -- check_on "$d"
 
+# ---------------------------------------------------------------------------
+# F-arms (scripts/check-facts-live.mjs): each of these is a fact-shape check,
+# not a network check -- --only scopes the walk to one fact, and the guards
+# they exercise (unverifiable, the verify+unverifiable contradiction, the
+# stray expect_contains guard) all return before any network call, so all
+# four stay OFFLINE, unlike the L-arms below.
+# ---------------------------------------------------------------------------
+FACTS_LIVE="$ROOT/scripts/check-facts-live.mjs"
+arm "F1 unverifiable fact is SKIP by name (offline: --only scopes to a fact with no verify block)" pass "SKIP  test_migration_cap_gb  unverifiable: true" -- "${NODE[@]}" "$FACTS_LIVE" --only test_migration_cap_gb
+d="$(fresh_copy)"; printf '\nzz_probe_fact:\n  value: 1\n' >> "$d/facts.yaml"
+arm "F2 fact with neither verify nor unverifiable FAILS (no silent SKIP)" fail "FAIL  zz_probe_fact  no verify block and no unverifiable: true" -- "${NODE[@]}" "$FACTS_LIVE" --facts "$d/facts.yaml" --only zz_probe_fact
+
+# F3: give test_migration_cap_gb (unverifiable: true) a verify: block too, so
+# it carries both -- the contradiction guard must FAIL it, not silently
+# prefer either flag. Inserted via awk (not sed) because this is a two-line
+# INSERT after a matched line, which BSD sed's `-i ''` cannot do inline the
+# way the single-line M-arm substitutions above do.
+d="$(fresh_copy)"
+awk '{print} /^  unverifiable: true/{print "  verify: {type: http, expect_status: [200]}"}' "$d/facts.yaml" > "$d/facts.yaml.tmp" && mv "$d/facts.yaml.tmp" "$d/facts.yaml"
+arm "F3 fact with BOTH verify and unverifiable: true FAILS (contradiction, not a silent preference)" fail "FAIL  test_migration_cap_gb  contradictory: has a verify block AND unverifiable: true" -- "${NODE[@]}" "$FACTS_LIVE" --facts "$d/facts.yaml" --only test_migration_cap_gb
+
+# F4: re-add expect_contains to mx.verify (task 6 deleted it in favour of the
+# derived mxExpectation) -- the guard must FAIL loudly rather than let a
+# stray key silently coexist with the derived value.
+d="$(fresh_copy)"; sed -i '' 's/verify: {type: dns, name: kuju.email, record: MX}/verify: {type: dns, name: kuju.email, record: MX, expect_contains: "10 mail.kuju.email."}/' "$d/facts.yaml"
+arm "F4 stray expect_contains on mx.verify FAILS (derived value, not a leftover key)" fail "FAIL  mx  expect_contains is derived from target/priority now — remove it from mail-facts.yaml" -- "${NODE[@]}" "$FACTS_LIVE" --facts "$d/facts.yaml" --only mx
+
 rm -rf "$SCRATCH"
 
 # ---------------------------------------------------------------------------
@@ -115,7 +142,7 @@ rm -rf "$SCRATCH"
 # gated behind LIVE=1 -- the default offline harness run stays deterministic.
 # ---------------------------------------------------------------------------
 if [[ "${LIVE:-0}" == "1" ]]; then
-  arm "L1 live checker self-test proves all five mutants fail" pass "SELF-TEST OK: 5/5 mutants failed as required" -- "${NODE[@]}" "$ROOT/scripts/check-facts-live.mjs" --self-test
+  arm "L1 live checker self-test proves all seven mutants fail" pass "SELF-TEST OK: 7/7 mutants failed as required" -- "${NODE[@]}" "$ROOT/scripts/check-facts-live.mjs" --self-test
   arm "L2 live checker reports signup_url as PENDING (still 303)" pass "PENDING  signup_url" -- "${NODE[@]}" "$ROOT/scripts/check-facts-live.mjs"
   arm "L3 live checker names the URL-less registrar as SKIP" pass "SKIP  registrars.name-services.com" -- "${NODE[@]}" "$ROOT/scripts/check-facts-live.mjs"
 fi
