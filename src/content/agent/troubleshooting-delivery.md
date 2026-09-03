@@ -16,11 +16,11 @@ domain that already uses Kuju Email. Replace `<domain>` with the customer's
 domain everywhere below (for example `example.com`). Never invent a value you
 did not observe. Every command here is read-only.
 
-Steps marked **HUMAN ACTION** are things you cannot do: clicking through DNS
-or registrar control panels, reading a bounce message from the person's own
-inbox, reading a value from the Kuju admin screen, or sending and inspecting a
-test message from their own mailbox. Give the person exact instructions, then
-wait for them to confirm.
+Steps marked **HUMAN ACTION** are things you cannot do — for example clicking
+through DNS or registrar control panels, reading a bounce message from the
+person's own inbox, reading a value from the Kuju admin screen, or sending and
+inspecting a test message from their own mailbox. Give the person exact
+instructions, then wait for them to confirm.
 
 Pick the section that matches the symptom the person reports. Collect every
 observation you make; the last section tells you how to report them.

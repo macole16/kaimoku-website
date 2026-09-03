@@ -18,9 +18,9 @@ host they already use. Replace `<domain>` with the customer's domain everywhere
 below (for example `example.com`). Never invent a value you did not observe.
 Every command here is read-only.
 
-Steps marked **HUMAN ACTION** are things you cannot do: registrar logins,
-clicking through control panels, reading a value from the Kuju admin screen.
-Give the person exact instructions, then wait for them to confirm.
+Steps marked **HUMAN ACTION** are things you cannot do — for example registrar
+logins, clicking through control panels, reading a value from the Kuju admin
+screen. Give the person exact instructions, then wait for them to confirm.
 
 ## Step 1 - Find out who runs this domain's DNS today
 
@@ -36,9 +36,11 @@ Read the `status:` in the header and the `ANSWER SECTION`.
 | NS answers present, any other host | Step 2 |
 | `status: SERVFAIL`, `status: REFUSED`, or no response (timeout) | retry the lookup once; if it still fails, stop and tell the person the lookup itself is failing — do not guess a registrar from absent data |
 
-If `dig` is not installed, `nslookup -type=NS <domain>` gives the same answer:
-"can't find" is NXDOMAIN, an empty result is 1b, otherwise read the `nameserver =`
-lines.
+If `dig` is not installed, `nslookup -type=NS <domain>` gives the same answer,
+but it prints "can't find" for BOTH outcomes below - never key off that phrase;
+read what follows the colon instead: `: NXDOMAIN` is Step 1a (the name does not
+exist), `: No answer` is Step 1b (no NS published here); otherwise read the
+`nameserver =` lines.
 
 Write the NS answers down. They name the host that answers for this domain right
 now, which Step 3b needs in order to query it directly, and Step 6 reports them
