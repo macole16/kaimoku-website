@@ -18,7 +18,12 @@ export const FACT_RE = /\{\{fact:([^{}]*)\}\}/g;
 export const SINGLE_BRACE_RE = /(?<!\{)\{[^{}\s]+\}(?!\})/g;
 
 /** Keys inside a fact object that are metadata, not data. */
-const RESERVED_KEYS = new Set(["verify", "pending", "unverifiable"]);
+// Exported because scripts/check-facts-live.mjs counts a fact's LEAVES
+// (launch-1.31) and must exclude the same metadata keys this file does.
+// A second hand-maintained copy there would drift the moment a reserved
+// key is added, and an undercount reads as a SMALLER unchecked surface --
+// the wrong direction for a guard about silent growth.
+export const RESERVED_KEYS = new Set(["verify", "pending", "unverifiable"]);
 
 /**
  * @param {string} factsPath absolute path to mail-facts.yaml
