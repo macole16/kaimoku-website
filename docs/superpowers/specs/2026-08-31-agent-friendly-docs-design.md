@@ -294,6 +294,12 @@ CI at all**, so the build is the only gate available and the cheapest place to a
   by construction" scope note above; the TS twins are out of Tier 1's reach
 - every internal link resolves to a real route
 - `llms.txt` covers every runbook; no orphans
+- no fact value carrying a `source:` (verbatim copy from another repo — today the
+  seven `wizard_labels` leaves quoting kuju-mail templates) is typed out literally
+  in a runbook instead of referenced through its token. Newlines are collapsed
+  before matching, because the labels that got missed by hand were line-wrapped.
+  Needs kuju-mail at **authoring** time only, never at check time — which is what
+  keeps it inside Tier 1's offline constraint (launch-1.32)
 
 ### Tier 2 - scheduled reality check (reports, never blocks)
 

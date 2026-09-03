@@ -15,6 +15,7 @@
 //   preconditions denylist       no denylisted command in a front-matter preconditions: list
 //   preconditions single-brace   no {x} survives in the preconditions: block (served verbatim)
 //   preconditions unresolved fact no {{fact:...}} token in preconditions: (never interpolated)
+//   inlines UI copy              no fact value carrying a source: is typed out verbatim in a runbook
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -82,6 +83,28 @@ function enumerateRoutes(appDir, slugs) {
   return routes;
 }
 
+// --- UI-copy deny-list -------------------------------------------------------
+// Every fact leaf carrying a `source:` is VERBATIM COPY FROM ANOTHER REPO (today
+// that is wizard_labels, whose seven leaves quote kuju-mail templates). Keying on
+// `source:` rather than on the literal name "wizard_labels" means a future family
+// of borrowed copy is guarded the day it is added, with no edit here.
+//
+// This is what makes the check TIER 1. It needs kuju-mail at AUTHORING time --
+// when a human copies a label in and records its source: -- and never at check
+// time, so it survives the two places this checker actually runs: Vercel prebuild
+// (no tailnet, cannot reach Forgejo) and the build host (whose two kuju-mail
+// trees are not git checkouts and have been frozen since 2026-03-16, so a checker
+// that grepped them would report PASS against a fossil forever).
+function uiCopyStrings(node, trail = [], out = []) {
+  if (node === null || typeof node !== "object" || Array.isArray(node)) return out;
+  if (typeof node.source === "string" && (typeof node.value === "string" || typeof node.value === "number")) {
+    out.push({ path: trail.join("."), value: String(node.value) });
+    return out;
+  }
+  for (const [k, v] of Object.entries(node)) uiCopyStrings(v, [...trail, k], out);
+  return out;
+}
+
 const problems = [];
 let factRefs = 0;
 let linkCount = 0;
@@ -91,6 +114,7 @@ try {
   const facts = loadFacts(FACTS_PATH);
   runbooks = loadRunbooks(CONTENT_DIR);
   const routes = enumerateRoutes(APP_DIR, runbooks.map((r) => r.slug));
+  const uiCopy = uiCopyStrings(facts);
 
   for (const rb of runbooks) {
     const where = `${rb.filename}`;
@@ -138,6 +162,31 @@ try {
     for (const link of extractInternalLinks(rb.body)) {
       linkCount += 1;
       if (!routes.has(link)) problems.push(`${where}: broken link ${link} (not a page.tsx/route.ts under src/app)`);
+    }
+
+    // 6. no known UI label is inlined as literal prose.
+    //
+    // COLLAPSE NEWLINES FIRST. A per-line scan is precisely what made the
+    // launch-1.26 hand sweep report 9 labels against a true 12: three were
+    // line-wrapped in the markdown source, so no single line contained the whole
+    // label. A version of this check that matched line-by-line would report
+    // clean while leaking.
+    //
+    // Scanned against rb.body -- the SOURCE -- never against `rendered`. The
+    // rendered text is SUPPOSED to contain every label value (that is what the
+    // token resolves to), so scanning it would fire on every correct usage and
+    // the gate would have to be deleted. The source contains the value only when
+    // somebody typed it by hand instead of referencing the fact.
+    const flatBody = rb.body.replace(/\s*\n\s*/g, " ");
+    const hits = uiCopy.filter((c) => flatBody.includes(c.value));
+    // Report only the LONGEST match. "Auto-Configure" is a substring of
+    // "Auto-Configure Mail Records", so inlining the heading matched both and the
+    // first line named auto_configure_BUTTON -- sending an author to fix a heading
+    // by referencing the button's fact. A gate that names the wrong fact is worse
+    // than one that stays quiet, because the wrong fix looks like it worked.
+    for (const hit of hits) {
+      if (hits.some((o) => o !== hit && o.value.includes(hit.value))) continue;
+      problems.push(`${where}: inlines UI copy verbatim: ${JSON.stringify(hit.value)} — reference {{fact:${hit.path}}} instead (it is quoted from another repo and drifts silently)`);
     }
   }
 } catch (err) {
