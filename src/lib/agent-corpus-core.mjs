@@ -318,6 +318,47 @@ export function loadRunbooks(contentDir) {
   return runbooks.sort((a, b) => a.order - b.order);
 }
 
+/** The "Before you start" block. Empty list → empty string (start-here). */
+export function renderPreconditions(preconditions) {
+  if (!preconditions?.length) return "";
+  return [
+    "**Before you start.** This runbook assumes:",
+    "",
+    ...preconditions.map((p) => `- ${p}`),
+    "",
+    "If one of these is not true, stop and resolve it first.",
+  ].join("\n");
+}
+
+/**
+ * Insert after the first H1 line that is NOT inside a fenced code block —
+ * fence tracking mirrors extractCodeLines' (toggle on `/^\s*```/`, skip
+ * lines while inside), so a runbook that shows a fenced markdown/llms.txt
+ * EXAMPLE containing a bare `# ` line cannot have the block spliced into
+ * that example. A body with no such H1 gets the block prepended.
+ */
+function injectAfterH1(text, block) {
+  if (!block) return text;
+  const lines = text.split("\n");
+  let inFence = false;
+  let pos = 0;
+  let at = -1;
+  for (const raw of lines) {
+    if (/^\s*```/.test(raw)) {
+      inFence = !inFence;
+    } else if (at === -1 && !inFence && /^# .*$/.test(raw)) {
+      at = pos + raw.length;
+    }
+    pos += raw.length + 1;
+  }
+  if (at === -1) return `${block}\n\n${text}`;
+  // text.slice(at) already starts with the blank line that followed the H1
+  // in the source, so the block is NOT followed by an extra "\n" here — an
+  // extra one would double that blank line in the served bytes (D7 fix
+  // round 1, Finding 2).
+  return `${text.slice(0, at)}\n\n${block}${text.slice(at)}`;
+}
+
 /**
  * @param {any} runbook
  * @param {Record<string, any>} facts
@@ -325,7 +366,7 @@ export function loadRunbooks(contentDir) {
  */
 export function renderRunbook(runbook, facts, siteUrl) {
   const { text, used } = interpolate(runbook.body, facts);
-  const markdown = absolutiseLinks(text, siteUrl);
+  const markdown = absolutiseLinks(injectAfterH1(text, renderPreconditions(runbook.preconditions)), siteUrl);
   const { body: _b, filename: _f, ...meta } = runbook;
   void _b;
   void _f;
@@ -351,7 +392,16 @@ const CORPUS_INTRO =
 /** llms.txt per llmstxt.org: H1, blockquote summary, H2 sections of `- [name](url): description`. */
 export function renderLlmsTxt(index) {
   const lines = ["# Kuju Email — agent runbooks", "", CORPUS_INTRO, "", "## Runbooks (read start-here first)", ""];
-  for (const r of index.runbooks) lines.push(`- [${r.title}](${r.url}): ${r.outcome}`);
+  for (const r of index.runbooks) {
+    // Gate the summary line on renderPreconditions itself (not a raw
+    // .length check) so this and the runbook body share one source of
+    // truth for "does this doc have a preconditions block" — see the
+    // falsifiability protocol in scripts/corpus-selftest.mjs.
+    const hasBlock = renderPreconditions(r.preconditions) !== "";
+    lines.push(
+      `- [${r.title}](${r.url}): ${r.outcome}${hasBlock ? ` — Assumes: ${r.preconditions.join("; ")}.` : ""}`,
+    );
+  }
   lines.push("", "## Reference", "");
   for (const d of index.reference) lines.push(`- [${d.title}](${d.url}): ${d.description}`);
   lines.push("", "## Optional", "", `- [Everything in one file](${index.siteUrl}/llms-full.txt): the runbooks and reference concatenated`, "");

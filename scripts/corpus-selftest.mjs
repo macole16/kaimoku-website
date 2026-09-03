@@ -244,6 +244,50 @@ function withTempDir(prefix, fn) {
     fs.rmSync(dir, { recursive: true, force: true });
   }
 }
+
+check("renderRunbook injects the preconditions block after the H1 when the list is non-empty", () => {
+  const rb = { slug: "p", title: "P", order: 1, preconditions: ["alpha is true", "beta is true"], outcome: "o", facts_used: [], body: "\n# P\n\nIntro.\n", filename: "p.md" };
+  const md = core.renderRunbook(rb, facts, "https://site.test").markdown;
+  const h1 = md.indexOf("# P"), blk = md.indexOf("**Before you start.** This runbook assumes:"), intro = md.indexOf("Intro.");
+  assert.ok(h1 !== -1 && blk > h1 && intro > blk, md);
+  assert.ok(md.includes("- alpha is true\n- beta is true"), md);
+  assert.ok(md.includes("If one of these is not true, stop and resolve it first."), md);
+});
+check("renderRunbook skips a fenced '# ' line and inserts after the REAL H1 (D7 fix round 1, Finding 1)", () => {
+  const rb = {
+    slug: "r", title: "R", order: 1, preconditions: ["z is true"], outcome: "o", facts_used: [],
+    body: "```\n# Fake heading inside a fence\n```\n\n# R\n\nIntro.\n",
+    filename: "r.md",
+  };
+  const md = core.renderRunbook(rb, facts, "https://site.test").markdown;
+  assert.ok(
+    md.includes(
+      "```\n# Fake heading inside a fence\n```\n\n# R\n\n**Before you start.** This runbook assumes:\n\n- z is true\n\nIf one of these is not true, stop and resolve it first.\n\nIntro.",
+    ),
+    md,
+  );
+});
+check("renderRunbook prepends the block when the body has no H1", () => {
+  const rb = { slug: "q", title: "Q", order: 1, preconditions: ["x"], outcome: "o", facts_used: [], body: "No heading.\n", filename: "q.md" };
+  assert.ok(core.renderRunbook(rb, facts, "https://site.test").markdown.startsWith("**Before you start.**"));
+});
+check("renderRunbook emits NO block for an empty list — start-here (note: it has its own '## Before you start' H2, so the BOLD sentinel is what must be absent)", () => {
+  const sh = core.loadRunbooks(path.join(ROOT, "src/content/agent")).find((r) => r.slug === "start-here");
+  assert.deepEqual(sh.preconditions, []);
+  assert.ok(!core.renderRunbook(sh, facts, "https://site.test").markdown.includes("**Before you start.** This runbook assumes:"));
+});
+check("dns-delegation's SERVED body states the signup-trial gate it declares", () => {
+  const rb = core.loadRunbooks(path.join(ROOT, "src/content/agent")).find((r) => r.slug === "dns-delegation");
+  assert.ok(core.renderRunbook(rb, facts, "https://site.test").markdown.includes("- the customer has an active Kuju account (see signup-trial)"));
+});
+check("renderLlmsTxt appends Assumes: only for a runbook with preconditions", () => {
+  const x = { slug: "x", title: "X", order: 1, preconditions: [], outcome: "done", facts_used: [], body: "# X\n", filename: "x.md" };
+  const y = { slug: "y", title: "Y", order: 2, preconditions: ["a", "b"], outcome: "done", facts_used: [], body: "# Y\n", filename: "y.md" };
+  const txt = core.renderLlmsTxt(core.buildIndex([x, y], facts, "https://site.test", []));
+  assert.ok(txt.includes("- [X](https://site.test/kuju-email/agent/x.md): done\n"), txt);
+  assert.ok(txt.includes("- [Y](https://site.test/kuju-email/agent/y.md): done — Assumes: a; b.\n"), txt);
+});
+
 check("parseFrontMatter names the file when the front-matter YAML is malformed", () => {
   assert.throws(() => core.parseFrontMatter("---\nslug: a: b\n---\n", "z.md"), /z\.md: front-matter is not valid YAML: Nested mappings/);
 });
