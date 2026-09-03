@@ -321,16 +321,23 @@ if [[ "${SKIP_SERVER:-0}" != "1" ]]; then
   # that claim was wrong and has been corrected. See the Task 6 report's
   # correction note.)
   header_arm "S10 glossary.md is text/markdown" "/kuju-email/glossary.md" "content-type: text/markdown"
-  body_arm   "S11 glossary.md carries SPF and why-it-matters" "/kuju-email/glossary.md" "**Why it matters:**"
+  # S11 checked only "**Why it matters:**", which every entry emits; it never proved SPF.
+  body_arm   "S11a glossary.md carries the SPF entry (term + expansion heading)" "/kuju-email/glossary.md" "## SPF — Sender Policy Framework"
+  body_arm   "S11b glossary.md carries why-it-matters" "/kuju-email/glossary.md" "**Why it matters:**"
   header_arm "S12 docs.md is text/markdown" "/kuju-email/docs.md" "content-type: text/markdown"
   body_arm   "S13 docs.md lists endpoints" "/kuju-email/docs.md" "| GET | "
   body_arm   "S14 llms-full.txt embeds the glossary" "/llms-full.txt" "Sender Policy Framework"
+  # S23: S4 pins only the <!-- url --> marker; renderLlmsFullTxt pushes the marker THEN
+  # the body, so a renderer emitting markers with empty bodies passes S4 five times over
+  # and S14 pins only a REFERENCE body. This pins a heading that exists only inside the
+  # dns-delegation runbook body (llms.txt carries title/outcome/Assumes, never headings).
+  body_arm   "S23 llms-full.txt embeds a runbook BODY, not only its marker" "/llms-full.txt" "## Step 1 - Find out who runs this domain's DNS today"
 
-  # S15-S18: count arms (Task 6 review finding 1). S11/S13 above are
+  # S15-S18: count arms (Task 6 review finding 1). S11b/S13 above are
   # substring sentinels and cannot distinguish "the renderer emitted 1
   # entry/endpoint" from "it emitted all of them" -- e.g. an accidental
   # .slice(0,1) in renderGlossaryMarkdown() still emits one
-  # "**Why it matters:**" line and S11 still passes. corpus-selftest.mjs
+  # "**Why it matters:**" line and S11b still passes. corpus-selftest.mjs
   # cannot carry this assertion instead: it is plain ESM importing only
   # agent-corpus-core.mjs (node:assert against .mjs), while the renderers
   # live in src/lib/agent-corpus.ts and pull in src/lib/glossary.ts and
