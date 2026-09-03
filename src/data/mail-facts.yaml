@@ -51,13 +51,25 @@ test_migration_cap_gb:
   unverifiable: true   # product config the website cannot observe; declared, not defaulted
 
 wizard_labels:
-  # Verbatim UI copy from kuju-mail's domain wizard (_wizard.html:49,56) and the
-  # domain DNS page banner (_dns.html). The runbooks quote these so a copy change
-  # is one edit here, not a hunt across two files (launch-1.25 missed one on the
-  # first pass). Product config the site cannot observe: no verify block.
+  # Verbatim UI copy from kuju-mail: domain_admin/_wizard.html (49,56) and
+  # domain_admin/_dns.html (banner 74, auto-configure heading 118 and its
+  # button 127, re-check button 243). Directory-qualified deliberately --
+  # site_admin/_dns.html also exists AND also has a "Refresh" at line 5, so a
+  # bare basename sends a re-verifier to the wrong file with a false match.
+  #
+  # Adding a leaf: copy the value from the template, never from memory; name it
+  # for the CONTROL it labels, suffixing only when two would collide (the three
+  # older leaves predate this and are named by value); and quote a label in a
+  # runbook only where the reader is told to press it -- prose describing the
+  # action ("a re-check in the admin") stays prose. No verify block, product
+  # config the site cannot observe, so Tier 2 SKIPs the whole fact and nothing
+  # mechanically enforces any of the above (launch-1.25 / -1.26 / -1.27).
   use_kuju_dns: "Use Kuju DNS"
   keep_current_dns: "Keep your current DNS"
   nameservers_not_pointed: "Nameservers Not Pointed at Kuju"
+  recheck_button: "Re-check"
+  auto_configure_button: "Auto-Configure"
+  auto_configure_heading: "Auto-Configure Mail Records"
   unverifiable: true
 
 registrars:
