@@ -171,8 +171,19 @@ already obtained it) and about six digs that were just run.
 Add the matching bound on the troubleshooting side: **two** re-checks, mirroring
 `dns-delegation`'s wording, after which the agent stops and collects the evidence for
 support rather than routing back a third time. The bound belongs on the *return* edge —
-each file bounds its own escalation, so neither can loop even if the other is opened
-first.
+each file bounds its own escalation, so the specific B1 ↔ Step 5 cycle this fix targets
+("mail goes to spam" → missing SPF/DKIM → `dns-delegation` Step 5 → back to B1) cannot
+loop regardless of which file is opened first.
+
+**This does not bound every cross-file cycle** — narrow the claim to what was fixed. A
+different cycle exists on the A1 escalation path: `dns-delegation:440`'s "still missing
+after two re-checks, stop here and use the delivery troubleshooting runbook" hands off to
+`troubleshooting-delivery`; that file's A1 empty-MX row reads "the domain is not
+provisioned - run `dns-delegation` from Step 1", which lands back at Step 1 and, on a
+still-missing record, can walk forward to Step 5 and `:440` again. Nothing counts visits
+across that edge the way B1a's re-check counter does. Recorded here rather than fixed,
+since this is a documentation correction to what A7 actually shipped, not a new behavior
+change.
 
 Also **copy** `launch-1.25`'s authoritative-nameserver cache check into
 `troubleshooting` (`dns-delegation` keeps its own; this is duplication of a check, not a
@@ -274,8 +285,18 @@ Label it `body line N`.
 **Verified:** `checkDnsNonEmpty`'s "resolved but empty answer array", `checkHttp`'s
 neither-`expect_status`-nor-`reject_status` fallback, and the generic
 unsupported-`verify`-block fallback have no mutant. Narrow and hard to reach — but
-`SELF-TEST OK` is the only thing the nightly timer says. Add three mutants and bump
-`EXPECTED_MUTANT_COUNT` 5 → 8 as the deliberate edit that constant exists to force.
+`SELF-TEST OK` is the only thing the nightly timer says. Add mutants and bump
+`EXPECTED_MUTANT_COUNT` as the deliberate edit that constant exists to force.
+
+**Superseded (recorded during implementation, see the plan's premise corrections and
+decision 1):** the "empty answer array" branch turned out to be unreachable through the
+public DNS path — measured across A/TXT/MX on six no-data names, Node always rejects with
+`ENODATA` and never resolves to `[]`, so no facts mutation can reach `FAIL … -> empty`.
+Only the other two branches got mutants. **Shipped: 7, not 8** — `EXPECTED_MUTANT_COUNT =
+7`, `SELF-TEST OK: 7/7 mutants failed as required`. The unreachable branch is kept,
+documented in place as defensive-only and deliberately not mutant-covered, rather than
+deleted or covered by a fault-injection hook (an env var that can make the nightly
+deadman lie was judged the worse trade).
 
 ---
 

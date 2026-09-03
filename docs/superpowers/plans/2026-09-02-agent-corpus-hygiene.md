@@ -801,8 +801,25 @@ text. If implementation shows a decision is wrong, report it — do not silently
    message becomes
    `${where}: rendered body line ${hit.line}: denylisted command (${hit.name}): ${hit.text}`.
 
-6. **Preconditions are served verbatim** — not interpolated, not link-rewritten. Accepted as
-   the plan describes. `(see signup-trial)` stays plain text on every path.
+6. **Preconditions are served verbatim — but only half of that claim holds as shipped.**
+   "Not interpolated" is correct: preconditions never pass through `interpolate()`. "Not
+   link-rewritten" is FALSE. `renderRunbook` calls
+   `absolutiseLinks(injectAfterH1(text, renderPreconditions(...)), siteUrl)` — the
+   preconditions block is spliced into the body BEFORE `absolutiseLinks` runs, not after.
+   So a root-relative link inside a precondition would be:
+   - **absolutised** on the `.md` route and inside `llms-full.txt` (both render from that
+     same post-`absolutiseLinks` markdown);
+   - left **relative** in `llms.txt`'s `Assumes:` clause (built from the raw
+     `preconditions.join("; ")`, which never passes through `absolutiseLinks`);
+   - rendered as **raw, unprocessed text** on the landing page (`page.tsx` maps the
+     untouched front-matter `r.preconditions` strings straight into `<li>{p}</li>`, with no
+     link handling of any kind).
+
+   Three-way divergence across the three surfaces. `extractInternalLinks` (which backs
+   check-corpus.mjs's broken-link check) only scans `rb.body`, so a broken link inside a
+   precondition is invisible to that check too. Fully **latent today** — no precondition
+   contains a link — so this is a documentation correction, not a code fix.
+   `(see signup-trial)` stays plain text on every path, as before.
 
 7. **Landing-page shape → the `<ul>` in task 18.** Accepted as written.
 
