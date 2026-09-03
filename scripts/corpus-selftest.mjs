@@ -234,6 +234,16 @@ function withTempDir(prefix, fn) {
     fs.rmSync(dir, { recursive: true, force: true });
   }
 }
+check("parseFrontMatter names the file when the front-matter YAML is malformed", () => {
+  assert.throws(() => core.parseFrontMatter("---\nslug: a: b\n---\n", "z.md"), /z\.md: front-matter is not valid YAML: Nested mappings/);
+});
+check("loadFacts names the file when the facts YAML is malformed", () => {
+  withTempDir("corpus-selftest-badfacts-", (dir) => {
+    const f = path.join(dir, "facts.yaml");
+    fs.writeFileSync(f, "zz: a: b\n");
+    assert.throws(() => core.loadFacts(f), /facts\.yaml is not valid YAML: Nested mappings/);
+  });
+});
 check("loadRunbooks orders by the order: field, not by filename/directory order", () => {
   withTempDir("corpus-selftest-order-", (dir) => {
     // Alphabetical filename order is a-file, b-file, c-file; declared order:

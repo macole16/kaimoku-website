@@ -26,7 +26,12 @@ const RESERVED_KEYS = new Set(["verify", "pending"]);
  */
 export function loadFacts(factsPath) {
   const raw = fs.readFileSync(factsPath, "utf-8");
-  const parsed = yaml.parse(raw);
+  let parsed;
+  try {
+    parsed = yaml.parse(raw);
+  } catch (err) {
+    throw new Error(`facts file ${factsPath} is not valid YAML: ${err.message}`);
+  }
   if (!parsed || typeof parsed !== "object") {
     throw new Error(`facts file ${factsPath} did not parse to a mapping`);
   }
@@ -217,7 +222,12 @@ export const DENYLIST = [
 export function parseFrontMatter(raw, filename) {
   const m = raw.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
   if (!m) throw new Error(`${filename}: missing front-matter (expected a leading --- block)`);
-  const meta = yaml.parse(m[1]) ?? {};
+  let meta;
+  try {
+    meta = yaml.parse(m[1]) ?? {};
+  } catch (err) {
+    throw new Error(`${filename}: front-matter is not valid YAML: ${err.message}`);
+  }
   const missing = REQUIRED_META.filter((k) => !Object.hasOwn(meta, k));
   if (missing.length) throw new Error(`${filename}: front-matter missing keys: ${missing.join(", ")}`);
   if (!Array.isArray(meta.facts_used) || !Array.isArray(meta.preconditions)) {

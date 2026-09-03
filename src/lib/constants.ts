@@ -33,7 +33,13 @@ export const URLS = {
  * Deliberately the vercel.app host. kaimoku.tech does NOT resolve at all as of
  * 2026-09-01 (launch-1.1 was closed by UNPOINTING the DNS; re-attaching the
  * branded domain is github-j3x, deferred). Switch this the day the domain is
- * attached and answers 200 — and nowhere else: this is the only definition.
+ * attached and answers 200. This is the only definition the SITE imports — but
+ * NOT the only copy. Two harness scripts run under plain node, cannot import a
+ * .ts file, and hardcode the host; update them by hand in the same change, and
+ * grep for it before claiming you are done:
+ *   scripts/verify-corpus.sh      served-route sentinels
+ *   scripts/check-facts-live.mjs  the User-Agent string and the mutant targets
+ * Both fail loudly on drift, which is why they are duplicated rather than derived.
  */
 export const SITE_URL = "https://kaimoku-website.vercel.app";
 

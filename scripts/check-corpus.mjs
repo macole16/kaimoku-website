@@ -11,6 +11,7 @@
 //   denylisted command           no write/credential/privilege command in code
 //   single-brace token           no {x} survives into a rendered runbook
 //   broken link                  every root-relative link is a real route
+//   unknown flag                 a misspelled --flag is fatal, never a silent fallback to the real corpus
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -26,9 +27,19 @@ import {
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
+const KNOWN_FLAGS = new Set(["--content-dir", "--facts", "--app-dir"]);
+for (const a of process.argv.slice(2)) {
+  if (a.startsWith("--") && !KNOWN_FLAGS.has(a)) {
+    console.error(`check-corpus: unknown flag ${a} (known: ${[...KNOWN_FLAGS].join(", ")})`);
+    process.exit(2);
+  }
+}
 function arg(name, fallback) {
   const i = process.argv.indexOf(name);
-  return i !== -1 && process.argv[i + 1] ? path.resolve(process.argv[i + 1]) : fallback;
+  if (i === -1) return fallback;
+  const v = process.argv[i + 1];
+  if (!v || v.startsWith("--")) { console.error(`check-corpus: ${name} needs a value`); process.exit(2); }
+  return path.resolve(v);
 }
 const CONTENT_DIR = arg("--content-dir", path.join(ROOT, "src/content/agent"));
 const FACTS_PATH = arg("--facts", path.join(ROOT, "src/data/mail-facts.yaml"));
@@ -98,7 +109,7 @@ try {
 
     // 3. nothing an agent could run that writes, authenticates or escalates
     for (const hit of scanDenylist(rendered)) {
-      problems.push(`${where}:${hit.line}: denylisted command (${hit.name}): ${hit.text}`);
+      problems.push(`${where}: rendered body line ${hit.line}: denylisted command (${hit.name}): ${hit.text}`);
     }
 
     // 4. no single-brace token survives (the confusable third syntax)

@@ -11,6 +11,16 @@ set -uo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 FAILS=0
 
+# evidence <text>: first 5 and last 5 lines, with a marker when anything was cut.
+# tail alone truncated the real "Cannot find module" line out of a RED transcript.
+evidence() {
+  local n; n="$(printf '%s\n' "$1" | wc -l | tr -d ' ')"
+  if [[ "$n" -le 10 ]]; then printf '%s\n' "$1"; return; fi
+  printf '%s\n' "$1" | head -n 5
+  echo "  ... ($((n - 10)) lines omitted) ..."
+  printf '%s\n' "$1" | tail -n 5
+}
+
 # arm <name> <expected-exit: pass|fail> <must-contain> -- <command...>
 # Runs the command, captures stdout+stderr, checks BOTH the exit-code class and
 # the sentinel. A "fail" arm passes only when the command exits non-zero AND
@@ -21,13 +31,13 @@ arm() {
   local out rc
   out="$("$@" 2>&1)"; rc=$?
   if [[ "$expect" == "pass" && "$rc" -ne 0 ]]; then
-    echo "FAIL  ${name}: expected exit 0, got ${rc}"; echo "$out" | tail -n 5; FAILS=$((FAILS + 1)); return
+    echo "FAIL  ${name}: expected exit 0, got ${rc}"; evidence "$out"; FAILS=$((FAILS + 1)); return
   fi
   if [[ "$expect" == "fail" && "$rc" -eq 0 ]]; then
     echo "FAIL  ${name}: expected non-zero exit, got 0"; FAILS=$((FAILS + 1)); return
   fi
   if [[ "$out" != *"$must"* ]]; then
-    echo "FAIL  ${name}: expected output to contain: ${must}"; echo "$out" | tail -n 5; FAILS=$((FAILS + 1)); return
+    echo "FAIL  ${name}: expected output to contain: ${must}"; evidence "$out"; FAILS=$((FAILS + 1)); return
   fi
   echo "PASS  ${name}"
 }
@@ -90,6 +100,14 @@ arm "M7 duplicate order fails" fail "order 3 is already used" -- check_on "$d"
 
 d="$(fresh_copy)"; sed -i '' 's/^slug: dns-delegation$/slug: dns-delegate/' "$d/agent/dns-delegation.md"
 arm "M8 slug/filename mismatch fails" fail "must equal the filename stem" -- check_on "$d"
+
+arm "M9 unknown flag dies (does not fall back to the real corpus)" fail "unknown flag --content-dr" -- "${NODE[@]}" "$CHECK" --content-dr /nonexistent
+
+d="$(fresh_copy)"; sed -i '' 's/^slug: dns-delegation$/slug: a: b/' "$d/agent/dns-delegation.md"
+arm "M10 malformed front-matter YAML names its file" fail "dns-delegation.md: front-matter is not valid YAML" -- check_on "$d"
+d="$(fresh_copy)"; printf 'zz: a: b\n' >> "$d/facts.yaml"
+arm "M11 malformed facts YAML names its file" fail "facts.yaml is not valid YAML" -- check_on "$d"
+
 rm -rf "$SCRATCH"
 
 # ---------------------------------------------------------------------------
