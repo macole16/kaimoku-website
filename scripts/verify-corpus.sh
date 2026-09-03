@@ -108,6 +108,17 @@ arm "M10 malformed front-matter YAML names its file" fail "dns-delegation.md: fr
 d="$(fresh_copy)"; printf 'zz: a: b\n' >> "$d/facts.yaml"
 arm "M11 malformed facts YAML names its file" fail "facts.yaml is not valid YAML" -- check_on "$d"
 
+# M12/M13 (Task 19, B1): the preconditions block is SERVED (renderRunbook
+# injects it into the .md route, llms-full.txt, llms.txt and the landing
+# page), so it needs the same scans as the body -- a denylisted command or an
+# unresolved {{fact:...}} token in front-matter preconditions: would reach an
+# agent verbatim otherwise.
+d="$(fresh_copy)"; sed -i '' 's/^  - you can run dig (or nslookup)$/  - run `sudo dig` first/' "$d/agent/dns-delegation.md"
+arm "M12 denylisted command inside a precondition fails" fail "preconditions: denylisted command (privileged or destructive tool)" -- check_on "$d"
+
+d="$(fresh_copy)"; sed -i '' 's/^  - the customer has an active Kuju account (see signup-trial)$/  - the customer has an active Kuju account (see signup-trial) {{fact:nameservers.0}}/' "$d/agent/dns-delegation.md"
+arm "M13 unresolved {{fact:...}} token inside a precondition fails" fail "preconditions: unresolved {{fact:...}} token" -- check_on "$d"
+
 # ---------------------------------------------------------------------------
 # F-arms (scripts/check-facts-live.mjs): each of these is a fact-shape check,
 # not a network check -- --only scopes the walk to one fact, and the guards
@@ -283,7 +294,7 @@ if [[ "${SKIP_SERVER:-0}" != "1" ]]; then
   occurrence_arm() {
     local name="$1" p="$2" needle="$3" expected="$4" body n
     body="$(curl -s "${BASE}${p}")"
-    n="$(printf '%s' "$body" | grep -o -- "$needle" | wc -l | tr -d ' ')"
+    n="$(printf '%s' "$body" | grep -oF -- "$needle" | wc -l | tr -d ' ')"
     if [[ "$n" -ne "$expected" ]]; then
       echo "FAIL  ${name}: expected ${expected}, got ${n}"; FAILS=$((FAILS + 1)); return
     fi

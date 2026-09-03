@@ -22,6 +22,7 @@ import {
   interpolate,
   loadFacts,
   loadRunbooks,
+  renderPreconditions,
   scanDenylist,
 } from "../src/lib/agent-corpus-core.mjs";
 
@@ -110,6 +111,19 @@ try {
     // 3. nothing an agent could run that writes, authenticates or escalates
     for (const hit of scanDenylist(rendered)) {
       problems.push(`${where}: rendered body line ${hit.line}: denylisted command (${hit.name}): ${hit.text}`);
+    }
+
+    // 3b. the preconditions block is SERVED (renderRunbook injects it), so it is scanned
+    // like the body: "every string an agent could execute is scanned" stays true, not nearly true.
+    const pre = renderPreconditions(rb.preconditions);
+    for (const hit of scanDenylist(pre)) problems.push(`${where}: preconditions: denylisted command (${hit.name}): ${hit.text}`);
+    for (const m of pre.matchAll(SINGLE_BRACE_RE)) problems.push(`${where}: preconditions: single-brace token ${m[0]} — use <name> for run-time placeholders`);
+
+    // 3c. preconditions are served VERBATIM -- never interpolated, by deliberate decision --
+    // so a stray {{fact:...}} token here reaches an agent as those literal characters and
+    // is never caught by the interpolate() step above (that only runs over rb.body).
+    if (pre.includes("{{fact:")) {
+      problems.push(`${where}: preconditions: unresolved {{fact:...}} token — preconditions are served verbatim and are never interpolated`);
     }
 
     // 4. no single-brace token survives (the confusable third syntax)
