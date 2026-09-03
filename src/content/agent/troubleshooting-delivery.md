@@ -82,7 +82,7 @@ observation you make; the last section tells you how to report them.
 
 | Record | Expected | If not |
 | --- | --- | --- |
-| SPF | a TXT equal to `{{fact:customer_domain_records.spf}}` | missing SPF is the most common cause of spam placement; the domain is not fully provisioned - [dns-delegation](/kuju-email/agent/dns-delegation.md) Step 5 |
+| SPF | a TXT equal to `{{fact:customer_domain_records.spf}}` | missing SPF is the most common cause of spam placement; the domain is not fully provisioned - B1a, then [dns-delegation](/kuju-email/agent/dns-delegation.md) Step 5 |
 | DMARC | a TXT starting `v=DMARC1` | same |
 | more than one SPF record | INVALID - SPF fails outright for every message (a PermError per RFC 7208), so neither record is used | **HUMAN ACTION** - the extra record must be deleted where the DNS lives |
 
@@ -97,7 +97,45 @@ DKIM's selector rotates, so ask for it:
 | Observation | Next |
 | --- | --- |
 | a record containing `v=DKIM1` | B2 |
-| empty | [dns-delegation](/kuju-email/agent/dns-delegation.md) Step 5 - on a delegated domain a re-check in the admin usually fixes it; on the "{{fact:wizard_labels.keep_current_dns}}" path the person must add the record themselves |
+| empty | B1a, then [dns-delegation](/kuju-email/agent/dns-delegation.md) Step 5 - on a delegated domain a re-check in the admin usually fixes it; on the "{{fact:wizard_labels.keep_current_dns}}" path the person must add the record themselves |
+
+### B1a - Before routing back: rule out a cached answer
+
+Rule out a cached answer before routing back to `dns-delegation`: a lookup
+made before the record existed can be remembered by the resolver for an hour
+or more, so ask the domain's own nameservers directly.
+
+    dig NS <domain> +short
+
+Ask EACH host it prints, and do not add `+short` below, because you need the
+header:
+
+    dig MX <domain> @<nameserver>
+    dig TXT <domain> @<nameserver>
+    dig TXT _dmarc.<domain> @<nameserver>
+    dig TXT <selector>._domainkey.<domain> @<nameserver>
+
+This check needs `dig`, and it is the one place in this runbook where
+`nslookup` is not a substitute: it takes the server as a trailing argument
+rather than `@server`, and prints no `status:` line, so the table below
+cannot be read through it. With only `nslookup`, do not conclude anything is
+missing - report the record UNVERIFIED and give the person the `dig` command
+to run.
+
+Read the `status:` line and the ANSWER SECTION:
+
+| Observation | Meaning |
+| --- | --- |
+| `status: NOERROR` and the record is in the ANSWER SECTION | the record IS published and only your resolver's cache is stale - report it as PASS, and tell the person it will be visible everywhere shortly |
+| `status: NOERROR` with no ANSWER SECTION, or `status: NXDOMAIN`, on every nameserver you asked | the record is genuinely not there - continue below. (A missing record at the domain itself, MX or SPF, answers NOERROR; a missing `_dmarc` or `._domainkey` name answers NXDOMAIN. Both mean absent) |
+| the nameservers disagree with each other | the change is still publishing across their provider - wait 15 minutes and ask again |
+| `status: REFUSED`, `status: SERVFAIL`, or `connection timed out` | this tells you NOTHING about the record - the server would not answer you. Do not treat it as missing; wait and re-check, or ask a different nameserver |
+
+If the record really is absent on every nameserver, go to
+[dns-delegation](/kuju-email/agent/dns-delegation.md) Step 5 to publish or
+re-check it. If a record is still missing after two re-checks, stop here:
+collect the evidence for support (see Report) rather than returning to the
+DNS runbook a third time.
 
 ### B2 - What does a receiver actually see?
 
