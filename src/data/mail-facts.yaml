@@ -50,6 +50,16 @@ test_migration_cap_gb:
   value: 2         # beta-1.10: per-account cap on a TEST migration; a PAUSE, not a failure
   unverifiable: true   # product config the website cannot observe; declared, not defaulted
 
+wizard_labels:
+  # Verbatim UI copy from kuju-mail's domain wizard (_wizard.html:49,56) and the
+  # domain DNS page banner (_dns.html). The runbooks quote these so a copy change
+  # is one edit here, not a hunt across two files (launch-1.25 missed one on the
+  # first pass). Product config the site cannot observe: no verify block.
+  use_kuju_dns: "Use Kuju DNS"
+  keep_current_dns: "Keep your current DNS"
+  nameservers_not_pointed: "Nameservers Not Pointed at Kuju"
+  unverifiable: true
+
 registrars:
   # Ported verbatim from kuju-mail/internal/api/registrar.go (11 keys, 10 with a
   # panel URL). Accepted duplication (spec section 2). Matching is

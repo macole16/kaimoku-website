@@ -6,7 +6,7 @@ preconditions:
   - the domain is already delegated to Kuju (see dns-delegation) or its mail records were added externally
   - you can run dig and openssl
 outcome: "The cause of missing or rejected mail is identified from observations, or the exact evidence for support is collected"
-facts_used: [mx, customer_domain_records]
+facts_used: [mx, customer_domain_records, wizard_labels]
 ---
 
 # Troubleshoot mail delivery for a Kuju domain
@@ -47,7 +47,7 @@ observation you make; the last section tells you how to report them.
 | --- | --- |
 | both answers end in `.kuju.email.` | A3 |
 | they differ | propagation is still in progress; wait 15 minutes and re-run A1 |
-| neither is Kuju | the person chose "Keep your current DNS", so the nameservers are not meant to be Kuju's; A1's result is what matters - if A1 passed, A3 |
+| neither is Kuju | the person chose "{{fact:wizard_labels.keep_current_dns}}", so the nameservers are not meant to be Kuju's; A1's result is what matters - if A1 passed, A3 |
 
 ### A3 - Does Kuju's mail server accept connections?
 
@@ -97,7 +97,7 @@ DKIM's selector rotates, so ask for it:
 | Observation | Next |
 | --- | --- |
 | a record containing `v=DKIM1` | B2 |
-| empty | [dns-delegation](/kuju-email/agent/dns-delegation.md) Step 5 - on a delegated domain a re-check in the admin usually fixes it; on the "Keep your current DNS" path the person must add the record themselves |
+| empty | [dns-delegation](/kuju-email/agent/dns-delegation.md) Step 5 - on a delegated domain a re-check in the admin usually fixes it; on the "{{fact:wizard_labels.keep_current_dns}}" path the person must add the record themselves |
 
 ### B2 - What does a receiver actually see?
 

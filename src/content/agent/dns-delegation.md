@@ -7,7 +7,7 @@ preconditions:
   - the customer has an active Kuju account (see signup-trial)
   - you can run dig (or nslookup)
 outcome: "Mail for the domain reaches Kuju — by delegating the nameservers, or by adding Kuju's records at the existing DNS host — and MX, SPF, DKIM and DMARC verify"
-facts_used: [nameservers, mx, customer_domain_records, registrars]
+facts_used: [nameservers, mx, customer_domain_records, registrars, wizard_labels]
 ---
 
 # Set up your domain's DNS for Kuju
@@ -69,10 +69,11 @@ delegation never happening, so treat this branch as its own procedure:
 
 > **HUMAN ACTION** - you cannot do this step. Give the person:
 >
-> 1. The instruction to add `<domain>` in the Kuju admin, choose **Use Kuju
->    DNS**, and provision it. The choice matters: the wizard's other option is
->    pre-selected, and picking it would leave Kuju with no zone for the
->    subdomain, so the delegation below could never work.
+> 1. The instruction to add `<domain>` in the Kuju admin, choose
+>    **{{fact:wizard_labels.use_kuju_dns}}**, and provision it. The choice
+>    matters: the wizard's other option is pre-selected, and picking it would
+>    leave Kuju with no zone for the subdomain, so the delegation below could
+>    never work.
 > 2. The DNS panel link or host name from Step 2 (or the nameserver hostnames
 >    you observed if no key matched).
 > 3. The instruction to open the parent zone's DNS RECORDS section — not the
@@ -120,8 +121,10 @@ you carry with you.
 ## Step 3 - Choose how the domain will use Kuju
 
 There are two ways to finish this, and the choice belongs to the person, not to
-you. Kuju's domain wizard asks the same question — "Use Kuju DNS" or "Keep your
-current DNS" — so whatever they answer here is what they must pick there too.
+you. Kuju's domain wizard asks the same question —
+"{{fact:wizard_labels.use_kuju_dns}}" or
+"{{fact:wizard_labels.keep_current_dns}}" — so whatever they answer here is what
+they must pick there too.
 
 Two facts you will need on either path:
 
@@ -150,8 +153,8 @@ Two facts you will need on either path:
 
 | Answer | Next |
 | --- | --- |
-| Kuju runs all DNS ("Use Kuju DNS" in the wizard) | Step 3a |
-| keep the current DNS host ("Keep your current DNS" in the wizard) | Step 3b |
+| Kuju runs all DNS ("{{fact:wizard_labels.use_kuju_dns}}" in the wizard) | Step 3a |
+| keep the current DNS host ("{{fact:wizard_labels.keep_current_dns}}" in the wizard) | Step 3b |
 
 ### Step 3a - Move all DNS to Kuju
 
@@ -170,10 +173,11 @@ query tells you which value that is. Then:
 
 > **HUMAN ACTION** - you cannot do this step. Give the person:
 >
-> 1. The instruction to add the domain in the Kuju admin, choose **Use Kuju
->    DNS**, and provision it. This has to happen BEFORE the nameservers change,
->    so that Kuju's nameservers have a zone to answer for, and the choice
->    matters: the wizard's other option is pre-selected.
+> 1. The instruction to add the domain in the Kuju admin, choose
+>    **{{fact:wizard_labels.use_kuju_dns}}**, and provision it. This has to
+>    happen BEFORE the nameservers change, so that Kuju's nameservers have a
+>    zone to answer for, and the choice matters: the wizard's other option is
+>    pre-selected.
 > 2. The DNS panel link or host name you carried from Step 2 (or the nameserver
 >    hostnames you observed in Step 1, if no key matched — that is the only
 >    identifying information you have).
@@ -224,12 +228,13 @@ there is no DKIM record to add and no record table to check against.
 
 > **HUMAN ACTION** - you cannot do this step. Give the person:
 >
-> 1. The instruction to add the domain in the Kuju admin, choose **Keep your
->    current DNS**, and provision it. Kuju then shows a table of the exact
->    records to add — Type, Name and Value — and does not touch their DNS
->    itself. If the domain is already there, they do not add it again: ask them
->    to confirm it is provisioned and that "Keep your current DNS" is the
->    option selected, then read the record table from its DNS page.
+> 1. The instruction to add the domain in the Kuju admin, choose
+>    **{{fact:wizard_labels.keep_current_dns}}**, and provision it. Kuju then
+>    shows a table of the exact records to add — Type, Name and Value — and does
+>    not touch their DNS itself. If the domain is already there, they do not add
+>    it again: ask them to confirm it is provisioned and that
+>    "{{fact:wizard_labels.keep_current_dns}}" is the option selected, then read
+>    the record table from its DNS page.
 > 2. The DNS panel link or host name you carried from Step 2, and the
 >    instruction to add every row of that table there: an MX at the domain, an
 >    SPF TXT at the domain, a DKIM TXT at a `._domainkey` name, and a DMARC TXT
@@ -306,9 +311,10 @@ choice, so Kuju's nameservers refuse to answer for it and the delegation cannot
 resolve. This is not a registrar problem and the registrar cannot fix it.
 
 > **HUMAN ACTION** - ask the person to open the domain in the Kuju admin and
-> provision it with **Use Kuju DNS**. If it is already there, ask them to
-> confirm which DNS option is selected; "Keep your current DNS" is the one that
-> produces this. Then re-run this step.
+> provision it with **{{fact:wizard_labels.use_kuju_dns}}**. If it is already
+> there, ask them to confirm which DNS option is selected;
+> "{{fact:wizard_labels.keep_current_dns}}" is the one that produces this. Then
+> re-run this step.
 
 ### Step 4d - Still unchanged after 48 hours
 
@@ -365,9 +371,9 @@ probe. Otherwise:
 > **HUMAN ACTION** - ask the person to open the domain in the Kuju admin, find
 > the DNS section, and read you the DKIM selector shown there (after a rotation
 > it looks like `mail-20260901`). On a domain that keeps its own DNS host, that
-> screen also shows a "Nameservers Not Pointed at Kuju" notice and says DNS is
-> externally managed. Tell them before they read it out that this is expected on
-> their setup and is not a fault.
+> screen also shows a "{{fact:wizard_labels.nameservers_not_pointed}}" notice
+> and says DNS is externally managed. Tell them before they read it out that
+> this is expected on their setup and is not a fault.
 
     dig TXT <selector>._domainkey.<domain> +short
 

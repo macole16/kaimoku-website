@@ -52,6 +52,12 @@ check("bare wrapped scalar is identical to its explicit .value form: signup_url"
   assert.equal(core.resolveFact(facts, "signup_url"), core.resolveFact(facts, "signup_url.value"));
   assert.equal(core.resolveFact(facts, "signup_url"), "https://mail.kuju.email/signup");
 });
+check("wizard_labels.use_kuju_dns resolves to the verbatim UI copy", () => {
+  assert.equal(core.resolveFact(facts, "wizard_labels.use_kuju_dns"), "Use Kuju DNS");
+});
+check("wizard_labels bare throws (non-scalar: a map of labels, not one string)", () => {
+  assert.throws(() => core.resolveFact(facts, "wizard_labels"), /non-scalar/);
+});
 check("negative control: nameservers bare STILL throws (its value is an ARRAY; unwrap must not comma-join it)", () => {
   assert.throws(() => core.resolveFact(facts, "nameservers"), /non-scalar/);
 });
@@ -290,7 +296,7 @@ check("dns-delegation renders with facts resolved and run-time placeholders inta
   assert.ok(!out.markdown.includes("{{"), "unresolved placeholder");
   assert.equal(out.markdown.match(core.SINGLE_BRACE_RE), null, "single-brace token leaked");
   assert.ok(out.markdown.includes("ns-1234.awsdns-56.org"), "worked AWS example missing");
-  assert.deepEqual(out.used, ["customer_domain_records", "mx", "nameservers", "registrars"]);
+  assert.deepEqual(out.used, ["customer_domain_records", "mx", "nameservers", "registrars", "wizard_labels"]);
   assert.deepEqual([...rb.facts_used].sort(), out.used);
   assert.equal(core.scanDenylist(rb.body).length, 0, JSON.stringify(core.scanDenylist(rb.body)));
 });
