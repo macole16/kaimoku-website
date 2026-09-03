@@ -48,20 +48,28 @@ NODE=(mise exec -- node)
 arm "1 core selftest" pass "corpus-selftest:" -- "${NODE[@]}" "$ROOT/scripts/corpus-selftest.mjs"
 
 # ---------------------------------------------------------------------------
-# Tier 1 mutation arms (M0-M8) for scripts/check-corpus.mjs. Each M1-M8 arm
+# Tier 1 mutation arms (M0-M14) for scripts/check-corpus.mjs. Each M1-M14 arm
 # copies the corpus to a scratch dir, mutates the copy in exactly ONE way,
 # and asserts the checker fails WITH THE SENTINEL SPECIFIC TO THAT MUTATION
 # -- never just a non-zero exit, since a checker that crashed for an
 # unrelated reason (a typo in the checker itself, a missing module) would
 # also exit non-zero and could satisfy a naive "expects failure" arm.
 #
-# M0 is a deliberate addition beyond M1-M8: an UNMUTATED-BASELINE arm that
+# M0 is a deliberate addition beyond M1-M14: an UNMUTATED-BASELINE arm that
 # runs the checker against a pristine copy of the real corpus and asserts
-# exit 0 plus the success sentinel "corpus OK". Without it, every M1-M8
+# exit 0 plus the success sentinel "corpus OK". Without it, every M1-M14
 # "PASS" could be passing for the wrong reason -- e.g. a checker that always
-# exits 1 regardless of input would pass all eight failure arms and never be
-# caught, because none of them alone proves the checker can ALSO recognize
-# a clean corpus. M0 is the negative control that gives M1-M8 meaning.
+# exits 1 regardless of input would pass all fourteen failure arms and never
+# be caught, because none of them alone proves the checker can ALSO recognize
+# a clean corpus. M0 is the negative control that gives M1-M14 meaning.
+#
+# KEEP THE COUNTS CURRENT when you add an arm. This block said "M0-M8" and
+# "all eight failure arms" while fourteen were running -- caught by the
+# launch-1.26 simplify pass, which noted that every OTHER count in that branch
+# (check-facts-live's "seven mutants", EXPECTED_MUTANT_COUNT, the L1 sentinel)
+# had been updated in the same commit and only this block was missed. A comment
+# that undercounts its own family by six is the exact drift this file exists
+# to prevent, one level up.
 # ---------------------------------------------------------------------------
 CHECK="$ROOT/scripts/check-corpus.mjs"
 SCRATCH="$(mktemp -d "${TMPDIR:-/tmp}/verify-corpus.XXXXXX")"

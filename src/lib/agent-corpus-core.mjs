@@ -74,8 +74,19 @@ export function renderRegistrarTable(facts) {
   return lines.join("\n");
 }
 
+/**
+ * How an MX priority+host renders as a comparable string. ONE definition, used
+ * for BOTH sides of the live comparison: mxExpectation() builds the expected
+ * value from the fact, and check-facts-live.mjs's checkMx() formats the OBSERVED
+ * DNS answer with this same function. They must agree for the `.includes()`
+ * comparison to mean anything, and nothing connects them by name — the fact
+ * calls the host `target`, DNS calls it `exchange` — so a grep would never find
+ * the pair. Sharing the formatter is what keeps them from drifting.
+ */
+export function formatMx(priority, host) { return `${priority} ${host}.`; }
+
 /** Live MX expectation, derived from the SAME leaves the runbooks render. */
-export function mxExpectation(mx) { return `${mx.priority} ${mx.target}.`; }
+export function mxExpectation(mx) { return formatMx(mx.priority, mx.target); }
 
 /** Derived views: paths that are not YAML leaves but are rendered from them. */
 const DERIVED = {

@@ -24,7 +24,7 @@ import path from "node:path";
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import yaml from "yaml";
-import { loadFacts, registrarEntries, mxExpectation } from "../src/lib/agent-corpus-core.mjs";
+import { loadFacts, registrarEntries, mxExpectation, formatMx } from "../src/lib/agent-corpus-core.mjs";
 
 const SELF = fileURLToPath(import.meta.url);
 const ROOT = path.resolve(path.dirname(SELF), "..");
@@ -66,7 +66,12 @@ async function checkDnsNonEmpty(host, record) {
 async function checkMx(name, expectContains) {
   try {
     const mx = await dns.resolveMx(name);
-    const rendered = mx.map((r) => `${r.priority} ${r.exchange}.`);
+    // formatMx, not a local template literal: this is the OBSERVED side of the
+    // comparison and mxExpectation() builds the EXPECTED side, so both must
+    // render identically or every MX check fails for a formatting reason
+    // rather than a DNS one. DNS calls the host `exchange`; the fact calls it
+    // `target`, which is why no grep would ever pair these two call sites.
+    const rendered = mx.map((r) => formatMx(r.priority, r.exchange));
     const ok = rendered.some((r) => r.includes(expectContains));
     return { status: ok ? "PASS" : "FAIL", detail: `MX ${name} -> ${rendered.join(" | ")} (want "${expectContains}")` };
   } catch (err) {
