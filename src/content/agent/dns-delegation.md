@@ -398,9 +398,11 @@ itself.
 **Where Kuju publishes the records:** wait 15 minutes and re-check — Kuju
 creates them when the domain is provisioned. If it is still missing,
 **HUMAN ACTION** - ask the person to open the domain's DNS page in the Kuju
-admin and press "re-check DNS", then re-run. If the record is still absent, that
-button only re-reads what is published — ask them to press **Auto-Configure Mail
-Records** on the same page, which republishes the records themselves.
+admin and press "{{fact:wizard_labels.recheck_button}}", then re-run. If the
+record is still absent, that button only re-reads what is published — ask them
+to find the **{{fact:wizard_labels.auto_configure_heading}}** section on the
+same page and press its **{{fact:wizard_labels.auto_configure_button}}** button,
+which republishes the records themselves.
 
 **Where the person publishes them (Step 3b):** rule out a cached answer first. A
 lookup made before the record existed can be remembered by the resolver for an
