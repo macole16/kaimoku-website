@@ -12,6 +12,9 @@
 //   single-brace token           no {x} survives into a rendered runbook
 //   broken link                  every root-relative link is a real route
 //   unknown flag                 a misspelled --flag is fatal, never a silent fallback to the real corpus
+//   preconditions denylist       no denylisted command in a front-matter preconditions: list
+//   preconditions single-brace   no {x} survives in the preconditions: block (served verbatim)
+//   preconditions unresolved fact no {{fact:...}} token in preconditions: (never interpolated)
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";

@@ -326,7 +326,9 @@ export function renderPreconditions(preconditions) {
     "",
     ...preconditions.map((p) => `- ${p}`),
     "",
-    "If one of these is not true, stop and resolve it first.",
+    "If one of these is not true, say so before you continue — a step below may " +
+      "already tell you what to do about it, so keep reading before you stop. Only " +
+      "abort here if nothing further down handles it.",
   ].join("\n");
 }
 

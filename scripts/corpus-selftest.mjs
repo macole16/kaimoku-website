@@ -251,7 +251,7 @@ check("renderRunbook injects the preconditions block after the H1 when the list 
   const h1 = md.indexOf("# P"), blk = md.indexOf("**Before you start.** This runbook assumes:"), intro = md.indexOf("Intro.");
   assert.ok(h1 !== -1 && blk > h1 && intro > blk, md);
   assert.ok(md.includes("- alpha is true\n- beta is true"), md);
-  assert.ok(md.includes("If one of these is not true, stop and resolve it first."), md);
+  assert.ok(md.includes("If one of these is not true, say so before you continue"), md);
 });
 check("renderRunbook skips a fenced '# ' line and inserts after the REAL H1 (D7 fix round 1, Finding 1)", () => {
   const rb = {
@@ -262,7 +262,7 @@ check("renderRunbook skips a fenced '# ' line and inserts after the REAL H1 (D7 
   const md = core.renderRunbook(rb, facts, "https://site.test").markdown;
   assert.ok(
     md.includes(
-      "```\n# Fake heading inside a fence\n```\n\n# R\n\n**Before you start.** This runbook assumes:\n\n- z is true\n\nIf one of these is not true, stop and resolve it first.\n\nIntro.",
+      "```\n# Fake heading inside a fence\n```\n\n# R\n\n**Before you start.** This runbook assumes:\n\n- z is true\n\nIf one of these is not true, say so before you continue — a step below may already tell you what to do about it, so keep reading before you stop. Only abort here if nothing further down handles it.\n\nIntro.",
     ),
     md,
   );

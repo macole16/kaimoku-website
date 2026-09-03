@@ -4,7 +4,7 @@ title: Set up your domain's DNS for Kuju
 order: 3
 preconditions:
   - the customer owns a domain and can log in to wherever it is registered
-  - the customer has an active Kuju account (see signup-trial)
+  - the customer has an active Kuju account (see signup-trial) — redeem the invite first; do not start this runbook without one
   - you can run dig (or nslookup)
 outcome: "Mail for the domain reaches Kuju — by delegating the nameservers, or by adding Kuju's records at the existing DNS host — and MX, SPF, DKIM and DMARC verify"
 facts_used: [nameservers, mx, customer_domain_records, registrars, wizard_labels]
@@ -100,7 +100,8 @@ subdomain and using its "from Step 1b" row.
 Take the FIRST line of the NS answers from Step 1. Lowercase it and strip the
 trailing dot. Then test whether that hostname CONTAINS each key in the table
 below - a substring test, not a suffix test. Two of the biggest providers put
-their key in the MIDDLE of the name:
+their key in the MIDDLE of the name - illustrative examples, not something you
+observed:
 
     ns-1234.awsdns-56.org      contains "awsdns"     -> AWS Route 53
     ns1-08.azure-dns.com       contains "azure-dns"  -> Microsoft Azure

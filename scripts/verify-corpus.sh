@@ -34,7 +34,7 @@ arm() {
     echo "FAIL  ${name}: expected exit 0, got ${rc}"; evidence "$out"; FAILS=$((FAILS + 1)); return
   fi
   if [[ "$expect" == "fail" && "$rc" -eq 0 ]]; then
-    echo "FAIL  ${name}: expected non-zero exit, got 0"; FAILS=$((FAILS + 1)); return
+    echo "FAIL  ${name}: expected non-zero exit, got 0"; evidence "$out"; FAILS=$((FAILS + 1)); return
   fi
   if [[ "$out" != *"$must"* ]]; then
     echo "FAIL  ${name}: expected output to contain: ${must}"; evidence "$out"; FAILS=$((FAILS + 1)); return
@@ -116,8 +116,15 @@ arm "M11 malformed facts YAML names its file" fail "facts.yaml is not valid YAML
 d="$(fresh_copy)"; sed -i '' 's/^  - you can run dig (or nslookup)$/  - run `sudo dig` first/' "$d/agent/dns-delegation.md"
 arm "M12 denylisted command inside a precondition fails" fail "preconditions: denylisted command (privileged or destructive tool)" -- check_on "$d"
 
-d="$(fresh_copy)"; sed -i '' 's/^  - the customer has an active Kuju account (see signup-trial)$/  - the customer has an active Kuju account (see signup-trial) {{fact:nameservers.0}}/' "$d/agent/dns-delegation.md"
+d="$(fresh_copy)"; sed -i '' 's/^  - the customer has an active Kuju account (see signup-trial) — redeem the invite first; do not start this runbook without one$/  - the customer has an active Kuju account (see signup-trial) — redeem the invite first; do not start this runbook without one {{fact:nameservers.0}}/' "$d/agent/dns-delegation.md"
 arm "M13 unresolved {{fact:...}} token inside a precondition fails" fail "preconditions: unresolved {{fact:...}} token" -- check_on "$d"
+
+# M14 (launch-1.26 fix wave): b89ef20 added THREE precondition scans -- denylist
+# (M12), single-brace (this one) and unresolved {{fact:...}} (M13) -- but only
+# two ever got an arm. This closes the gap with its own RED observation before
+# the fix: see the final fix report for the pre-fix transcript.
+d="$(fresh_copy)"; sed -i '' 's/^  - the customer owns a domain and can log in to wherever it is registered$/  - the customer owns a domain and can log in to wherever it is registered {domain}/' "$d/agent/dns-delegation.md"
+arm "M14 single-brace token inside a precondition fails" fail "preconditions: single-brace token" -- check_on "$d"
 
 # ---------------------------------------------------------------------------
 # F-arms (scripts/check-facts-live.mjs): each of these is a fact-shape check,
