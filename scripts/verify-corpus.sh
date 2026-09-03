@@ -48,20 +48,20 @@ NODE=(mise exec -- node)
 arm "1 core selftest" pass "corpus-selftest:" -- "${NODE[@]}" "$ROOT/scripts/corpus-selftest.mjs"
 
 # ---------------------------------------------------------------------------
-# Tier 1 mutation arms (M0-M14) for scripts/check-corpus.mjs. Each M1-M14 arm
+# Tier 1 mutation arms (M0-M16) for scripts/check-corpus.mjs. Each M1-M16 arm
 # copies the corpus to a scratch dir, mutates the copy in exactly ONE way,
 # and asserts the checker fails WITH THE SENTINEL SPECIFIC TO THAT MUTATION
 # -- never just a non-zero exit, since a checker that crashed for an
 # unrelated reason (a typo in the checker itself, a missing module) would
 # also exit non-zero and could satisfy a naive "expects failure" arm.
 #
-# M0 is a deliberate addition beyond M1-M14: an UNMUTATED-BASELINE arm that
+# M0 is a deliberate addition beyond M1-M16: an UNMUTATED-BASELINE arm that
 # runs the checker against a pristine copy of the real corpus and asserts
-# exit 0 plus the success sentinel "corpus OK". Without it, every M1-M14
+# exit 0 plus the success sentinel "corpus OK". Without it, every M1-M16
 # "PASS" could be passing for the wrong reason -- e.g. a checker that always
-# exits 1 regardless of input would pass all fourteen failure arms and never
+# exits 1 regardless of input would pass all sixteen failure arms and never
 # be caught, because none of them alone proves the checker can ALSO recognize
-# a clean corpus. M0 is the negative control that gives M1-M14 meaning.
+# a clean corpus. M0 is the negative control that gives M1-M16 meaning.
 #
 # KEEP THE COUNTS CURRENT when you add an arm. This block said "M0-M8" and
 # "all eight failure arms" while fourteen were running -- caught by the
@@ -133,6 +133,32 @@ arm "M13 unresolved {{fact:...}} token inside a precondition fails" fail "precon
 # the fix: see the final fix report for the pre-fix transcript.
 d="$(fresh_copy)"; sed -i '' 's/^  - the customer owns a domain and can log in to wherever it is registered$/  - the customer owns a domain and can log in to wherever it is registered {domain}/' "$d/agent/dns-delegation.md"
 arm "M14 single-brace token inside a precondition fails" fail "preconditions: single-brace token" -- check_on "$d"
+
+# M15 (launch-1.32): the axis that has failed THREE times -- a kuju-mail UI
+# label sitting un-facted in a runbook. launch-1.25 missed one, launch-1.26
+# miscounted 9 against a true 12 (three were LINE-WRAPPED in the markdown, which
+# is why the checker collapses newlines before matching -- a per-line regex is
+# exactly what produced that miscount), launch-1.27 found two more. The sibling
+# axis -- a fact VALUE drifting from its template -- has occurred ZERO times and
+# deliberately gets no guard.
+#
+# The mutation inlines ONE of dns-delegation's fifteen wizard_labels tokens.
+# That is surgical on purpose: the file keeps fourteen other references, so
+# facts_used stays honest and this arm cannot pass on the pre-existing
+# 'facts_used lists "wizard_labels" but the body never references it' problem.
+# A RED arm that goes red for a neighbouring reason is indistinguishable from a
+# working one (feedback: a red test can be red for the wrong reason).
+d="$(fresh_copy)"; sed -i '' 's/{{fact:wizard_labels.auto_configure_heading}}/Auto-Configure Mail Records/' "$d/agent/dns-delegation.md"
+arm "M15 inlined UI label fails (un-facted verbatim copy)" fail 'inlines UI copy verbatim: "Auto-Configure Mail Records"' -- check_on "$d"
+
+# M16 (launch-1.32): the SAME leak, but line-wrapped -- which is the form that
+# actually got missed. M15 alone would pass against a checker that scanned
+# line-by-line, so it does not test the one property this gate is built around;
+# only M16 distinguishes a collapsing checker from a per-line one. Without it the
+# newline collapse is an untested claim sitting in a comment.
+# perl, not sed: BSD sed cannot put a literal newline in a replacement.
+d="$(fresh_copy)"; perl -0pi -e 's/\Q{{fact:wizard_labels.auto_configure_heading}}\E/Auto-Configure\nMail Records/' "$d/agent/dns-delegation.md"
+arm "M16 line-wrapped inlined UI label fails (newline collapse is load-bearing)" fail 'inlines UI copy verbatim: "Auto-Configure Mail Records"' -- check_on "$d"
 
 # ---------------------------------------------------------------------------
 # F-arms (scripts/check-facts-live.mjs): each of these is a fact-shape check,
