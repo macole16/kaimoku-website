@@ -1,5 +1,5 @@
 // Tier 2: compare src/data/mail-facts.yaml with live DNS and HTTPS. REPORTS,
-// never blocks. Tier 3: with --self-test, five mutants run FIRST as separate
+// never blocks. Tier 3: with --self-test, seven mutants run FIRST as separate
 // processes, each scoped to the ONE fact it mutates via --only (so the mutant
 // sweep does not multiply the registrar/DNS network footprint); if any exits 0
 // the checker can no longer fail and the real result would be meaningless, so
@@ -24,7 +24,7 @@ import path from "node:path";
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import yaml from "yaml";
-import { loadFacts, registrarEntries } from "../src/lib/agent-corpus-core.mjs";
+import { loadFacts, registrarEntries, mxExpectation, formatMx } from "../src/lib/agent-corpus-core.mjs";
 
 const SELF = fileURLToPath(import.meta.url);
 const ROOT = path.resolve(path.dirname(SELF), "..");
@@ -50,6 +50,12 @@ const HTTP_TIMEOUT_MS = 30_000;
 async function checkDnsNonEmpty(host, record) {
   try {
     const answers = record === "A" ? await dns.resolve4(host) : await dns.resolve(host, record);
+    // Defensive only. Measured 2026-09-02: five no-data lookups across three
+    // names, spanning all three record types -- MX and TXT on
+    // kaimoku-website.vercel.app, A on _dmarc.demo.kuju.email, and TXT and MX
+    // on ns1.kuju.email.
+    // node ALWAYS rejects with ENODATA and never resolves to []. Deliberately NOT
+    // mutant-covered — no facts mutation can reach it through the public DNS path.
     return answers.length ? { status: "PASS", detail: `${record} ${host} -> ${answers.join(", ")}` }
                           : { status: "FAIL", detail: `${record} ${host} -> empty` };
   } catch (err) {
@@ -60,7 +66,12 @@ async function checkDnsNonEmpty(host, record) {
 async function checkMx(name, expectContains) {
   try {
     const mx = await dns.resolveMx(name);
-    const rendered = mx.map((r) => `${r.priority} ${r.exchange}.`);
+    // formatMx, not a local template literal: this is the OBSERVED side of the
+    // comparison and mxExpectation() builds the EXPECTED side, so both must
+    // render identically or every MX check fails for a formatting reason
+    // rather than a DNS one. DNS calls the host `exchange`; the fact calls it
+    // `target`, which is why no grep would ever pair these two call sites.
+    const rendered = mx.map((r) => formatMx(r.priority, r.exchange));
     const ok = rendered.some((r) => r.includes(expectContains));
     return { status: ok ? "PASS" : "FAIL", detail: `MX ${name} -> ${rendered.join(" | ")} (want "${expectContains}")` };
   } catch (err) {
@@ -147,7 +158,15 @@ async function runChecks(facts, only) {
       }
       continue;
     }
-    if (!verify) { rows.push({ fact: key, status: "SKIP", detail: "no verify block (product config the site cannot observe)" }); continue; }
+    if (verify && fact?.unverifiable === true) {
+      rows.push({ fact: key, status: "FAIL", detail: "contradictory: has a verify block AND unverifiable: true" });
+      continue;
+    }
+    if (!verify) {
+      if (fact?.unverifiable === true) { rows.push({ fact: key, status: "SKIP", detail: "unverifiable: true — product config the site cannot observe" }); continue; }
+      rows.push({ fact: key, status: "FAIL", detail: "no verify block and no unverifiable: true — a mistyped verify: key would otherwise silently downgrade this fact to SKIP" });
+      continue;
+    }
 
     if (verify.type === "dns" && key === "nameservers") {
       // Deliberately A-record-of-each-target, NOT "NS kuju.email contains ns1":
@@ -155,7 +174,11 @@ async function runChecks(facts, only) {
       // delegate TO. The NS form would be a permanent false failure.
       for (const host of fact.value) push(`nameservers.${host}`, await checkDnsNonEmpty(host, verify.record), pending);
     } else if (verify.type === "dns" && verify.record === "MX") {
-      push(key, await checkMx(verify.name, verify.expect_contains), pending);
+      if (verify.expect_contains !== undefined) {
+        rows.push({ fact: key, status: "FAIL", detail: "expect_contains is derived from target/priority now — remove it from mail-facts.yaml" });
+      } else {
+        push(key, await checkMx(verify.name, mxExpectation(fact)), pending);
+      }
     } else if (verify.type === "dns" && key === "customer_domain_records") {
       push(`${key}.spf`, await checkTxtEquals(verify.name, fact.spf), pending);
       push(`${key}.dmarc`, await checkTxtEquals(`_dmarc.${verify.name}`, fact.dmarc.replaceAll("{domain}", verify.name)), pending);
@@ -187,7 +210,7 @@ function render(rows) {
 
 // `only`, when given, is passed through as --only so the child process scopes
 // its network calls to the single fact this mutant touches instead of
-// re-running the full ~18-row check (5 mutants x a full run would multiply
+// re-running the full ~18-row check (7 mutants x a full run would multiply
 // the ~30 registrar GETs and DNS lookups a bare full run already makes; see
 // selfTest() below for the measured before/after). `mustContain` is one
 // string or an array of strings that must ALL appear (ANDed) -- splitting a
@@ -219,7 +242,7 @@ function runMutant(name, mutate, mustContain, only) {
 // rather than silently reporting "SELF-TEST OK: 0/0 mutants failed as
 // required" and letting a checker that has stopped checking pass forever.
 // Bump this ONLY as a deliberate edit alongside adding/removing a mutant.
-const EXPECTED_MUTANT_COUNT = 5;
+const EXPECTED_MUTANT_COUNT = 7;
 
 function selfTest() {
   const results = [
@@ -230,10 +253,13 @@ function selfTest() {
     // Exercises checkMx's `ok` comparison (the `rendered.some((r) =>
     // r.includes(expectContains))` line) -- previously the only way to
     // defeat it (e.g. `const ok = true;`) was to be invisible to self-test.
+    // Corrupts the derived mx target (task 6): mx.verify.expect_contains is
+    // no longer read by anything, so mutating it would be a no-op mutant --
+    // this mutates the leaf mxExpectation() actually derives from instead.
     runMutant(
-      "mx-expect-mismatch",
-      (f) => { f.mx.verify.expect_contains = "MUTANT-MX-TOKEN-not-a-real-target."; },
-      ["FAIL  mx  MX kuju.email -> ", '(want "MUTANT-MX-TOKEN-not-a-real-target.")'],
+      "mx-target-mismatch",
+      (f) => { f.mx.target = "MUTANT-MX-TOKEN-not-a-real-target"; },
+      ["FAIL  mx  MX kuju.email -> ", '(want "10 MUTANT-MX-TOKEN-not-a-real-target.")'],
       "mx",
     ),
     // Exercises checkTxtEquals's `ok = txt.includes(expected)` comparison --
@@ -263,6 +289,23 @@ function selfTest() {
       (f) => { f.registrars["google.com"].dns_url = "https://kaimoku-website.vercel.app/zz-mutant-probe-does-not-exist"; },
       "FAIL  registrars.google.com  https://kaimoku-website.vercel.app/zz-mutant-probe-does-not-exist -> HTTP 404 (reject 404/410)",
       "registrars.google.com",
+    ),
+    // Exercises checkHttp's neither-expect_status-nor-reject_status fallback (line 105).
+    // Re-pointed at OUR site first, same reasoning as reject-status-self-404: a
+    // third-party outage must not be able to flip this mutant.
+    runMutant(
+      "http-verify-neither-status",
+      (f) => { delete f.registrars.verify.reject_status; f.registrars["google.com"].dns_url = "https://kaimoku-website.vercel.app/"; },
+      "FAIL  registrars.google.com  https://kaimoku-website.vercel.app/: verify block has neither expect_status nor reject_status",
+      "registrars.google.com",
+    ),
+    // Exercises the generic unsupported-verify-block fallback (line 165). Reaches no
+    // network: no check function runs for an unknown type.
+    runMutant(
+      "unsupported-verify-type",
+      (f) => { f.mx.verify = { type: "smtp-banner" }; },
+      'FAIL  mx  unsupported verify block {"type":"smtp-banner"}',
+      "mx",
     ),
   ];
   if (results.length !== EXPECTED_MUTANT_COUNT) {

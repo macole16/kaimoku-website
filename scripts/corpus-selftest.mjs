@@ -30,6 +30,10 @@ check("nameservers.1 resolves", () => {
 check("mx.priority is stringified", () => {
   assert.equal(core.resolveFact(facts, "mx.priority"), "10");
 });
+check("mxExpectation derives the live expectation from the leaves the corpus renders", () => {
+  assert.equal(core.mxExpectation(facts.mx), "10 mail.kuju.email.");
+  assert.equal(core.mxExpectation({ target: "x.test", priority: 20 }), "20 x.test.");
+});
 check("dmarc template is emitted with the RUN-time placeholder", () => {
   const v = core.resolveFact(facts, "customer_domain_records.dmarc");
   assert.ok(v.includes("<domain>"), v);
@@ -47,6 +51,12 @@ check("wrapped scalar resolves BARE (terminal position), not only via .value: te
 check("bare wrapped scalar is identical to its explicit .value form: signup_url", () => {
   assert.equal(core.resolveFact(facts, "signup_url"), core.resolveFact(facts, "signup_url.value"));
   assert.equal(core.resolveFact(facts, "signup_url"), "https://mail.kuju.email/signup");
+});
+check("wizard_labels.use_kuju_dns resolves to the verbatim UI copy", () => {
+  assert.equal(core.resolveFact(facts, "wizard_labels.use_kuju_dns"), "Use Kuju DNS");
+});
+check("wizard_labels bare throws (non-scalar: a map of labels, not one string)", () => {
+  assert.throws(() => core.resolveFact(facts, "wizard_labels"), /non-scalar/);
 });
 check("negative control: nameservers bare STILL throws (its value is an ARRAY; unwrap must not comma-join it)", () => {
   assert.throws(() => core.resolveFact(facts, "nameservers"), /non-scalar/);
@@ -234,6 +244,60 @@ function withTempDir(prefix, fn) {
     fs.rmSync(dir, { recursive: true, force: true });
   }
 }
+
+check("renderRunbook injects the preconditions block after the H1 when the list is non-empty", () => {
+  const rb = { slug: "p", title: "P", order: 1, preconditions: ["alpha is true", "beta is true"], outcome: "o", facts_used: [], body: "\n# P\n\nIntro.\n", filename: "p.md" };
+  const md = core.renderRunbook(rb, facts, "https://site.test").markdown;
+  const h1 = md.indexOf("# P"), blk = md.indexOf("**Before you start.** This runbook assumes:"), intro = md.indexOf("Intro.");
+  assert.ok(h1 !== -1 && blk > h1 && intro > blk, md);
+  assert.ok(md.includes("- alpha is true\n- beta is true"), md);
+  assert.ok(md.includes("If one of these is not true, say so before you continue"), md);
+});
+check("renderRunbook skips a fenced '# ' line and inserts after the REAL H1 (D7 fix round 1, Finding 1)", () => {
+  const rb = {
+    slug: "r", title: "R", order: 1, preconditions: ["z is true"], outcome: "o", facts_used: [],
+    body: "```\n# Fake heading inside a fence\n```\n\n# R\n\nIntro.\n",
+    filename: "r.md",
+  };
+  const md = core.renderRunbook(rb, facts, "https://site.test").markdown;
+  assert.ok(
+    md.includes(
+      "```\n# Fake heading inside a fence\n```\n\n# R\n\n**Before you start.** This runbook assumes:\n\n- z is true\n\nIf one of these is not true, say so before you continue — a step below may already tell you what to do about it, so keep reading before you stop. Only abort here if nothing further down handles it.\n\nIntro.",
+    ),
+    md,
+  );
+});
+check("renderRunbook prepends the block when the body has no H1", () => {
+  const rb = { slug: "q", title: "Q", order: 1, preconditions: ["x"], outcome: "o", facts_used: [], body: "No heading.\n", filename: "q.md" };
+  assert.ok(core.renderRunbook(rb, facts, "https://site.test").markdown.startsWith("**Before you start.**"));
+});
+check("renderRunbook emits NO block for an empty list — start-here (note: it has its own '## Before you start' H2, so the BOLD sentinel is what must be absent)", () => {
+  const sh = core.loadRunbooks(path.join(ROOT, "src/content/agent")).find((r) => r.slug === "start-here");
+  assert.deepEqual(sh.preconditions, []);
+  assert.ok(!core.renderRunbook(sh, facts, "https://site.test").markdown.includes("**Before you start.** This runbook assumes:"));
+});
+check("dns-delegation's SERVED body states the signup-trial gate it declares", () => {
+  const rb = core.loadRunbooks(path.join(ROOT, "src/content/agent")).find((r) => r.slug === "dns-delegation");
+  assert.ok(core.renderRunbook(rb, facts, "https://site.test").markdown.includes("- the customer has an active Kuju account (see signup-trial)"));
+});
+check("renderLlmsTxt appends Assumes: only for a runbook with preconditions", () => {
+  const x = { slug: "x", title: "X", order: 1, preconditions: [], outcome: "done", facts_used: [], body: "# X\n", filename: "x.md" };
+  const y = { slug: "y", title: "Y", order: 2, preconditions: ["a", "b"], outcome: "done", facts_used: [], body: "# Y\n", filename: "y.md" };
+  const txt = core.renderLlmsTxt(core.buildIndex([x, y], facts, "https://site.test", []));
+  assert.ok(txt.includes("- [X](https://site.test/kuju-email/agent/x.md): done\n"), txt);
+  assert.ok(txt.includes("- [Y](https://site.test/kuju-email/agent/y.md): done — Assumes: a; b.\n"), txt);
+});
+
+check("parseFrontMatter names the file when the front-matter YAML is malformed", () => {
+  assert.throws(() => core.parseFrontMatter("---\nslug: a: b\n---\n", "z.md"), /z\.md: front-matter is not valid YAML: Nested mappings/);
+});
+check("loadFacts names the file when the facts YAML is malformed", () => {
+  withTempDir("corpus-selftest-badfacts-", (dir) => {
+    const f = path.join(dir, "facts.yaml");
+    fs.writeFileSync(f, "zz: a: b\n");
+    assert.throws(() => core.loadFacts(f), /facts\.yaml is not valid YAML: Nested mappings/);
+  });
+});
 check("loadRunbooks orders by the order: field, not by filename/directory order", () => {
   withTempDir("corpus-selftest-order-", (dir) => {
     // Alphabetical filename order is a-file, b-file, c-file; declared order:
@@ -271,11 +335,12 @@ check("dns-delegation renders with facts resolved and run-time placeholders inta
   const out = core.renderRunbook(rb, facts, "https://site.test");
   assert.ok(out.markdown.includes("ns1.kuju.email") && out.markdown.includes("ns2.kuju.email"));
   assert.ok(out.markdown.includes("10 mail.kuju.email."));
+  assert.ok(out.markdown.includes(core.mxExpectation(facts.mx)), "rendered MX and live expectation must be the same string");
   assert.ok(out.markdown.includes("<domain>"));
   assert.ok(!out.markdown.includes("{{"), "unresolved placeholder");
   assert.equal(out.markdown.match(core.SINGLE_BRACE_RE), null, "single-brace token leaked");
   assert.ok(out.markdown.includes("ns-1234.awsdns-56.org"), "worked AWS example missing");
-  assert.deepEqual(out.used, ["customer_domain_records", "mx", "nameservers", "registrars"]);
+  assert.deepEqual(out.used, ["customer_domain_records", "mx", "nameservers", "registrars", "wizard_labels"]);
   assert.deepEqual([...rb.facts_used].sort(), out.used);
   assert.equal(core.scanDenylist(rb.body).length, 0, JSON.stringify(core.scanDenylist(rb.body)));
 });

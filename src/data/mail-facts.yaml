@@ -12,8 +12,11 @@
 #                          token that survives into a rendered runbook.
 #
 # `verify:` blocks are read by scripts/check-facts-live.mjs (Tier 2). A fact
-# without one is unverifiable by this site (spec section 2, "our product config")
-# and is reported as SKIP, never silently omitted.
+# with neither a `verify:` block nor `unverifiable: true` is now a FAIL, not a
+# silent SKIP -- so a mistyped `verify:` key can no longer silently downgrade a
+# fact to SKIP. Use `unverifiable: true` to declare, deliberately, that this is
+# product config the website cannot observe (spec section 2, "our product
+# config"); that fact is then reported as SKIP by name.
 # `pending: true` = known-divergent on purpose; the checker fails if it PASSES.
 
 nameservers:
@@ -29,7 +32,7 @@ nameservers:
 mx:
   target: mail.kuju.email
   priority: 10
-  verify: {type: dns, name: kuju.email, record: MX, expect_contains: "10 mail.kuju.email."}
+  verify: {type: dns, name: kuju.email, record: MX}
 
 customer_domain_records:
   spf: "v=spf1 mx ~all"
@@ -45,7 +48,17 @@ signup_url:
 
 test_migration_cap_gb:
   value: 2         # beta-1.10: per-account cap on a TEST migration; a PAUSE, not a failure
-  # No verify block: this is product config the website cannot observe.
+  unverifiable: true   # product config the website cannot observe; declared, not defaulted
+
+wizard_labels:
+  # Verbatim UI copy from kuju-mail's domain wizard (_wizard.html:49,56) and the
+  # domain DNS page banner (_dns.html). The runbooks quote these so a copy change
+  # is one edit here, not a hunt across two files (launch-1.25 missed one on the
+  # first pass). Product config the site cannot observe: no verify block.
+  use_kuju_dns: "Use Kuju DNS"
+  keep_current_dns: "Keep your current DNS"
+  nameservers_not_pointed: "Nameservers Not Pointed at Kuju"
+  unverifiable: true
 
 registrars:
   # Ported verbatim from kuju-mail/internal/api/registrar.go (11 keys, 10 with a

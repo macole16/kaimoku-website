@@ -18,7 +18,7 @@ export const FACT_RE = /\{\{fact:([^{}]*)\}\}/g;
 export const SINGLE_BRACE_RE = /(?<!\{)\{[^{}\s]+\}(?!\})/g;
 
 /** Keys inside a fact object that are metadata, not data. */
-const RESERVED_KEYS = new Set(["verify", "pending"]);
+const RESERVED_KEYS = new Set(["verify", "pending", "unverifiable"]);
 
 /**
  * @param {string} factsPath absolute path to mail-facts.yaml
@@ -26,7 +26,12 @@ const RESERVED_KEYS = new Set(["verify", "pending"]);
  */
 export function loadFacts(factsPath) {
   const raw = fs.readFileSync(factsPath, "utf-8");
-  const parsed = yaml.parse(raw);
+  let parsed;
+  try {
+    parsed = yaml.parse(raw);
+  } catch (err) {
+    throw new Error(`facts file ${factsPath} is not valid YAML: ${err.message}`);
+  }
   if (!parsed || typeof parsed !== "object") {
     throw new Error(`facts file ${factsPath} did not parse to a mapping`);
   }
@@ -68,6 +73,20 @@ export function renderRegistrarTable(facts) {
   }
   return lines.join("\n");
 }
+
+/**
+ * How an MX priority+host renders as a comparable string. ONE definition, used
+ * for BOTH sides of the live comparison: mxExpectation() builds the expected
+ * value from the fact, and check-facts-live.mjs's checkMx() formats the OBSERVED
+ * DNS answer with this same function. They must agree for the `.includes()`
+ * comparison to mean anything, and nothing connects them by name — the fact
+ * calls the host `target`, DNS calls it `exchange` — so a grep would never find
+ * the pair. Sharing the formatter is what keeps them from drifting.
+ */
+export function formatMx(priority, host) { return `${priority} ${host}.`; }
+
+/** Live MX expectation, derived from the SAME leaves the runbooks render. */
+export function mxExpectation(mx) { return formatMx(mx.priority, mx.target); }
 
 /** Derived views: paths that are not YAML leaves but are rendered from them. */
 const DERIVED = {
@@ -217,7 +236,12 @@ export const DENYLIST = [
 export function parseFrontMatter(raw, filename) {
   const m = raw.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
   if (!m) throw new Error(`${filename}: missing front-matter (expected a leading --- block)`);
-  const meta = yaml.parse(m[1]) ?? {};
+  let meta;
+  try {
+    meta = yaml.parse(m[1]) ?? {};
+  } catch (err) {
+    throw new Error(`${filename}: front-matter is not valid YAML: ${err.message}`);
+  }
   const missing = REQUIRED_META.filter((k) => !Object.hasOwn(meta, k));
   if (missing.length) throw new Error(`${filename}: front-matter missing keys: ${missing.join(", ")}`);
   if (!Array.isArray(meta.facts_used) || !Array.isArray(meta.preconditions)) {
@@ -305,6 +329,49 @@ export function loadRunbooks(contentDir) {
   return runbooks.sort((a, b) => a.order - b.order);
 }
 
+/** The "Before you start" block. Empty list → empty string (start-here). */
+export function renderPreconditions(preconditions) {
+  if (!preconditions?.length) return "";
+  return [
+    "**Before you start.** This runbook assumes:",
+    "",
+    ...preconditions.map((p) => `- ${p}`),
+    "",
+    "If one of these is not true, say so before you continue — a step below may " +
+      "already tell you what to do about it, so keep reading before you stop. Only " +
+      "abort here if nothing further down handles it.",
+  ].join("\n");
+}
+
+/**
+ * Insert after the first H1 line that is NOT inside a fenced code block —
+ * fence tracking mirrors extractCodeLines' (toggle on `/^\s*```/`, skip
+ * lines while inside), so a runbook that shows a fenced markdown/llms.txt
+ * EXAMPLE containing a bare `# ` line cannot have the block spliced into
+ * that example. A body with no such H1 gets the block prepended.
+ */
+function injectAfterH1(text, block) {
+  if (!block) return text;
+  const lines = text.split("\n");
+  let inFence = false;
+  let pos = 0;
+  let at = -1;
+  for (const raw of lines) {
+    if (/^\s*```/.test(raw)) {
+      inFence = !inFence;
+    } else if (at === -1 && !inFence && /^# .*$/.test(raw)) {
+      at = pos + raw.length;
+    }
+    pos += raw.length + 1;
+  }
+  if (at === -1) return `${block}\n\n${text}`;
+  // text.slice(at) already starts with the blank line that followed the H1
+  // in the source, so the block is NOT followed by an extra "\n" here — an
+  // extra one would double that blank line in the served bytes (D7 fix
+  // round 1, Finding 2).
+  return `${text.slice(0, at)}\n\n${block}${text.slice(at)}`;
+}
+
 /**
  * @param {any} runbook
  * @param {Record<string, any>} facts
@@ -312,7 +379,7 @@ export function loadRunbooks(contentDir) {
  */
 export function renderRunbook(runbook, facts, siteUrl) {
   const { text, used } = interpolate(runbook.body, facts);
-  const markdown = absolutiseLinks(text, siteUrl);
+  const markdown = absolutiseLinks(injectAfterH1(text, renderPreconditions(runbook.preconditions)), siteUrl);
   const { body: _b, filename: _f, ...meta } = runbook;
   void _b;
   void _f;
@@ -338,7 +405,16 @@ const CORPUS_INTRO =
 /** llms.txt per llmstxt.org: H1, blockquote summary, H2 sections of `- [name](url): description`. */
 export function renderLlmsTxt(index) {
   const lines = ["# Kuju Email — agent runbooks", "", CORPUS_INTRO, "", "## Runbooks (read start-here first)", ""];
-  for (const r of index.runbooks) lines.push(`- [${r.title}](${r.url}): ${r.outcome}`);
+  for (const r of index.runbooks) {
+    // Gate the summary line on renderPreconditions itself (not a raw
+    // .length check) so this and the runbook body share one source of
+    // truth for "does this doc have a preconditions block" — see the
+    // falsifiability protocol in scripts/corpus-selftest.mjs.
+    const hasBlock = renderPreconditions(r.preconditions) !== "";
+    lines.push(
+      `- [${r.title}](${r.url}): ${r.outcome}${hasBlock ? ` — Assumes: ${r.preconditions.join("; ")}.` : ""}`,
+    );
+  }
   lines.push("", "## Reference", "");
   for (const d of index.reference) lines.push(`- [${d.title}](${d.url}): ${d.description}`);
   lines.push("", "## Optional", "", `- [Everything in one file](${index.siteUrl}/llms-full.txt): the runbooks and reference concatenated`, "");

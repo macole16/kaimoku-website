@@ -11,6 +11,16 @@ set -uo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 FAILS=0
 
+# evidence <text>: first 5 and last 5 lines, with a marker when anything was cut.
+# tail alone truncated the real "Cannot find module" line out of a RED transcript.
+evidence() {
+  local n; n="$(printf '%s\n' "$1" | wc -l | tr -d ' ')"
+  if [[ "$n" -le 10 ]]; then printf '%s\n' "$1"; return; fi
+  printf '%s\n' "$1" | head -n 5
+  echo "  ... ($((n - 10)) lines omitted) ..."
+  printf '%s\n' "$1" | tail -n 5
+}
+
 # arm <name> <expected-exit: pass|fail> <must-contain> -- <command...>
 # Runs the command, captures stdout+stderr, checks BOTH the exit-code class and
 # the sentinel. A "fail" arm passes only when the command exits non-zero AND
@@ -21,13 +31,13 @@ arm() {
   local out rc
   out="$("$@" 2>&1)"; rc=$?
   if [[ "$expect" == "pass" && "$rc" -ne 0 ]]; then
-    echo "FAIL  ${name}: expected exit 0, got ${rc}"; echo "$out" | tail -n 5; FAILS=$((FAILS + 1)); return
+    echo "FAIL  ${name}: expected exit 0, got ${rc}"; evidence "$out"; FAILS=$((FAILS + 1)); return
   fi
   if [[ "$expect" == "fail" && "$rc" -eq 0 ]]; then
-    echo "FAIL  ${name}: expected non-zero exit, got 0"; FAILS=$((FAILS + 1)); return
+    echo "FAIL  ${name}: expected non-zero exit, got 0"; evidence "$out"; FAILS=$((FAILS + 1)); return
   fi
   if [[ "$out" != *"$must"* ]]; then
-    echo "FAIL  ${name}: expected output to contain: ${must}"; echo "$out" | tail -n 5; FAILS=$((FAILS + 1)); return
+    echo "FAIL  ${name}: expected output to contain: ${must}"; evidence "$out"; FAILS=$((FAILS + 1)); return
   fi
   echo "PASS  ${name}"
 }
@@ -38,20 +48,28 @@ NODE=(mise exec -- node)
 arm "1 core selftest" pass "corpus-selftest:" -- "${NODE[@]}" "$ROOT/scripts/corpus-selftest.mjs"
 
 # ---------------------------------------------------------------------------
-# Tier 1 mutation arms (M0-M8) for scripts/check-corpus.mjs. Each M1-M8 arm
+# Tier 1 mutation arms (M0-M14) for scripts/check-corpus.mjs. Each M1-M14 arm
 # copies the corpus to a scratch dir, mutates the copy in exactly ONE way,
 # and asserts the checker fails WITH THE SENTINEL SPECIFIC TO THAT MUTATION
 # -- never just a non-zero exit, since a checker that crashed for an
 # unrelated reason (a typo in the checker itself, a missing module) would
 # also exit non-zero and could satisfy a naive "expects failure" arm.
 #
-# M0 is a deliberate addition beyond M1-M8: an UNMUTATED-BASELINE arm that
+# M0 is a deliberate addition beyond M1-M14: an UNMUTATED-BASELINE arm that
 # runs the checker against a pristine copy of the real corpus and asserts
-# exit 0 plus the success sentinel "corpus OK". Without it, every M1-M8
+# exit 0 plus the success sentinel "corpus OK". Without it, every M1-M14
 # "PASS" could be passing for the wrong reason -- e.g. a checker that always
-# exits 1 regardless of input would pass all eight failure arms and never be
-# caught, because none of them alone proves the checker can ALSO recognize
-# a clean corpus. M0 is the negative control that gives M1-M8 meaning.
+# exits 1 regardless of input would pass all fourteen failure arms and never
+# be caught, because none of them alone proves the checker can ALSO recognize
+# a clean corpus. M0 is the negative control that gives M1-M14 meaning.
+#
+# KEEP THE COUNTS CURRENT when you add an arm. This block said "M0-M8" and
+# "all eight failure arms" while fourteen were running -- caught by the
+# launch-1.26 simplify pass, which noted that every OTHER count in that branch
+# (check-facts-live's "seven mutants", EXPECTED_MUTANT_COUNT, the L1 sentinel)
+# had been updated in the same commit and only this block was missed. A comment
+# that undercounts its own family by six is the exact drift this file exists
+# to prevent, one level up.
 # ---------------------------------------------------------------------------
 CHECK="$ROOT/scripts/check-corpus.mjs"
 SCRATCH="$(mktemp -d "${TMPDIR:-/tmp}/verify-corpus.XXXXXX")"
@@ -90,6 +108,59 @@ arm "M7 duplicate order fails" fail "order 3 is already used" -- check_on "$d"
 
 d="$(fresh_copy)"; sed -i '' 's/^slug: dns-delegation$/slug: dns-delegate/' "$d/agent/dns-delegation.md"
 arm "M8 slug/filename mismatch fails" fail "must equal the filename stem" -- check_on "$d"
+
+arm "M9 unknown flag dies (does not fall back to the real corpus)" fail "unknown flag --content-dr" -- "${NODE[@]}" "$CHECK" --content-dr /nonexistent
+
+d="$(fresh_copy)"; sed -i '' 's/^slug: dns-delegation$/slug: a: b/' "$d/agent/dns-delegation.md"
+arm "M10 malformed front-matter YAML names its file" fail "dns-delegation.md: front-matter is not valid YAML" -- check_on "$d"
+d="$(fresh_copy)"; printf 'zz: a: b\n' >> "$d/facts.yaml"
+arm "M11 malformed facts YAML names its file" fail "facts.yaml is not valid YAML" -- check_on "$d"
+
+# M12/M13 (Task 19, B1): the preconditions block is SERVED (renderRunbook
+# injects it into the .md route, llms-full.txt, llms.txt and the landing
+# page), so it needs the same scans as the body -- a denylisted command or an
+# unresolved {{fact:...}} token in front-matter preconditions: would reach an
+# agent verbatim otherwise.
+d="$(fresh_copy)"; sed -i '' 's/^  - you can run dig (or nslookup)$/  - run `sudo dig` first/' "$d/agent/dns-delegation.md"
+arm "M12 denylisted command inside a precondition fails" fail "preconditions: denylisted command (privileged or destructive tool)" -- check_on "$d"
+
+d="$(fresh_copy)"; sed -i '' 's/^  - the customer has an active Kuju account (see signup-trial) — redeem the invite first; do not start this runbook without one$/  - the customer has an active Kuju account (see signup-trial) — redeem the invite first; do not start this runbook without one {{fact:nameservers.0}}/' "$d/agent/dns-delegation.md"
+arm "M13 unresolved {{fact:...}} token inside a precondition fails" fail "preconditions: unresolved {{fact:...}} token" -- check_on "$d"
+
+# M14 (launch-1.26 fix wave): b89ef20 added THREE precondition scans -- denylist
+# (M12), single-brace (this one) and unresolved {{fact:...}} (M13) -- but only
+# two ever got an arm. This closes the gap with its own RED observation before
+# the fix: see the final fix report for the pre-fix transcript.
+d="$(fresh_copy)"; sed -i '' 's/^  - the customer owns a domain and can log in to wherever it is registered$/  - the customer owns a domain and can log in to wherever it is registered {domain}/' "$d/agent/dns-delegation.md"
+arm "M14 single-brace token inside a precondition fails" fail "preconditions: single-brace token" -- check_on "$d"
+
+# ---------------------------------------------------------------------------
+# F-arms (scripts/check-facts-live.mjs): each of these is a fact-shape check,
+# not a network check -- --only scopes the walk to one fact, and the guards
+# they exercise (unverifiable, the verify+unverifiable contradiction, the
+# stray expect_contains guard) all return before any network call, so all
+# four stay OFFLINE, unlike the L-arms below.
+# ---------------------------------------------------------------------------
+FACTS_LIVE="$ROOT/scripts/check-facts-live.mjs"
+arm "F1 unverifiable fact is SKIP by name (offline: --only scopes to a fact with no verify block)" pass "SKIP  test_migration_cap_gb  unverifiable: true" -- "${NODE[@]}" "$FACTS_LIVE" --only test_migration_cap_gb
+d="$(fresh_copy)"; printf '\nzz_probe_fact:\n  value: 1\n' >> "$d/facts.yaml"
+arm "F2 fact with neither verify nor unverifiable FAILS (no silent SKIP)" fail "FAIL  zz_probe_fact  no verify block and no unverifiable: true" -- "${NODE[@]}" "$FACTS_LIVE" --facts "$d/facts.yaml" --only zz_probe_fact
+
+# F3: give test_migration_cap_gb (unverifiable: true) a verify: block too, so
+# it carries both -- the contradiction guard must FAIL it, not silently
+# prefer either flag. Inserted via awk (not sed) because this is a two-line
+# INSERT after a matched line, which BSD sed's `-i ''` cannot do inline the
+# way the single-line M-arm substitutions above do.
+d="$(fresh_copy)"
+awk '{print} /^  unverifiable: true/{print "  verify: {type: http, expect_status: [200]}"}' "$d/facts.yaml" > "$d/facts.yaml.tmp" && mv "$d/facts.yaml.tmp" "$d/facts.yaml"
+arm "F3 fact with BOTH verify and unverifiable: true FAILS (contradiction, not a silent preference)" fail "FAIL  test_migration_cap_gb  contradictory: has a verify block AND unverifiable: true" -- "${NODE[@]}" "$FACTS_LIVE" --facts "$d/facts.yaml" --only test_migration_cap_gb
+
+# F4: re-add expect_contains to mx.verify (task 6 deleted it in favour of the
+# derived mxExpectation) -- the guard must FAIL loudly rather than let a
+# stray key silently coexist with the derived value.
+d="$(fresh_copy)"; sed -i '' 's/verify: {type: dns, name: kuju.email, record: MX}/verify: {type: dns, name: kuju.email, record: MX, expect_contains: "10 mail.kuju.email."}/' "$d/facts.yaml"
+arm "F4 stray expect_contains on mx.verify FAILS (derived value, not a leftover key)" fail "FAIL  mx  expect_contains is derived from target/priority now — remove it from mail-facts.yaml" -- "${NODE[@]}" "$FACTS_LIVE" --facts "$d/facts.yaml" --only mx
+
 rm -rf "$SCRATCH"
 
 # ---------------------------------------------------------------------------
@@ -97,7 +168,7 @@ rm -rf "$SCRATCH"
 # gated behind LIVE=1 -- the default offline harness run stays deterministic.
 # ---------------------------------------------------------------------------
 if [[ "${LIVE:-0}" == "1" ]]; then
-  arm "L1 live checker self-test proves all five mutants fail" pass "SELF-TEST OK: 5/5 mutants failed as required" -- "${NODE[@]}" "$ROOT/scripts/check-facts-live.mjs" --self-test
+  arm "L1 live checker self-test proves all seven mutants fail" pass "SELF-TEST OK: 7/7 mutants failed as required" -- "${NODE[@]}" "$ROOT/scripts/check-facts-live.mjs" --self-test
   arm "L2 live checker reports signup_url as PENDING (still 303)" pass "PENDING  signup_url" -- "${NODE[@]}" "$ROOT/scripts/check-facts-live.mjs"
   arm "L3 live checker names the URL-less registrar as SKIP" pass "SKIP  registrars.name-services.com" -- "${NODE[@]}" "$ROOT/scripts/check-facts-live.mjs"
 fi
@@ -226,6 +297,24 @@ if [[ "${SKIP_SERVER:-0}" != "1" ]]; then
     fi
     echo "PASS  ${name}"
   }
+  # occurrence_arm <name> <path> <fixed-string> <expected-count>
+  # Like count_arm, but counts every OCCURRENCE (grep -o | wc -l), not every
+  # matching LINE (count_arm's grep -cE). Needed whenever the served body can
+  # legitimately pack more than one match onto a single line -- which
+  # count_arm's callers (S15-S18: one heading/row per markdown line) never
+  # do, but S27 does, since Next's SSR emits the whole HTML document as ONE
+  # line. See the comment above S27 below for why this is the right tool
+  # there specifically, and why it is not just count_arm with a different
+  # regex engine.
+  occurrence_arm() {
+    local name="$1" p="$2" needle="$3" expected="$4" body n
+    body="$(curl -s "${BASE}${p}")"
+    n="$(printf '%s' "$body" | grep -oF -- "$needle" | wc -l | tr -d ' ')"
+    if [[ "$n" -ne "$expected" ]]; then
+      echo "FAIL  ${name}: expected ${expected}, got ${n}"; FAILS=$((FAILS + 1)); return
+    fi
+    echo "PASS  ${name}"
+  }
 
   for slug in $(cd "$ROOT/src/content/agent" && ls -- *.md | sed 's/\.md$//'); do
     header_arm "S1 ${slug}.md is text/markdown" "/kuju-email/agent/${slug}.md" "content-type: text/markdown"
@@ -276,16 +365,81 @@ if [[ "${SKIP_SERVER:-0}" != "1" ]]; then
   # that claim was wrong and has been corrected. See the Task 6 report's
   # correction note.)
   header_arm "S10 glossary.md is text/markdown" "/kuju-email/glossary.md" "content-type: text/markdown"
-  body_arm   "S11 glossary.md carries SPF and why-it-matters" "/kuju-email/glossary.md" "**Why it matters:**"
+  # S11 checked only "**Why it matters:**", which every entry emits; it never proved SPF.
+  body_arm   "S11a glossary.md carries the SPF entry (term + expansion heading)" "/kuju-email/glossary.md" "## SPF — Sender Policy Framework"
+  body_arm   "S11b glossary.md carries why-it-matters" "/kuju-email/glossary.md" "**Why it matters:**"
   header_arm "S12 docs.md is text/markdown" "/kuju-email/docs.md" "content-type: text/markdown"
   body_arm   "S13 docs.md lists endpoints" "/kuju-email/docs.md" "| GET | "
   body_arm   "S14 llms-full.txt embeds the glossary" "/llms-full.txt" "Sender Policy Framework"
+  # S23: S4 pins only the <!-- url --> marker; renderLlmsFullTxt pushes the marker THEN
+  # the body, so a renderer emitting markers with empty bodies passes S4 five times over
+  # and S14 pins only a REFERENCE body. This pins a heading that exists only inside the
+  # dns-delegation runbook body (llms.txt carries title/outcome/Assumes, never headings).
+  body_arm   "S23 llms-full.txt embeds a runbook BODY, not only its marker" "/llms-full.txt" "## Step 1 - Find out who runs this domain's DNS today"
 
-  # S15-S18: count arms (Task 6 review finding 1). S11/S13 above are
+  # S24-S26 (Task 20, group B1): the served preconditions block, across all
+  # three paths it reaches -- the landing page (Task 18), llms.txt's
+  # "Assumes:" clause, and the runbook .md route's "Before you start." block
+  # (Task 17, already shipped). Sentinel uniqueness for each was checked
+  # against PROMPT (page.tsx:14), metadata (page.tsx:8-12) and the
+  # Index-files section, per the audit S19-S21's comments above record:
+  # `grep -n` for each of the three strings below in page.tsx returns no
+  # match outside the runbook-list section that Task 18 adds.
+  body_arm   "S24 landing page renders a runbook's preconditions under its outcome" "/kuju-email/agent" "the customer has an active Kuju account (see signup-trial)"
+  body_arm   "S25 llms.txt carries the routing-time Assumes: gate" "/llms.txt" "Assumes: the customer owns a domain and can log in to wherever it is registered;"
+  body_arm   "S26 dns-delegation.md serves the preconditions block" "/kuju-email/agent/dns-delegation.md" "**Before you start.** This runbook assumes:"
+
+  # S27 (Task 21, permanent arm -- the plan's "one-off curl" was overridden
+  # in favour of this): every CopyButton on the landing page must carry a
+  # live region so its label swap ("Copy" -> "Copied"/"Copy failed") is
+  # announced to screen readers. The page renders six buttons (one prompt
+  # button + one per runbook, and there are five runbooks).
+  #
+  # This is an occurrence_arm (grep -o | wc -l), not count_arm (grep -cE),
+  # and that distinction was checked, not assumed -- three things had to be
+  # true for it to be safe, and all three were measured against the actual
+  # served body rather than reasoned about in the abstract:
+  #   1. count_arm's grep -cE counts matching LINES, and Next's SSR emits
+  #      the ENTIRE served document as a single line (measured:
+  #      `curl -s .../kuju-email/agent | wc -l` is 0, i.e. no newline in the
+  #      body at all). So count_arm here can only ever report 0 or 1 -- it
+  #      cannot distinguish "every button carries it" from "one line of the
+  #      page happens to mention it once" from "one out of six buttons has
+  #      it". That is why an earlier draft of this arm, scored via
+  #      count_arm with an expected value of 1, was renamed rather than kept
+  #      -- its name said "every" and its check could not tell one button
+  #      from six. occurrence_arm's grep -o counts each match regardless of
+  #      line breaks, so it can and does assert all 6.
+  #   2. Before switching to a per-occurrence count, the risk considered was
+  #      that Next's RSC hydration "flight" payload re-serialises some
+  #      server-rendered content for the client (confirmed separately: S24's
+  #      precondition-text sentinel appears 3x in the raw bytes -- 1 real
+  #      render + 2 inside the flight payload's `["$","li",key,{"children":
+  #      ...}]` entries), which would make a occurrence count fragile against
+  #      a framework upgrade for no real reason. MEASURED for this attribute
+  #      specifically, on the actual served body, and found NOT to apply:
+  #      `aria-live` and `polite` each appear exactly 6 times total, one per
+  #      real `<button>` element, with zero additional occurrences inside any
+  #      `self.__next_f.push(...)` flight chunk. The difference from S24:
+  #      preconditions text is server-rendered `.map()` content the flight
+  #      payload must describe to hydrate around; `aria-live`/`aria-atomic`
+  #      are hardcoded directly in CopyButton's own ("use client") JSX, not
+  #      props the server passes it, so they never enter the serialized tree
+  #      the way server-rendered children do. This is specific to this
+  #      attribute on this component, not a general exemption from the S24
+  #      risk -- re-measure before reusing this pattern elsewhere.
+  #   3. All six buttons render from ONE shared CopyButton component
+  #      (src/components/agent/CopyButton.tsx), so the attribute is present
+  #      on all of them or none -- a partial regression (present on some
+  #      buttons, absent on others) is not reachable, which is part of why
+  #      "every" is a stable, true claim for this arm's name.
+  occurrence_arm "S27 every CopyButton carries a live region" "/kuju-email/agent" 'aria-live="polite"' 6
+
+  # S15-S18: count arms (Task 6 review finding 1). S11b/S13 above are
   # substring sentinels and cannot distinguish "the renderer emitted 1
   # entry/endpoint" from "it emitted all of them" -- e.g. an accidental
   # .slice(0,1) in renderGlossaryMarkdown() still emits one
-  # "**Why it matters:**" line and S11 still passes. corpus-selftest.mjs
+  # "**Why it matters:**" line and S11b still passes. corpus-selftest.mjs
   # cannot carry this assertion instead: it is plain ESM importing only
   # agent-corpus-core.mjs (node:assert against .mjs), while the renderers
   # live in src/lib/agent-corpus.ts and pull in src/lib/glossary.ts and

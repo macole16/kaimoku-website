@@ -18,13 +18,24 @@ anywhere in this corpus is read-only.
 
 1. **Only run the commands the runbooks show.** They are all read-only
    (`dig`, `nslookup`, `curl -sI`, `openssl s_client`). Do not improvise
-   commands that write, log in, or change anything on any system.
+   commands that write, log in, or change anything on any system. A
+   4-space-indented block is not always something to run - it can also be
+   words to say to the person (a script, for example migration's cap
+   explanation) or a template for them to fill in (for example the support
+   report). The sentence introducing it says what it is; only a command is
+   something you execute.
 2. **Branch on observations, not on guesses.** Every step has a table of what
    you might observe and what to do next. If your observation is not in the
    table, stop and tell the person exactly what you saw.
-3. **`<angle brackets>` are yours to fill in at run time** - `<domain>` is the
-   person's domain, `<selector>` is a value they read to you. Values with no
-   brackets are real and current; do not "correct" them.
+3. **Values come in three kinds.** `<angle brackets>` are yours to fill in at
+   run time - `<domain>` is the person's domain, `<selector>` is a value they
+   read to you. A value with no brackets is real and current; do not
+   "correct" it. A third kind is an illustrative example, always marked
+   locally where it appears: an invite that "looks like `KUJU-7F3K-9QM2`", a
+   worked nameserver table using `ns-1234.awsdns-56.org`, a DKIM selector that
+   "after a rotation... looks like `mail-20260901`", or a migration script
+   sized in GB and months. None of these is the person's value - never report
+   one as something you observed.
 4. **HUMAN ACTION means you cannot do it.** A step tagged **HUMAN ACTION** is
    off-limits to you — for example a registrar login, a control panel, a
    password, or a screen inside Kuju. Give the person precise instructions
@@ -45,7 +56,7 @@ Check which tools you have:
 | Observation | Next |
 | --- | --- |
 | all three print a version | continue |
-| `dig` is missing | use `nslookup -type=<record> <name>` wherever a runbook shows `dig <record> <name>`; the observations are the same. A `dig` command that names a server with `@` is the exception — `nslookup` cannot express it, and the runbook that uses one says what to do instead |
+| `dig` is missing | use `nslookup -type=<record> <name>` wherever a runbook shows `dig <record> <name>`. For NS and MX, read the `nameserver =` / `mail exchanger =` lines when present. `nslookup` prints "can't find" for BOTH an absent name and a present name with no record of that type - never key off that phrase; read what follows the colon instead: `: NXDOMAIN` means the name does not exist, `: No answer` means the name exists but has no record of that type. For TXT and SRV, a present record is prefixed with a `text =` / `service =` label, so compare the value on the right of `=`, not the whole line. `nslookup` CAN query a specific nameserver — pass it as a trailing argument rather than `@server` — but it never prints a `status:` line, so any step that branches on `status:` cannot be read through it: tell the person which command you cannot run, and ask them to run it and report back what it printed, the same as when `curl` or `openssl` is missing |
 | `curl` or `openssl` is missing | tell the person which command is missing; read them the step's command and ask them to run it and report back what it printed |
 
 ## Which runbook
@@ -53,9 +64,10 @@ Check which tools you have:
 | The person wants to | Open |
 | --- | --- |
 | redeem an invite they received (Kuju is invite-only during the beta) | [Redeem a Kuju Email invite](/kuju-email/agent/signup-trial.md) |
-| point their own domain at Kuju | [Set up your domain's DNS for Kuju](/kuju-email/agent/dns-delegation.md) |
+| point their own domain at Kuju (needs an active Kuju account — [redeem the invite](/kuju-email/agent/signup-trial.md) first) | [Set up your domain's DNS for Kuju](/kuju-email/agent/dns-delegation.md) |
 | bring their existing mail across from another provider | [Move an existing mailbox into Kuju](/kuju-email/agent/migration.md) |
 | find out why mail is not arriving, bounces, or lands in spam | [Troubleshoot mail delivery for a Kuju domain](/kuju-email/agent/troubleshooting-delivery.md) |
+| understand a sending-limit, rate-limit or quota error they hit while sending | [Troubleshoot mail delivery for a Kuju domain](/kuju-email/agent/troubleshooting-delivery.md), section C |
 
 Reference, when a term is unfamiliar: the [glossary](/kuju-email/glossary.md).
 The [API reference](/kuju-email/docs.md) exists for completeness; no runbook
