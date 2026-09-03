@@ -61,6 +61,12 @@ export default function AgentLandingPage() {
                       {r.title}
                     </a>
                     <p className="text-sm text-slate-600">{r.outcome}</p>
+                    {r.preconditions.length > 0 && (
+                      <ul className="mt-1 list-disc pl-4 text-xs text-slate-500">
+                        <li className="list-none -ml-4 font-medium">Assumes:</li>
+                        {r.preconditions.map((p) => <li key={p}>{p}</li>)}
+                      </ul>
+                    )}
                     <p className="font-mono text-xs text-slate-500">{r.url}</p>
                   </div>
                   <CopyButton text={r.url} label="Copy URL" />

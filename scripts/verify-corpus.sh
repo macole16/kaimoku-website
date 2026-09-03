@@ -271,6 +271,24 @@ if [[ "${SKIP_SERVER:-0}" != "1" ]]; then
     fi
     echo "PASS  ${name}"
   }
+  # occurrence_arm <name> <path> <fixed-string> <expected-count>
+  # Like count_arm, but counts every OCCURRENCE (grep -o | wc -l), not every
+  # matching LINE (count_arm's grep -cE). Needed whenever the served body can
+  # legitimately pack more than one match onto a single line -- which
+  # count_arm's callers (S15-S18: one heading/row per markdown line) never
+  # do, but S27 does, since Next's SSR emits the whole HTML document as ONE
+  # line. See the comment above S27 below for why this is the right tool
+  # there specifically, and why it is not just count_arm with a different
+  # regex engine.
+  occurrence_arm() {
+    local name="$1" p="$2" needle="$3" expected="$4" body n
+    body="$(curl -s "${BASE}${p}")"
+    n="$(printf '%s' "$body" | grep -o -- "$needle" | wc -l | tr -d ' ')"
+    if [[ "$n" -ne "$expected" ]]; then
+      echo "FAIL  ${name}: expected ${expected}, got ${n}"; FAILS=$((FAILS + 1)); return
+    fi
+    echo "PASS  ${name}"
+  }
 
   for slug in $(cd "$ROOT/src/content/agent" && ls -- *.md | sed 's/\.md$//'); do
     header_arm "S1 ${slug}.md is text/markdown" "/kuju-email/agent/${slug}.md" "content-type: text/markdown"
@@ -332,6 +350,64 @@ if [[ "${SKIP_SERVER:-0}" != "1" ]]; then
   # and S14 pins only a REFERENCE body. This pins a heading that exists only inside the
   # dns-delegation runbook body (llms.txt carries title/outcome/Assumes, never headings).
   body_arm   "S23 llms-full.txt embeds a runbook BODY, not only its marker" "/llms-full.txt" "## Step 1 - Find out who runs this domain's DNS today"
+
+  # S24-S26 (Task 20, group B1): the served preconditions block, across all
+  # three paths it reaches -- the landing page (Task 18), llms.txt's
+  # "Assumes:" clause, and the runbook .md route's "Before you start." block
+  # (Task 17, already shipped). Sentinel uniqueness for each was checked
+  # against PROMPT (page.tsx:14), metadata (page.tsx:8-12) and the
+  # Index-files section, per the audit S19-S21's comments above record:
+  # `grep -n` for each of the three strings below in page.tsx returns no
+  # match outside the runbook-list section that Task 18 adds.
+  body_arm   "S24 landing page renders a runbook's preconditions under its outcome" "/kuju-email/agent" "the customer has an active Kuju account (see signup-trial)"
+  body_arm   "S25 llms.txt carries the routing-time Assumes: gate" "/llms.txt" "Assumes: the customer owns a domain and can log in to wherever it is registered;"
+  body_arm   "S26 dns-delegation.md serves the preconditions block" "/kuju-email/agent/dns-delegation.md" "**Before you start.** This runbook assumes:"
+
+  # S27 (Task 21, permanent arm -- the plan's "one-off curl" was overridden
+  # in favour of this): every CopyButton on the landing page must carry a
+  # live region so its label swap ("Copy" -> "Copied"/"Copy failed") is
+  # announced to screen readers. The page renders six buttons (one prompt
+  # button + one per runbook, and there are five runbooks).
+  #
+  # This is an occurrence_arm (grep -o | wc -l), not count_arm (grep -cE),
+  # and that distinction was checked, not assumed -- three things had to be
+  # true for it to be safe, and all three were measured against the actual
+  # served body rather than reasoned about in the abstract:
+  #   1. count_arm's grep -cE counts matching LINES, and Next's SSR emits
+  #      the ENTIRE served document as a single line (measured:
+  #      `curl -s .../kuju-email/agent | wc -l` is 0, i.e. no newline in the
+  #      body at all). So count_arm here can only ever report 0 or 1 -- it
+  #      cannot distinguish "every button carries it" from "one line of the
+  #      page happens to mention it once" from "one out of six buttons has
+  #      it". That is why an earlier draft of this arm, scored via
+  #      count_arm with an expected value of 1, was renamed rather than kept
+  #      -- its name said "every" and its check could not tell one button
+  #      from six. occurrence_arm's grep -o counts each match regardless of
+  #      line breaks, so it can and does assert all 6.
+  #   2. Before switching to a per-occurrence count, the risk considered was
+  #      that Next's RSC hydration "flight" payload re-serialises some
+  #      server-rendered content for the client (confirmed separately: S24's
+  #      precondition-text sentinel appears 3x in the raw bytes -- 1 real
+  #      render + 2 inside the flight payload's `["$","li",key,{"children":
+  #      ...}]` entries), which would make a occurrence count fragile against
+  #      a framework upgrade for no real reason. MEASURED for this attribute
+  #      specifically, on the actual served body, and found NOT to apply:
+  #      `aria-live` and `polite` each appear exactly 6 times total, one per
+  #      real `<button>` element, with zero additional occurrences inside any
+  #      `self.__next_f.push(...)` flight chunk. The difference from S24:
+  #      preconditions text is server-rendered `.map()` content the flight
+  #      payload must describe to hydrate around; `aria-live`/`aria-atomic`
+  #      are hardcoded directly in CopyButton's own ("use client") JSX, not
+  #      props the server passes it, so they never enter the serialized tree
+  #      the way server-rendered children do. This is specific to this
+  #      attribute on this component, not a general exemption from the S24
+  #      risk -- re-measure before reusing this pattern elsewhere.
+  #   3. All six buttons render from ONE shared CopyButton component
+  #      (src/components/agent/CopyButton.tsx), so the attribute is present
+  #      on all of them or none -- a partial regression (present on some
+  #      buttons, absent on others) is not reachable, which is part of why
+  #      "every" is a stable, true claim for this arm's name.
+  occurrence_arm "S27 every CopyButton carries a live region" "/kuju-email/agent" 'aria-live="polite"' 6
 
   # S15-S18: count arms (Task 6 review finding 1). S11b/S13 above are
   # substring sentinels and cannot distinguish "the renderer emitted 1
