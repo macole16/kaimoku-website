@@ -267,10 +267,15 @@ complete without the other:
 
 ### Read-only by construction
 
-Every command in the corpus is read-only: `dig`, `curl -sI`, `openssl s_client`.
+Every command in the runbooks is read-only: `dig`, `curl -sI`, `openssl s_client`.
 Nothing writes, authenticates, or destroys. Because a customer's agent may execute
 these autonomously on a machine we never see, this is enforced mechanically rather
-than by authorial discipline — see Tier 1.
+than by authorial discipline — see Tier 1. Tier 1 scans `src/content/agent/*.md`
+only; the generated twins (`glossary.md` from `src/lib/glossary.ts`, `docs.md` from
+`src/lib/api-docs.ts`) are TypeScript and unreachable from plain node 22.11.0
+(`Unknown file extension ".ts"`), and their example bodies are DNS-record and
+mail-header specimens rather than commands — confirmed by reading every `body:`
+field on 2026-09-02.
 
 ---
 
@@ -284,8 +289,9 @@ CI at all**, so the build is the only gate available and the cheapest place to a
 
 - every `{{fact:...}}` resolves to a real key in `mail-facts.yaml`
 - each runbook's `facts_used` front-matter matches what it actually references
-- no write-verb commands anywhere in the corpus (denylist: `rm`, `curl -X POST`,
-  `-u`/`--user`, `nsupdate`, anything with a credential flag)
+- no write-verb commands anywhere in the runbooks (denylist: `rm`, `curl -X POST`,
+  `-u`/`--user`, `nsupdate`, anything with a credential flag) — see the "Read-only
+  by construction" scope note above; the TS twins are out of Tier 1's reach
 - every internal link resolves to a real route
 - `llms.txt` covers every runbook; no orphans
 
