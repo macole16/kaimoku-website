@@ -16,6 +16,7 @@
 //   preconditions single-brace   no {x} survives in the preconditions: block (served verbatim)
 //   preconditions unresolved fact no {{fact:...}} token in preconditions: (never interpolated)
 //   inlines UI copy              no fact value carrying a source: is typed out verbatim in a runbook
+//   unclassified bold span       every **bold** span is a fact token or a declared prose_emphasis entry
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -28,6 +29,7 @@ import {
   loadRunbooks,
   renderPreconditions,
   scanDenylist,
+  extractBoldSpans,
 } from "../src/lib/agent-corpus-core.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -187,6 +189,35 @@ try {
     for (const hit of hits) {
       if (hits.some((o) => o !== hit && o.value.includes(hit.value))) continue;
       problems.push(`${where}: inlines UI copy verbatim: ${JSON.stringify(hit.value)} — reference {{fact:${hit.path}}} instead (it is quoted from another repo and drifts silently)`);
+    }
+
+    // 7. every bold span is CLASSIFIED -- a fact token, or declared prose.
+    //
+    // Check 6 catches a label already in wizard_labels being typed out again. It
+    // cannot catch a label that was NEVER facted, which is what actually happened
+    // in launch-1.25/-1.26/-1.27 -- all three found by hand sweep, not by a gate.
+    //
+    // This classifies instead of guessing because no heuristic survives the real
+    // data: "Keep your current DNS" is a label and "Keep the current DNS host."
+    // is prose; "From Step 1b" and "Step 5" are prose that look exactly like
+    // labels; and one genuine label is a full sentence ending in "?". Word count,
+    // title case and terminal punctuation each produce false positives here, and
+    // a gate that fires on prose is the shape that gets deleted.
+    //
+    // Checked in BOTH directions, exactly like facts_used above: an undeclared
+    // span fails, and a declared entry the body no longer contains fails too.
+    // Without the reverse check the list rots into a rubber stamp that no longer
+    // describes the file.
+    const declaredProse = new Set(rb.prose_emphasis);
+    const spans = extractBoldSpans(rb.body);
+    for (const span of spans) {
+      if (span.includes("{{fact:") || declaredProse.has(span)) continue;
+      problems.push(`${where}: bold span ${JSON.stringify(span)} is neither a fact token nor declared prose — if it is UI copy from kuju-mail, add it to wizard_labels with a source: and reference the token; otherwise declare it in prose_emphasis:`);
+    }
+    for (const declared of declaredProse) {
+      if (!spans.includes(declared)) {
+        problems.push(`${where}: declares prose_emphasis ${JSON.stringify(declared)} but the body has no such bold span`);
+      }
     }
   }
 } catch (err) {

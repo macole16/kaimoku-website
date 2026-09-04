@@ -182,7 +182,7 @@ export function interpolate(body, facts) {
 // ---------------------------------------------------------------------------
 
 export const RUNBOOK_URL_PREFIX = "/kuju-email/agent/";
-export const REQUIRED_META = ["slug", "title", "order", "preconditions", "outcome", "facts_used"];
+export const REQUIRED_META = ["slug", "title", "order", "preconditions", "outcome", "facts_used", "prose_emphasis"];
 
 /**
  * Commands the corpus may never contain. Scanned over CODE only (fences,
@@ -249,8 +249,8 @@ export function parseFrontMatter(raw, filename) {
   }
   const missing = REQUIRED_META.filter((k) => !Object.hasOwn(meta, k));
   if (missing.length) throw new Error(`${filename}: front-matter missing keys: ${missing.join(", ")}`);
-  if (!Array.isArray(meta.facts_used) || !Array.isArray(meta.preconditions)) {
-    throw new Error(`${filename}: facts_used and preconditions must be lists`);
+  if (!Array.isArray(meta.facts_used) || !Array.isArray(meta.preconditions) || !Array.isArray(meta.prose_emphasis)) {
+    throw new Error(`${filename}: facts_used, preconditions and prose_emphasis must be lists`);
   }
   if (!Number.isInteger(meta.order)) throw new Error(`${filename}: order must be an integer`);
   return { meta, body: m[2] };
@@ -332,6 +332,22 @@ export function loadRunbooks(contentDir) {
     orders.set(r.order, r.filename);
   }
   return runbooks.sort((a, b) => a.order - b.order);
+}
+
+/**
+ * Every bolded span in a runbook body, deduplicated.
+ *
+ * COLLAPSES NEWLINES FIRST, and that is the whole reason this is a shared
+ * function rather than an inline regex at each call site. The launch-1.26 hand
+ * sweep reported 9 labels against a true 12 because three were LINE-WRAPPED in
+ * the markdown, so no single line held the whole span. Any per-line extraction
+ * reports clean while leaking.
+ * @param {string} body
+ * @returns {string[]}
+ */
+export function extractBoldSpans(body) {
+  const flat = body.replace(/\s*\n\s*/g, " ");
+  return [...new Set([...flat.matchAll(/\*\*(.+?)\*\*/g)].map((m) => m[1].trim()))];
 }
 
 /** The "Before you start" block. Empty list → empty string (start-here). */

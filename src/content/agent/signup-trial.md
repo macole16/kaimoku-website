@@ -7,6 +7,9 @@ preconditions:
   - you can run curl
 outcome: "The invite is redeemed, the customer has chosen a demo-domain mailbox or bring-your-own-domain, and you know which runbook comes next"
 facts_used: [signup_url]
+prose_emphasis:
+  - "HUMAN ACTION"
+  - "bring your own domain"
 ---
 
 # Redeem a Kuju Email invite

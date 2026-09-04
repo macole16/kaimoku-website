@@ -87,7 +87,7 @@ check("SINGLE_BRACE_RE matches {domain} and %{http_code} but not {{fact:x}}", ()
 });
 
 check("parseFrontMatter returns meta and body", () => {
-  const raw = "---\nslug: x\ntitle: T\norder: 9\npreconditions: [a]\noutcome: o\nfacts_used: []\n---\n\n# body\n";
+  const raw = "---\nslug: x\ntitle: T\norder: 9\npreconditions: [a]\noutcome: o\nfacts_used: []\nprose_emphasis: []\n---\n\n# body\n";
   const r = core.parseFrontMatter(raw, "x.md");
   assert.equal(r.meta.slug, "x");
   assert.equal(r.meta.order, 9);
@@ -234,7 +234,7 @@ check("renderLlmsTxt lists every runbook and reference doc by absolute URL", () 
 // values (3, 1, 2), so the check fails if sorting ever silently falls back
 // to directory/read order.
 function runbookFixture({ slug, title, order, outcome }) {
-  return `---\nslug: ${slug}\ntitle: ${title}\norder: ${order}\npreconditions: []\noutcome: ${outcome}\nfacts_used: []\n---\n\n# ${title}\n`;
+  return `---\nslug: ${slug}\ntitle: ${title}\norder: ${order}\npreconditions: []\noutcome: ${outcome}\nfacts_used: []\nprose_emphasis: []\n---\n\n# ${title}\n`;
 }
 function withTempDir(prefix, fn) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), prefix));

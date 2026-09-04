@@ -8,6 +8,21 @@ preconditions:
   - you can run dig (or nslookup)
 outcome: "Mail for the domain reaches Kuju — by delegating the nameservers, or by adding Kuju's records at the existing DNS host — and MX, SPF, DKIM and DMARC verify"
 facts_used: [nameservers, mx, customer_domain_records, registrars, wizard_labels]
+prose_emphasis:
+  - "HUMAN ACTION"
+  - "Do not follow Step 3a's script on this path."
+  - "An SPF record is a TXT record whose value begins `v=spf1`."
+  - "Kuju's MX and SPF records REPLACE the old provider's; they never join them."
+  - "Kuju runs all DNS."
+  - "Keep the current DNS host."
+  - "Step 5"
+  - "Kuju publishes the records"
+  - "The person publishes them"
+  - "Where Kuju publishes the records:"
+  - "Where the person publishes them (Step 3b):"
+  - "From Step 3a"
+  - "From Step 3b"
+  - "From Step 1b"
 ---
 
 # Set up your domain's DNS for Kuju
