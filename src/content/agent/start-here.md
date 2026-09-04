@@ -5,6 +5,14 @@ order: 1
 preconditions: []
 outcome: "You know the rules of this corpus, which runbook to open, and what you can and cannot do"
 facts_used: []
+prose_emphasis:
+  - "Only run the commands the runbooks show."
+  - "Branch on observations, not on guesses."
+  - "Values come in three kinds."
+  - "HUMAN ACTION means you cannot do it."
+  - "HUMAN ACTION"
+  - "Never handle secrets."
+  - "Report what you observed, not what you concluded."
 ---
 
 # Start here

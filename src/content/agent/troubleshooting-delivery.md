@@ -7,6 +7,8 @@ preconditions:
   - you can run dig and openssl
 outcome: "The cause of missing or rejected mail is identified from observations, or the exact evidence for support is collected"
 facts_used: [mx, customer_domain_records, wizard_labels]
+prose_emphasis:
+  - "HUMAN ACTION"
 ---
 
 # Troubleshoot mail delivery for a Kuju domain

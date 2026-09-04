@@ -8,6 +8,12 @@ preconditions:
   - you can run dig and openssl
 outcome: "The old mailbox is imported into Kuju with folders, flags and dates intact, and the customer understands what the test cap means"
 facts_used: [test_migration_cap_gb, mx]
+prose_emphasis:
+  - "You never handle credentials."
+  - "HUMAN ACTION"
+  - "Gmail double-counts."
+  - "It is wire size, not disk size."
+  - "Reaching the cap is a PAUSE. It is not an error and it is not a restart."
 ---
 
 # Move an existing mailbox into Kuju

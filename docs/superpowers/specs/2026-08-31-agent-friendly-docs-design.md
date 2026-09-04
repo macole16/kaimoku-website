@@ -300,6 +300,16 @@ CI at all**, so the build is the only gate available and the cheapest place to a
   before matching, because the labels that got missed by hand were line-wrapped.
   Needs kuju-mail at **authoring** time only, never at check time — which is what
   keeps it inside Tier 1's offline constraint (launch-1.32)
+- every `**bold**` span is CLASSIFIED: it contains a fact token, or it is listed in
+  the runbook's `prose_emphasis:` front-matter. Checked in both directions, like
+  `facts_used` — a declared entry the body no longer contains is also an error, so
+  the list cannot rot into a rubber stamp. This is the half that catches a label
+  which was **never facted at all**, the failure that actually occurred in
+  launch-1.25/-1.26/-1.27; the check above only catches re-inlining of a label
+  already known. It classifies rather than guessing because no heuristic survives
+  the real data — "Keep your current DNS" is a label and "Keep the current DNS
+  host." is prose, "From Step 1b" and "Step 5" are prose shaped exactly like
+  labels, and one genuine label is a full sentence ending in "?" (launch-1.33)
 
 ### Tier 2 - scheduled reality check (reports, never blocks)
 

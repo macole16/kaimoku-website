@@ -48,20 +48,20 @@ NODE=(mise exec -- node)
 arm "1 core selftest" pass "corpus-selftest:" -- "${NODE[@]}" "$ROOT/scripts/corpus-selftest.mjs"
 
 # ---------------------------------------------------------------------------
-# Tier 1 mutation arms (M0-M16) for scripts/check-corpus.mjs. Each M1-M16 arm
+# Tier 1 mutation arms (M0-M19) for scripts/check-corpus.mjs. Each M1-M19 arm
 # copies the corpus to a scratch dir, mutates the copy in exactly ONE way,
 # and asserts the checker fails WITH THE SENTINEL SPECIFIC TO THAT MUTATION
 # -- never just a non-zero exit, since a checker that crashed for an
 # unrelated reason (a typo in the checker itself, a missing module) would
 # also exit non-zero and could satisfy a naive "expects failure" arm.
 #
-# M0 is a deliberate addition beyond M1-M16: an UNMUTATED-BASELINE arm that
+# M0 is a deliberate addition beyond M1-M19: an UNMUTATED-BASELINE arm that
 # runs the checker against a pristine copy of the real corpus and asserts
-# exit 0 plus the success sentinel "corpus OK". Without it, every M1-M16
+# exit 0 plus the success sentinel "corpus OK". Without it, every M1-M19
 # "PASS" could be passing for the wrong reason -- e.g. a checker that always
-# exits 1 regardless of input would pass all sixteen failure arms and never
+# exits 1 regardless of input would pass all nineteen failure arms and never
 # be caught, because none of them alone proves the checker can ALSO recognize
-# a clean corpus. M0 is the negative control that gives M1-M16 meaning.
+# a clean corpus. M0 is the negative control that gives M1-M19 meaning.
 #
 # KEEP THE COUNTS CURRENT when you add an arm. This block said "M0-M8" and
 # "all eight failure arms" while fourteen were running -- caught by the
@@ -159,6 +159,30 @@ arm "M15 inlined UI label fails (un-facted verbatim copy)" fail 'inlines UI copy
 # perl, not sed: BSD sed cannot put a literal newline in a replacement.
 d="$(fresh_copy)"; perl -0pi -e 's/\Q{{fact:wizard_labels.auto_configure_heading}}\E/Auto-Configure\nMail Records/' "$d/agent/dns-delegation.md"
 arm "M16 line-wrapped inlined UI label fails (newline collapse is load-bearing)" fail 'inlines UI copy verbatim: "Auto-Configure Mail Records"' -- check_on "$d"
+
+# M17-M19 (launch-1.33): the OTHER half of the un-facted-copy axis. M15/M16 catch
+# a label ALREADY in wizard_labels being typed out again; they cannot catch a
+# label that was never facted at all -- which is what actually happened in
+# launch-1.25/-1.26/-1.27, all three found by hand sweep. There is no sound
+# heuristic to separate a label from prose emphasis ("Keep your current DNS" the
+# label vs "Keep the current DNS host." the prose; and one real label is a full
+# sentence ending in "?"), so the gate CLASSIFIES instead of guessing: every bold
+# span must be a fact token or a declared prose string.
+d="$(fresh_copy)"; printf '\n**Undeclared Emphasis**\n' >> "$d/agent/troubleshooting-delivery.md"
+arm "M17 undeclared bold span fails (new UI copy cannot arrive unnoticed)" fail 'bold span "Undeclared Emphasis" is neither a fact token nor declared prose' -- check_on "$d"
+
+# M18 is the REVERSE direction, and it is what stops the allowlist rotting into a
+# rubber stamp: facts_used is checked both ways, so prose_emphasis is too. Without
+# it a stale entry lives forever and the list stops describing the file.
+d="$(fresh_copy)"; perl -0pi -e 's/^prose_emphasis:$/prose_emphasis:\n  - ZZ Never In Any Body/m' "$d/agent/troubleshooting-delivery.md"
+arm "M18 declared-but-absent prose entry fails (the list cannot rot)" fail 'declares prose_emphasis "ZZ Never In Any Body" but the body has no such bold span' -- check_on "$d"
+
+# M19: same leak as M17, LINE-WRAPPED. M17 alone passes against a per-line
+# scanner, so only M19 distinguishes one from a collapsing one -- the same
+# property M16 pins for check 6, re-pinned here because check 7 does its own
+# extraction and could regress independently.
+d="$(fresh_copy)"; printf '\n**Undeclared\nWrapped Emphasis**\n' >> "$d/agent/troubleshooting-delivery.md"
+arm "M19 line-wrapped undeclared bold span fails (collapse is load-bearing here too)" fail 'bold span "Undeclared Wrapped Emphasis" is neither a fact token nor declared prose' -- check_on "$d"
 
 # ---------------------------------------------------------------------------
 # F-arms (scripts/check-facts-live.mjs): each of these is a fact-shape check,
